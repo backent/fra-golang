@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/backent/fra-golang/helpers"
 	servicesUser "github.com/backent/fra-golang/services/user"
@@ -38,14 +39,81 @@ func (implementation *ControllerUserImpl) Create(w http.ResponseWriter, r *http.
 
 }
 func (implementation *ControllerUserImpl) Update(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUser.UserRequestUpdate
+	helpers.DecodeRequest(r, &request)
 
+	id, err := strconv.Atoi(p.ByName("id"))
+	helpers.PanifIfError(err)
+	request.Id = id
+
+	ctx := r.Context()
+
+	createResponse := implementation.ServiceUserInterface.Update(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   createResponse,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
 }
 func (implementation *ControllerUserImpl) Delete(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUser.UserRequestDelete
+	helpers.DecodeRequest(r, &request)
+
+	id, err := strconv.Atoi(p.ByName("id"))
+	helpers.PanifIfError(err)
+	request.Id = id
+
+	ctx := r.Context()
+
+	implementation.ServiceUserInterface.Delete(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   nil,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
 
 }
 func (implementation *ControllerUserImpl) FindById(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUser.UserRequestFindById
+	helpers.DecodeRequest(r, &request)
+
+	id, err := strconv.Atoi(p.ByName("id"))
+	helpers.PanifIfError(err)
+	request.Id = id
+
+	ctx := r.Context()
+
+	findByIdResponse := implementation.ServiceUserInterface.FindById(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   findByIdResponse,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
 
 }
 func (implementation *ControllerUserImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUser.UserRequestFindAll
+	helpers.DecodeRequest(r, &request)
+
+	ctx := r.Context()
+
+	findAllResponse := implementation.ServiceUserInterface.FindAll(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   findAllResponse,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
 
 }

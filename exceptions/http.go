@@ -23,6 +23,12 @@ func RouterPanicHandler(w http.ResponseWriter, r *http.Request, i interface{}) {
 			Status: "BAD REQUEST",
 			Data:   err.Error(),
 		}
+	} else if err, ok := i.(NotFoundError); ok {
+		response = web.WebResponse{
+			Code:   http.StatusNotFound,
+			Status: "NOT FOUND",
+			Data:   err.Error(),
+		}
 	} else if err, ok := i.(error); ok {
 		response = web.WebResponse{
 			Code:   http.StatusInternalServerError,

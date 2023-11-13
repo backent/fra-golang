@@ -8,9 +8,11 @@ type UserRequestCreate struct {
 
 type UserRequestUpdate struct {
 	Id       int    `json:"id"`
-	Nik      string `json:"nik"`
-	Name     string `json:"name"`
+	Name     string `json:"name" validate:"required"`
 	Password string `json:"password"`
+
+	Nik             string `json:"nik"`
+	CurrentPassword string
 }
 
 type UserRequestDelete struct {
@@ -22,5 +24,4 @@ type UserRequestFindById struct {
 }
 
 type UserRequestFindAll struct {
-	Id int `json:"id"`
 }

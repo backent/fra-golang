@@ -34,8 +34,8 @@ func (implementation *RepositoryUserImpl) Create(ctx context.Context, tx *sql.Tx
 
 }
 func (implementation *RepositoryUserImpl) Update(ctx context.Context, tx *sql.Tx, user models.User) (models.User, error) {
-	query := fmt.Sprintf("UPDATE  %s SET nik = ?, name = ?, password = ? WHERE id = ?", models.UserTable)
-	_, err := tx.ExecContext(ctx, query, user.Nik, user.Name, user.Password, user.Id)
+	query := fmt.Sprintf("UPDATE  %s SET name = ?, password = ? WHERE id = ?", models.UserTable)
+	_, err := tx.ExecContext(ctx, query, user.Name, user.Password, user.Id)
 	if err != nil {
 		return user, err
 	}

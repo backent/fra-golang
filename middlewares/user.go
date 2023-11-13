@@ -33,3 +33,35 @@ func (implementation *UserMiddleware) Create(ctx context.Context, tx *sql.Tx, re
 	}
 
 }
+
+func (implementation *UserMiddleware) Update(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestUpdate) {
+	err := implementation.Validate.Struct(request)
+	helpers.PanifIfError(err)
+
+	user, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
+	if err != nil {
+		panic(exceptions.NewNotFoundError(err.Error()))
+	}
+
+	request.CurrentPassword = user.Password
+	request.Nik = user.Nik
+}
+
+func (implementation *UserMiddleware) Delete(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestDelete) {
+
+	_, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
+	if err != nil {
+		panic(exceptions.NewNotFoundError(err.Error()))
+	}
+}
+
+func (implementation *UserMiddleware) FindById(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestFindById) {
+
+	_, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
+	if err != nil {
+		panic(exceptions.NewNotFoundError(err.Error()))
+	}
+}
+
+func (implementation *UserMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestFindAll) {
+}

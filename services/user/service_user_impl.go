@@ -48,14 +48,19 @@ func (implementation *ServiceUserImpl) Update(ctx context.Context, request webUs
 	helpers.PanifIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
-	_, err = implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
-	helpers.PanifIfError(err)
+	implementation.UserMiddleware.Update(ctx, tx, &request)
+
+	userPassword := request.CurrentPassword
+
+	if request.Password != "" {
+		userPassword = request.Password
+	}
 
 	user := models.User{
 		Id:       request.Id,
 		Nik:      request.Nik,
 		Name:     request.Name,
-		Password: request.Password,
+		Password: userPassword,
 	}
 
 	user, err = implementation.RepositoryUserInterface.Update(ctx, tx, user)
@@ -68,8 +73,7 @@ func (implementation *ServiceUserImpl) Delete(ctx context.Context, request webUs
 	helpers.PanifIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
-	_, err = implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
-	helpers.PanifIfError(err)
+	implementation.UserMiddleware.Delete(ctx, tx, &request)
 
 	err = implementation.RepositoryUserInterface.Delete(ctx, tx, request.Id)
 	helpers.PanifIfError(err)
@@ -80,6 +84,8 @@ func (implementation *ServiceUserImpl) FindById(ctx context.Context, request web
 	helpers.PanifIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
+	implementation.UserMiddleware.FindById(ctx, tx, &request)
+
 	user, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
 	helpers.PanifIfError(err)
 
@@ -89,6 +95,8 @@ func (implementation *ServiceUserImpl) FindAll(ctx context.Context, request webU
 	tx, err := implementation.DB.Begin()
 	helpers.PanifIfError(err)
 	defer helpers.CommitOrRollback(tx)
+
+	implementation.UserMiddleware.FindAll(ctx, tx, &request)
 
 	users, err := implementation.RepositoryUserInterface.FindAll(ctx, tx)
 	helpers.PanifIfError(err)
