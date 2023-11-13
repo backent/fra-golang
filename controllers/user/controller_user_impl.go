@@ -1,9 +1,13 @@
 package user
 
 import (
+	"encoding/json"
 	"net/http"
 
+	"github.com/backent/fra-golang/helpers"
 	servicesUser "github.com/backent/fra-golang/services/user"
+	"github.com/backent/fra-golang/web"
+	webUser "github.com/backent/fra-golang/web/user"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -18,7 +22,23 @@ func NewControllerUserImpl(servicesUser servicesUser.ServiceUserInterface) Contr
 }
 
 func (implementation *ControllerUserImpl) Create(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUser.UserRequestCreate
+	helpers.DecodeRequest(r, &request)
 
+	ctx := r.Context()
+
+	createResponse := implementation.ServiceUserInterface.Create(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   createResponse,
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(response.Code)
+	encoder := json.NewEncoder(w)
+	encoder.Encode(response)
 }
 func (implementation *ControllerUserImpl) Update(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 

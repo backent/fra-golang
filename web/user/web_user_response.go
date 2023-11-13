@@ -3,10 +3,9 @@ package user
 import "github.com/backent/fra-golang/models"
 
 type UserResponse struct {
-	Id       int    `json:"id"`
-	Nik      string `json:"nik"`
-	Name     string `json:"name"`
-	Password string `json:"password"`
+	Id   int    `json:"id"`
+	Nik  string `json:"nik"`
+	Name string `json:"name"`
 }
 
 func UserModelToUserResponse(user models.User) UserResponse {

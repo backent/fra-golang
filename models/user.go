@@ -6,3 +6,5 @@ type User struct {
 	Name     string
 	Password string
 }
+
+var UserTable string = "users"
