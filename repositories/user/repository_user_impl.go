@@ -92,3 +92,25 @@ func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.T
 
 	return users, nil
 }
+
+func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.User, error) {
+	var user models.User
+
+	query := fmt.Sprintf("SELECT id, nik, name, password FROM %s WHERE nik = ?", models.UserTable)
+	rows, err := tx.QueryContext(ctx, query, nik)
+	if err != nil {
+		return user, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Password)
+		if err != nil {
+			return user, err
+		}
+	} else {
+		return user, errors.New("not found user")
+	}
+
+	return user, nil
+}

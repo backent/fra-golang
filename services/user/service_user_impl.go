@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/backent/fra-golang/helpers"
+	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/models"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	webUser "github.com/backent/fra-golang/web/user"
@@ -13,12 +14,14 @@ import (
 type ServiceUserImpl struct {
 	DB *sql.DB
 	repositoriesUser.RepositoryUserInterface
+	*middlewares.UserMiddleware
 }
 
-func NewServiceUserImpl(db *sql.DB, repositoriesUser repositoriesUser.RepositoryUserInterface) ServiceUserInterface {
+func NewServiceUserImpl(db *sql.DB, repositoriesUser repositoriesUser.RepositoryUserInterface, userMiddleware *middlewares.UserMiddleware) ServiceUserInterface {
 	return &ServiceUserImpl{
 		DB:                      db,
 		RepositoryUserInterface: repositoriesUser,
+		UserMiddleware:          userMiddleware,
 	}
 }
 
@@ -26,6 +29,8 @@ func (implementation *ServiceUserImpl) Create(ctx context.Context, request webUs
 	tx, err := implementation.DB.Begin()
 	helpers.PanifIfError(err)
 	defer helpers.CommitOrRollback(tx)
+
+	implementation.UserMiddleware.Create(ctx, tx, &request)
 
 	user := models.User{
 		Nik:      request.Nik,

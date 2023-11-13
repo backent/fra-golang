@@ -2,6 +2,7 @@ package libs
 
 import (
 	controllersUser "github.com/backent/fra-golang/controllers/user"
+	"github.com/backent/fra-golang/exceptions"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -16,5 +17,6 @@ func NewRouter(
 	router.PUT("/users/:id", controllersUser.Update)
 	router.DELETE("/users/:id", controllersUser.Delete)
 
+	router.PanicHandler = exceptions.RouterPanicHandler
 	return router
 }

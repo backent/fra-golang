@@ -9,6 +9,7 @@ package injector
 import (
 	user3 "github.com/backent/fra-golang/controllers/user"
 	"github.com/backent/fra-golang/libs"
+	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/repositories/user"
 	user2 "github.com/backent/fra-golang/services/user"
 	"github.com/google/wire"
@@ -20,7 +21,9 @@ import (
 func InitializeRouter() *httprouter.Router {
 	db := libs.NewDatabase()
 	repositoryUserInterface := user.NewRepositoryUserImpl()
-	serviceUserInterface := user2.NewServiceUserImpl(db, repositoryUserInterface)
+	validate := libs.NewValidator()
+	userMiddleware := middlewares.NewUserMiddleware(validate, repositoryUserInterface)
+	serviceUserInterface := user2.NewServiceUserImpl(db, repositoryUserInterface, userMiddleware)
 	controllerUserInterface := user3.NewControllerUserImpl(serviceUserInterface)
 	router := libs.NewRouter(controllerUserInterface)
 	return router
@@ -28,4 +31,4 @@ func InitializeRouter() *httprouter.Router {
 
 // injector.go:
 
-var UserSet = wire.NewSet(user3.NewControllerUserImpl, user2.NewServiceUserImpl, user.NewRepositoryUserImpl)
+var UserSet = wire.NewSet(user3.NewControllerUserImpl, user2.NewServiceUserImpl, user.NewRepositoryUserImpl, middlewares.NewUserMiddleware)

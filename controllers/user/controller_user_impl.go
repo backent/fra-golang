@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/backent/fra-golang/helpers"
@@ -35,10 +34,8 @@ func (implementation *ControllerUserImpl) Create(w http.ResponseWriter, r *http.
 		Data:   createResponse,
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(response.Code)
-	encoder := json.NewEncoder(w)
-	encoder.Encode(response)
+	helpers.ReturnReponseJSON(w, response)
+
 }
 func (implementation *ControllerUserImpl) Update(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
