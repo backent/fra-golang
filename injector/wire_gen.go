@@ -7,10 +7,13 @@
 package injector
 
 import (
+	document3 "github.com/backent/fra-golang/controllers/document"
 	user3 "github.com/backent/fra-golang/controllers/user"
 	"github.com/backent/fra-golang/libs"
 	"github.com/backent/fra-golang/middlewares"
+	"github.com/backent/fra-golang/repositories/document"
 	"github.com/backent/fra-golang/repositories/user"
+	document2 "github.com/backent/fra-golang/services/document"
 	user2 "github.com/backent/fra-golang/services/user"
 	"github.com/google/wire"
 	"github.com/julienschmidt/httprouter"
@@ -25,10 +28,16 @@ func InitializeRouter() *httprouter.Router {
 	userMiddleware := middlewares.NewUserMiddleware(validate, repositoryUserInterface)
 	serviceUserInterface := user2.NewServiceUserImpl(db, repositoryUserInterface, userMiddleware)
 	controllerUserInterface := user3.NewControllerUserImpl(serviceUserInterface)
-	router := libs.NewRouter(controllerUserInterface)
+	repositoryDocumentInterface := document.NewRepositoryDocumentImpl()
+	documentMiddleware := middlewares.NewDocumentMiddleware(validate, repositoryDocumentInterface)
+	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, repositoryDocumentInterface, documentMiddleware)
+	controllerDocumentInterface := document3.NewControllerDocumentImpl(serviceDocumentInterface)
+	router := libs.NewRouter(controllerUserInterface, controllerDocumentInterface)
 	return router
 }
 
 // injector.go:
 
 var UserSet = wire.NewSet(user3.NewControllerUserImpl, user2.NewServiceUserImpl, user.NewRepositoryUserImpl, middlewares.NewUserMiddleware)
+
+var DocumentSet = wire.NewSet(document3.NewControllerDocumentImpl, document2.NewServiceDocumentImpl, document.NewRepositoryDocumentImpl, middlewares.NewDocumentMiddleware)
