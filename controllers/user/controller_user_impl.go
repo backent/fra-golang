@@ -60,7 +60,6 @@ func (implementation *ControllerUserImpl) Update(w http.ResponseWriter, r *http.
 }
 func (implementation *ControllerUserImpl) Delete(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var request webUser.UserRequestDelete
-	helpers.DecodeRequest(r, &request)
 
 	id, err := strconv.Atoi(p.ByName("id"))
 	helpers.PanifIfError(err)
@@ -81,7 +80,6 @@ func (implementation *ControllerUserImpl) Delete(w http.ResponseWriter, r *http.
 }
 func (implementation *ControllerUserImpl) FindById(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var request webUser.UserRequestFindById
-	helpers.DecodeRequest(r, &request)
 
 	id, err := strconv.Atoi(p.ByName("id"))
 	helpers.PanifIfError(err)
@@ -102,7 +100,6 @@ func (implementation *ControllerUserImpl) FindById(w http.ResponseWriter, r *htt
 }
 func (implementation *ControllerUserImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var request webUser.UserRequestFindAll
-	helpers.DecodeRequest(r, &request)
 
 	ctx := r.Context()
 
