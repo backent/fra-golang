@@ -25,7 +25,7 @@ func NewUserMiddleware(validator *validator.Validate, repositoriesUser repositor
 
 func (implementation *UserMiddleware) Create(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestCreate) {
 	err := implementation.Validate.Struct(request)
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	_, err = implementation.RepositoryUserInterface.FindByNik(ctx, tx, request.Nik)
 	if err == nil {
@@ -36,7 +36,7 @@ func (implementation *UserMiddleware) Create(ctx context.Context, tx *sql.Tx, re
 
 func (implementation *UserMiddleware) Update(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestUpdate) {
 	err := implementation.Validate.Struct(request)
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	user, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
 	if err != nil {

@@ -43,7 +43,7 @@ func (implementation *ControllerUserImpl) Update(w http.ResponseWriter, r *http.
 	helpers.DecodeRequest(r, &request)
 
 	id, err := strconv.Atoi(p.ByName("id"))
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	request.Id = id
 
 	ctx := r.Context()
@@ -62,7 +62,7 @@ func (implementation *ControllerUserImpl) Delete(w http.ResponseWriter, r *http.
 	var request webUser.UserRequestDelete
 
 	id, err := strconv.Atoi(p.ByName("id"))
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	request.Id = id
 
 	ctx := r.Context()
@@ -82,7 +82,7 @@ func (implementation *ControllerUserImpl) FindById(w http.ResponseWriter, r *htt
 	var request webUser.UserRequestFindById
 
 	id, err := strconv.Atoi(p.ByName("id"))
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	request.Id = id
 
 	ctx := r.Context()

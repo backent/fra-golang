@@ -10,7 +10,7 @@ import (
 func DecodeRequest(r *http.Request, requestVar interface{}) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(requestVar)
-	PanifIfError(err)
+	PanicIfError(err)
 }
 
 func ReturnReponseJSON(w http.ResponseWriter, response web.WebResponse) {

@@ -10,7 +10,7 @@ import (
 
 func main() {
 	err := godotenv.Load()
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	router := injector.InitializeRouter()
 

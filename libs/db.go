@@ -26,13 +26,13 @@ func NewDatabase() *sql.DB {
 	}
 
 	DB_CONN_MAX_LIFETIME_IN_SEC, err := strconv.Atoi(os.Getenv("DB_CONN_MAX_LIFETIME_IN_SEC"))
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	DB_MAX_OPEN_CONNECTIONS, err := strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNECTIONS"))
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	DB_MAX_IDLE_CONNECTIONS, err := strconv.Atoi(os.Getenv("DB_MAX_IDLE_CONNECTIONS"))
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	db.SetConnMaxLifetime(time.Second * time.Duration(DB_CONN_MAX_LIFETIME_IN_SEC))
 	db.SetMaxOpenConns(DB_MAX_OPEN_CONNECTIONS)

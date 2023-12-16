@@ -25,12 +25,12 @@ func NewDocumentMiddleware(validator *validator.Validate, repositoriesDocument r
 
 func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestCreate) {
 	err := implementation.Validate.Struct(request)
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 }
 
 func (implementation *DocumentMiddleware) Update(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestUpdate) {
 	err := implementation.Validate.Struct(request)
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	document, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
 	if err != nil {

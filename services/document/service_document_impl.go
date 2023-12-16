@@ -28,7 +28,7 @@ func NewServiceDocumentImpl(db *sql.DB, repositoriesDocument repositoriesDocumen
 
 func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request webDocument.DocumentRequestCreate) webDocument.DocumentResponse {
 	tx, err := implementation.DB.Begin()
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
 	implementation.DocumentMiddleware.Create(ctx, tx, &request)
@@ -51,13 +51,13 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 	}
 
 	document, err = implementation.RepositoryDocumentInterface.Create(ctx, tx, document)
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	return webDocument.DocumentModelToDocumentResponse(document)
 }
 func (implementation *ServiceDocumentImpl) Update(ctx context.Context, request webDocument.DocumentRequestUpdate) webDocument.DocumentResponse {
 	tx, err := implementation.DB.Begin()
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
 	implementation.DocumentMiddleware.Update(ctx, tx, &request)
@@ -81,42 +81,42 @@ func (implementation *ServiceDocumentImpl) Update(ctx context.Context, request w
 	document.Id = request.Id
 	document.DocumentId = request.DocumentId
 	document.UserId = request.UserId
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	return webDocument.DocumentModelToDocumentResponse(document)
 }
 func (implementation *ServiceDocumentImpl) Delete(ctx context.Context, request webDocument.DocumentRequestDelete) {
 	tx, err := implementation.DB.Begin()
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
 	implementation.DocumentMiddleware.Delete(ctx, tx, &request)
 
 	err = implementation.RepositoryDocumentInterface.Delete(ctx, tx, request.Id)
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 }
 func (implementation *ServiceDocumentImpl) FindById(ctx context.Context, request webDocument.DocumentRequestFindById) webDocument.DocumentResponse {
 	tx, err := implementation.DB.Begin()
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
 	implementation.DocumentMiddleware.FindById(ctx, tx, &request)
 
 	document, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	return webDocument.DocumentModelToDocumentResponse(document)
 }
 func (implementation *ServiceDocumentImpl) FindAll(ctx context.Context, request webDocument.DocumentRequestFindAll) []webDocument.DocumentResponse {
 	tx, err := implementation.DB.Begin()
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
 	implementation.DocumentMiddleware.FindAll(ctx, tx, &request)
 
 	documents, err := implementation.RepositoryDocumentInterface.FindAll(ctx, tx)
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 
 	return webDocument.BulkDocumentModelToDocumentResponse(documents)
 }

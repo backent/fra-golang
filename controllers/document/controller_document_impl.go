@@ -43,7 +43,7 @@ func (implementation *ControllerDocumentImpl) Update(w http.ResponseWriter, r *h
 	helpers.DecodeRequest(r, &request)
 
 	id, err := strconv.Atoi(p.ByName("id"))
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	request.Id = id
 
 	ctx := r.Context()
@@ -62,7 +62,7 @@ func (implementation *ControllerDocumentImpl) Delete(w http.ResponseWriter, r *h
 	var request webDocument.DocumentRequestDelete
 
 	id, err := strconv.Atoi(p.ByName("id"))
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	request.Id = id
 
 	ctx := r.Context()
@@ -82,7 +82,7 @@ func (implementation *ControllerDocumentImpl) FindById(w http.ResponseWriter, r 
 	var request webDocument.DocumentRequestFindById
 
 	id, err := strconv.Atoi(p.ByName("id"))
-	helpers.PanifIfError(err)
+	helpers.PanicIfError(err)
 	request.Id = id
 
 	ctx := r.Context()
