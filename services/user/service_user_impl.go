@@ -32,10 +32,13 @@ func (implementation *ServiceUserImpl) Create(ctx context.Context, request webUs
 
 	implementation.UserMiddleware.Create(ctx, tx, &request)
 
+	hashedPassword, err := helpers.HashPassword(request.Password)
+	helpers.PanicIfError(err)
+
 	user := models.User{
 		Nik:      request.Nik,
 		Name:     request.Name,
-		Password: request.Password,
+		Password: hashedPassword,
 	}
 
 	user, err = implementation.RepositoryUserInterface.Create(ctx, tx, user)
@@ -53,7 +56,8 @@ func (implementation *ServiceUserImpl) Update(ctx context.Context, request webUs
 	userPassword := request.CurrentPassword
 
 	if request.Password != "" {
-		userPassword = request.Password
+		userPassword, err = helpers.HashPassword(request.Password)
+		helpers.PanicIfError(err)
 	}
 
 	user := models.User{
