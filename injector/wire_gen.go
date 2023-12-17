@@ -7,12 +7,15 @@
 package injector
 
 import (
+	auth3 "github.com/backent/fra-golang/controllers/auth"
 	document3 "github.com/backent/fra-golang/controllers/document"
 	user3 "github.com/backent/fra-golang/controllers/user"
 	"github.com/backent/fra-golang/libs"
 	"github.com/backent/fra-golang/middlewares"
+	"github.com/backent/fra-golang/repositories/auth"
 	"github.com/backent/fra-golang/repositories/document"
 	"github.com/backent/fra-golang/repositories/user"
+	auth2 "github.com/backent/fra-golang/services/auth"
 	document2 "github.com/backent/fra-golang/services/document"
 	user2 "github.com/backent/fra-golang/services/user"
 	"github.com/google/wire"
@@ -32,7 +35,11 @@ func InitializeRouter() *httprouter.Router {
 	documentMiddleware := middlewares.NewDocumentMiddleware(validate, repositoryDocumentInterface)
 	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, repositoryDocumentInterface, documentMiddleware)
 	controllerDocumentInterface := document3.NewControllerDocumentImpl(serviceDocumentInterface)
-	router := libs.NewRouter(controllerUserInterface, controllerDocumentInterface)
+	repositoryAuthInterface := auth.NewRepositoryAuthJWTImpl()
+	authMiddleware := middlewares.NewAuthMiddleware(validate, repositoryUserInterface, repositoryAuthInterface)
+	serviceAuthInterface := auth2.NewServiceAuthImpl(db, repositoryAuthInterface, authMiddleware)
+	controllerAuthInterface := auth3.NewControllerAuthImpl(serviceAuthInterface)
+	router := libs.NewRouter(controllerUserInterface, controllerDocumentInterface, controllerAuthInterface)
 	return router
 }
 
@@ -41,3 +48,5 @@ func InitializeRouter() *httprouter.Router {
 var UserSet = wire.NewSet(user3.NewControllerUserImpl, user2.NewServiceUserImpl, user.NewRepositoryUserImpl, middlewares.NewUserMiddleware)
 
 var DocumentSet = wire.NewSet(document3.NewControllerDocumentImpl, document2.NewServiceDocumentImpl, document.NewRepositoryDocumentImpl, middlewares.NewDocumentMiddleware)
+
+var AuthSet = wire.NewSet(auth3.NewControllerAuthImpl, auth2.NewServiceAuthImpl, auth.NewRepositoryAuthJWTImpl, middlewares.NewAuthMiddleware)

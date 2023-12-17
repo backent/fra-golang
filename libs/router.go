@@ -1,6 +1,7 @@
 package libs
 
 import (
+	controllersAuth "github.com/backent/fra-golang/controllers/auth"
 	controllersDocument "github.com/backent/fra-golang/controllers/document"
 	controllersUser "github.com/backent/fra-golang/controllers/user"
 	"github.com/backent/fra-golang/exceptions"
@@ -10,8 +11,12 @@ import (
 func NewRouter(
 	controllersUser controllersUser.ControllerUserInterface,
 	controllersDocument controllersDocument.ControllerDocumentInterface,
+	controllersAuth controllersAuth.ControllerAuthInterface,
 ) *httprouter.Router {
 	router := httprouter.New()
+
+	router.POST("/login", controllersAuth.Login)
+	router.POST("/register", controllersAuth.Register)
 
 	router.GET("/users", controllersUser.FindAll)
 	router.GET("/users/:id", controllersUser.FindById)
