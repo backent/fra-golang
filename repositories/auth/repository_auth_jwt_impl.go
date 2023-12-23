@@ -56,7 +56,9 @@ func (implementation *RepositoryAuthJWTImpl) Validate(tokenString string) (int, 
 	if payload, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		if id, ok := payload["iss"].(string); ok {
 			intId, err := strconv.Atoi(id)
-			helpers.PanicIfError(err)
+			if err != nil {
+				return 0, false
+			}
 			return intId, true
 		} else {
 			return 0, false

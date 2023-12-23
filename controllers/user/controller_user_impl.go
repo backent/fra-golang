@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -101,7 +102,7 @@ func (implementation *ControllerUserImpl) FindById(w http.ResponseWriter, r *htt
 func (implementation *ControllerUserImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var request webUser.UserRequestFindAll
 
-	ctx := r.Context()
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	findAllResponse := implementation.ServiceUserInterface.FindAll(ctx, request)
 
