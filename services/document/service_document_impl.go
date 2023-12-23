@@ -35,7 +35,7 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 
 	document := models.Document{
 		DocumentId:             uuid.New().String(),
-		UserId:                 2,
+		UserId:                 request.UserId,
 		RiskName:               request.RiskName,
 		FraudSchema:            request.FraudSchema,
 		FraudMotive:            request.FraudMotive,

@@ -33,7 +33,7 @@ func InitializeRouter() *httprouter.Router {
 	serviceUserInterface := user2.NewServiceUserImpl(db, repositoryUserInterface, userMiddleware)
 	controllerUserInterface := user3.NewControllerUserImpl(serviceUserInterface)
 	repositoryDocumentInterface := document.NewRepositoryDocumentImpl()
-	documentMiddleware := middlewares.NewDocumentMiddleware(validate, repositoryDocumentInterface)
+	documentMiddleware := middlewares.NewDocumentMiddleware(validate, repositoryDocumentInterface, repositoryAuthInterface)
 	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, repositoryDocumentInterface, documentMiddleware)
 	controllerDocumentInterface := document3.NewControllerDocumentImpl(serviceDocumentInterface)
 	authMiddleware := middlewares.NewAuthMiddleware(validate, repositoryUserInterface, repositoryAuthInterface)

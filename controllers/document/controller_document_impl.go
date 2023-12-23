@@ -1,6 +1,7 @@
 package document
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -25,7 +26,7 @@ func (implementation *ControllerDocumentImpl) Create(w http.ResponseWriter, r *h
 	var request webDocument.DocumentRequestCreate
 	helpers.DecodeRequest(r, &request)
 
-	ctx := r.Context()
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	createResponse := implementation.ServiceDocumentInterface.Create(ctx, request)
 
@@ -46,7 +47,7 @@ func (implementation *ControllerDocumentImpl) Update(w http.ResponseWriter, r *h
 	helpers.PanicIfError(err)
 	request.Id = id
 
-	ctx := r.Context()
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	createResponse := implementation.ServiceDocumentInterface.Update(ctx, request)
 
@@ -65,7 +66,7 @@ func (implementation *ControllerDocumentImpl) Delete(w http.ResponseWriter, r *h
 	helpers.PanicIfError(err)
 	request.Id = id
 
-	ctx := r.Context()
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	implementation.ServiceDocumentInterface.Delete(ctx, request)
 
@@ -85,7 +86,7 @@ func (implementation *ControllerDocumentImpl) FindById(w http.ResponseWriter, r 
 	helpers.PanicIfError(err)
 	request.Id = id
 
-	ctx := r.Context()
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	findByIdResponse := implementation.ServiceDocumentInterface.FindById(ctx, request)
 
@@ -101,7 +102,7 @@ func (implementation *ControllerDocumentImpl) FindById(w http.ResponseWriter, r 
 func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var request webDocument.DocumentRequestFindAll
 
-	ctx := r.Context()
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	findAllResponse := implementation.ServiceDocumentInterface.FindAll(ctx, request)
 

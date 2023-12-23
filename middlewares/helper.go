@@ -11,6 +11,7 @@ import (
 func ValidateToken(ctx context.Context, repositoriesAuth auth.RepositoryAuthInterface) int {
 	var tokenString string
 	token := ctx.Value(helpers.ContextKey("token"))
+
 	tokenString, ok := token.(string)
 	if !ok || tokenString == "" {
 		helpers.PanicIfError(exceptions.NewUnAuthorized("authorization required"))

@@ -15,6 +15,7 @@ type DocumentRequestCreate struct {
 	StrategyRecomendation  string `json:"strategy_recomendation" validate:"required,max=1000"`   // strategy_recomendation
 
 	DocumentId string
+	UserId     int
 }
 
 type DocumentRequestUpdate struct {

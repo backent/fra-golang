@@ -6,6 +6,7 @@ import (
 
 	"github.com/backent/fra-golang/exceptions"
 	"github.com/backent/fra-golang/helpers"
+	repositoriesAuth "github.com/backent/fra-golang/repositories/auth"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
 	webDocument "github.com/backent/fra-golang/web/document"
 	"github.com/go-playground/validator/v10"
@@ -14,21 +15,27 @@ import (
 type DocumentMiddleware struct {
 	Validate *validator.Validate
 	repositoriesDocument.RepositoryDocumentInterface
+	repositoriesAuth.RepositoryAuthInterface
 }
 
-func NewDocumentMiddleware(validator *validator.Validate, repositoriesDocument repositoriesDocument.RepositoryDocumentInterface) *DocumentMiddleware {
+func NewDocumentMiddleware(validator *validator.Validate, repositoriesDocument repositoriesDocument.RepositoryDocumentInterface, repositoriesAuth repositoriesAuth.RepositoryAuthInterface) *DocumentMiddleware {
 	return &DocumentMiddleware{
 		Validate:                    validator,
 		RepositoryDocumentInterface: repositoriesDocument,
+		RepositoryAuthInterface:     repositoriesAuth,
 	}
 }
 
 func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestCreate) {
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
+
+	request.UserId = userId
 }
 
 func (implementation *DocumentMiddleware) Update(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestUpdate) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
 
@@ -43,6 +50,7 @@ func (implementation *DocumentMiddleware) Update(ctx context.Context, tx *sql.Tx
 }
 
 func (implementation *DocumentMiddleware) Delete(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestDelete) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 
 	_, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
 	if err != nil {
@@ -51,6 +59,7 @@ func (implementation *DocumentMiddleware) Delete(ctx context.Context, tx *sql.Tx
 }
 
 func (implementation *DocumentMiddleware) FindById(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestFindById) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 
 	_, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
 	if err != nil {
@@ -59,4 +68,5 @@ func (implementation *DocumentMiddleware) FindById(ctx context.Context, tx *sql.
 }
 
 func (implementation *DocumentMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestFindAll) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 }
