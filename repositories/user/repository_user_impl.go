@@ -114,3 +114,77 @@ func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql
 
 	return user, nil
 }
+
+func (implementation *RepositoryUserImpl) FindAllWithDocumentsDetail(ctx context.Context, tx *sql.Tx) ([]models.User, error) {
+	query := fmt.Sprintf(`SELECT
+		a.id,
+		a.nik,
+		a.name,
+		a.password,
+		b.id,
+		b.document_id,
+		b.user_id,
+		b.risk_name
+		FROM
+		%s a 
+		LEFT JOIN %s b
+		ON a.id = b.user_id
+		ORDER BY b.document_id DESC`, models.UserTable, models.DocumentTable)
+	rows, err := tx.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*models.User
+	usersMap := make(map[int]*models.User)
+
+	for rows.Next() {
+		var user models.User
+		var document struct {
+			Id         sql.NullInt32
+			DocumentId sql.NullString
+			UserId     sql.NullInt32
+			RiskName   sql.NullString
+		}
+		err = rows.Scan(
+			&user.Id,
+			&user.Nik,
+			&user.Name,
+			&user.Password,
+			&document.Id,
+			&document.DocumentId,
+			&document.UserId,
+			&document.RiskName,
+		)
+		if err != nil {
+			return nil, err
+		}
+		item, found := usersMap[user.Id]
+		if !found {
+			item = &user
+			usersMap[user.Id] = item
+			users = append(users, item)
+		}
+		if document.Id.Valid {
+			validDocument := models.Document{
+				Id:         int(document.Id.Int32),
+				DocumentId: document.DocumentId.String,
+				UserId:     int(document.UserId.Int32),
+				RiskName:   document.RiskName.String,
+			}
+			if item.DocumentsDetail == nil {
+				item.DocumentsDetail = []models.Document{validDocument}
+			} else {
+				item.DocumentsDetail = append(item.DocumentsDetail, validDocument)
+			}
+		}
+	}
+
+	var returnedUser []models.User
+	for _, item := range users {
+		returnedUser = append(returnedUser, *item)
+	}
+
+	return returnedUser, nil
+}

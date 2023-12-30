@@ -24,4 +24,5 @@ type UserRequestFindById struct {
 }
 
 type UserRequestFindAll struct {
+	WithDocument bool
 }

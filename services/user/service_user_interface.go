@@ -12,4 +12,5 @@ type ServiceUserInterface interface {
 	Delete(ctx context.Context, request user.UserRequestDelete)
 	FindById(ctx context.Context, request user.UserRequestFindById) user.UserResponse
 	FindAll(ctx context.Context, request user.UserRequestFindAll) []user.UserResponse
+	FindAllWithDocumentsDetail(ctx context.Context, request user.UserRequestFindAll) []user.UserResponseWithDocumentsDetail
 }

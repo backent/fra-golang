@@ -2,7 +2,6 @@ package document
 
 import (
 	"github.com/backent/fra-golang/models"
-	"github.com/backent/fra-golang/web/user"
 )
 
 type DocumentResponse struct {
@@ -68,7 +67,13 @@ type DocumentResponseWithUserDetail struct {
 	StartegyAgreement      string `json:"strategy_agreement"`       // strategy_agreement
 	StrategyRecomendation  string `json:"strategy_recomendation"`   // strategy_recomendation
 
-	UserDetail user.UserResponse `json:"user_detail"` // user detail
+	UserDetail userResponse `json:"user_detail"` // user detail
+}
+
+type userResponse struct {
+	Id   int    `json:"id"`
+	Nik  string `json:"nik"`
+	Name string `json:"name"`
 }
 
 func DocumentModelToDocumentResponseWithUserDetail(document models.Document) DocumentResponseWithUserDetail {
@@ -88,7 +93,7 @@ func DocumentModelToDocumentResponseWithUserDetail(document models.Document) Doc
 		ImpactJustification:    document.ImpactJustification,
 		StartegyAgreement:      document.StartegyAgreement,
 		StrategyRecomendation:  document.StrategyRecomendation,
-		UserDetail:             user.UserModelToUserResponse(document.UserDetail),
+		UserDetail:             userModelToUserResponse(document.UserDetail),
 	}
 }
 
@@ -98,4 +103,12 @@ func BulkDocumentModelToDocumentResponseWithUserDetail(documents []models.Docume
 		bulk = append(bulk, DocumentModelToDocumentResponseWithUserDetail(document))
 	}
 	return bulk
+}
+
+func userModelToUserResponse(user models.User) userResponse {
+	return userResponse{
+		Id:   user.Id,
+		Name: user.Name,
+		Nik:  user.Nik,
+	}
 }

@@ -107,3 +107,16 @@ func (implementation *ServiceUserImpl) FindAll(ctx context.Context, request webU
 
 	return webUser.BulkUserModelToUserResponse(users)
 }
+
+func (implementation *ServiceUserImpl) FindAllWithDocumentsDetail(ctx context.Context, request webUser.UserRequestFindAll) []webUser.UserResponseWithDocumentsDetail {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.UserMiddleware.FindAll(ctx, tx, &request)
+
+	users, err := implementation.RepositoryUserInterface.FindAllWithDocumentsDetail(ctx, tx)
+	helpers.PanicIfError(err)
+
+	return webUser.BulkUserModelToUserResponseWithDocumentsDetail(users)
+}
