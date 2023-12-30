@@ -120,3 +120,15 @@ func (implementation *ServiceDocumentImpl) FindAll(ctx context.Context, request 
 
 	return webDocument.BulkDocumentModelToDocumentResponse(documents)
 }
+func (implementation *ServiceDocumentImpl) FindAllWithUserDetail(ctx context.Context, request webDocument.DocumentRequestFindAll) []webDocument.DocumentResponseWithUserDetail {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.DocumentMiddleware.FindAll(ctx, tx, &request)
+
+	documents, err := implementation.RepositoryDocumentInterface.FindAllWithUserDetail(ctx, tx)
+	helpers.PanicIfError(err)
+
+	return webDocument.BulkDocumentModelToDocumentResponseWithUserDetail(documents)
+}

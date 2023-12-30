@@ -45,4 +45,5 @@ type DocumentRequestFindById struct {
 }
 
 type DocumentRequestFindAll struct {
+	WithUser bool
 }

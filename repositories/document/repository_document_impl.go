@@ -160,58 +160,6 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 
 	return document, nil
 }
-func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *sql.Tx) ([]models.Document, error) {
-	var documents []models.Document
-
-	query := fmt.Sprintf(`SELECT 
-		id,
-		document_id,
-		user_id,
-		risk_name,
-		fraud_schema,
-		fraud_motive,
-		fraud_technique,
-		risk_source,
-		root_cause,
-		bispro_control_procedure,
-		qualitative_impact,
-		likehood_justification,
-		impact_justification,
-		strategy_agreement,
-		strategy_recomendation
-	FROM %s ORDER BY id DESC`, models.DocumentTable)
-	rows, err := tx.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var document models.Document
-		err = rows.Scan(&document.Id,
-			&document.DocumentId,
-			&document.UserId,
-			&document.RiskName,
-			&document.FraudSchema,
-			&document.FraudMotive,
-			&document.FraudTechnique,
-			&document.RiskSource,
-			&document.RootCause,
-			&document.BisproControlProcedure,
-			&document.QualitativeImpact,
-			&document.LikehoodJustification,
-			&document.ImpactJustification,
-			&document.StartegyAgreement,
-			&document.StrategyRecomendation,
-		)
-		if err != nil {
-			return nil, err
-		}
-		documents = append(documents, document)
-	}
-
-	return documents, nil
-}
 
 func (implementation *RepositoryDocumentImpl) FindByDocumentId(ctx context.Context, tx *sql.Tx, documentId string) (models.Document, error) {
 	var document models.Document
@@ -264,4 +212,131 @@ func (implementation *RepositoryDocumentImpl) FindByDocumentId(ctx context.Conte
 	}
 
 	return document, nil
+}
+
+func (implementation *RepositoryDocumentImpl) FindAllWithUserDetail(ctx context.Context, tx *sql.Tx) ([]models.Document, error) {
+	query := fmt.Sprintf(`SELECT 
+		a.id,
+		a.document_id,
+		a.user_id,
+		a.risk_name,
+		a.fraud_schema,
+		a.fraud_motive,
+		a.fraud_technique,
+		a.risk_source,
+		a.root_cause,
+		a.bispro_control_procedure,
+		a.qualitative_impact,
+		a.likehood_justification,
+		a.impact_justification,
+		a.strategy_agreement,
+		a.strategy_recomendation,
+		b.id,
+		b.name,
+		b.nik
+	FROM %s a LEFT JOIN %s b ON a.user_id = b.id  ORDER BY a.id DESC`, models.DocumentTable, models.UserTable)
+	rows, err := tx.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var documents []*models.Document
+	documentsMap := make(map[int]*models.Document)
+
+	for rows.Next() {
+		var document models.Document
+		var user models.User
+
+		err = rows.Scan(&document.Id,
+			&document.DocumentId,
+			&document.UserId,
+			&document.RiskName,
+			&document.FraudSchema,
+			&document.FraudMotive,
+			&document.FraudTechnique,
+			&document.RiskSource,
+			&document.RootCause,
+			&document.BisproControlProcedure,
+			&document.QualitativeImpact,
+			&document.LikehoodJustification,
+			&document.ImpactJustification,
+			&document.StartegyAgreement,
+			&document.StrategyRecomendation,
+			&user.Id,
+			&user.Name,
+			&user.Nik,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		item, found := documentsMap[document.Id]
+		if !found {
+			item = &document
+			documentsMap[document.Id] = item
+			documents = append(documents, item)
+		}
+		item.UserDetail = user
+	}
+
+	var documentsReturn []models.Document
+	for _, document := range documents {
+		documentsReturn = append(documentsReturn, *document)
+	}
+
+	return documentsReturn, nil
+}
+
+func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *sql.Tx) ([]models.Document, error) {
+	var documents []models.Document
+
+	query := fmt.Sprintf(`SELECT 
+		id,
+		document_id,
+		user_id,
+		risk_name,
+		fraud_schema,
+		fraud_motive,
+		fraud_technique,
+		risk_source,
+		root_cause,
+		bispro_control_procedure,
+		qualitative_impact,
+		likehood_justification,
+		impact_justification,
+		strategy_agreement,
+		strategy_recomendation
+	FROM %s ORDER BY id DESC`, models.DocumentTable)
+	rows, err := tx.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var document models.Document
+		err = rows.Scan(&document.Id,
+			&document.DocumentId,
+			&document.UserId,
+			&document.RiskName,
+			&document.FraudSchema,
+			&document.FraudMotive,
+			&document.FraudTechnique,
+			&document.RiskSource,
+			&document.RootCause,
+			&document.BisproControlProcedure,
+			&document.QualitativeImpact,
+			&document.LikehoodJustification,
+			&document.ImpactJustification,
+			&document.StartegyAgreement,
+			&document.StrategyRecomendation,
+		)
+		if err != nil {
+			return nil, err
+		}
+		documents = append(documents, document)
+	}
+
+	return documents, nil
 }

@@ -102,9 +102,20 @@ func (implementation *ControllerDocumentImpl) FindById(w http.ResponseWriter, r 
 func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var request webDocument.DocumentRequestFindAll
 
+	if r.URL.Query().Has("user") {
+		withUser, err := strconv.ParseBool(r.URL.Query().Get("user"))
+		helpers.PanicIfError(err)
+		request.WithUser = withUser
+	}
+
 	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
-	findAllResponse := implementation.ServiceDocumentInterface.FindAll(ctx, request)
+	var findAllResponse interface{}
+	if request.WithUser {
+		findAllResponse = implementation.ServiceDocumentInterface.FindAllWithUserDetail(ctx, request)
+	} else {
+		findAllResponse = implementation.ServiceDocumentInterface.FindAll(ctx, request)
+	}
 
 	response := web.WebResponse{
 		Status: "OK",

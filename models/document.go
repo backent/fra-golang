@@ -16,6 +16,8 @@ type Document struct {
 	ImpactJustification    string // impact_justification
 	StartegyAgreement      string // strategy_agreement
 	StrategyRecomendation  string // strategy_recomendation
+
+	UserDetail User
 }
 
 var DocumentTable string = "documents"

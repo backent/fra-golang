@@ -12,4 +12,5 @@ type ServiceDocumentInterface interface {
 	Delete(ctx context.Context, request document.DocumentRequestDelete)
 	FindById(ctx context.Context, request document.DocumentRequestFindById) document.DocumentResponse
 	FindAll(ctx context.Context, request document.DocumentRequestFindAll) []document.DocumentResponse
+	FindAllWithUserDetail(ctx context.Context, request document.DocumentRequestFindAll) []document.DocumentResponseWithUserDetail
 }
