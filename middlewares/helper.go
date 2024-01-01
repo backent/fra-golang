@@ -9,6 +9,12 @@ import (
 )
 
 func ValidateToken(ctx context.Context, repositoriesAuth auth.RepositoryAuthInterface) int {
+	defer func() {
+		validateFail := recover()
+		if validateFail != nil {
+			helpers.PanicIfError(exceptions.NewUnAuthorized("authorization invalid"))
+		}
+	}()
 	var tokenString string
 	token := ctx.Value(helpers.ContextKey("token"))
 

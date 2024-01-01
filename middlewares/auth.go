@@ -31,7 +31,9 @@ func (implementation *AuthMiddleware) Login(ctx context.Context, tx *sql.Tx, req
 	helpers.PanicIfError(err)
 
 	user, err := implementation.RepositoryUserInterface.FindByNik(ctx, tx, request.Username)
-	helpers.PanicIfError(err)
+	if err != nil {
+		panic(exceptions.NewBadRequestError("username or password is incorrect"))
+	}
 
 	if !helpers.CheckPassword(request.Password, user.Password) {
 		panic(exceptions.NewBadRequestError("wrong username or password."))
