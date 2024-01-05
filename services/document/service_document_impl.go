@@ -48,6 +48,8 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 		ImpactJustification:    request.ImpactJustification,
 		StartegyAgreement:      request.StartegyAgreement,
 		StrategyRecomendation:  request.StrategyRecomendation,
+		Action:                 request.Action,
+		ActionBy:               request.ActionBy,
 	}
 
 	document, err = implementation.RepositoryDocumentInterface.Create(ctx, tx, document)
@@ -75,6 +77,8 @@ func (implementation *ServiceDocumentImpl) Update(ctx context.Context, request w
 		ImpactJustification:    request.ImpactJustification,
 		StartegyAgreement:      request.StartegyAgreement,
 		StrategyRecomendation:  request.StrategyRecomendation,
+		Action:                 request.Action,
+		ActionBy:               request.ActionBy,
 	}
 
 	document, err = implementation.RepositoryDocumentInterface.Update(ctx, tx, document)

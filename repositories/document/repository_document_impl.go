@@ -31,8 +31,10 @@ func (implementation *RepositoryDocumentImpl) Create(ctx context.Context, tx *sq
 		likehood_justification,
 		impact_justification,
 		strategy_agreement,
-		strategy_recomendation
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) `, models.DocumentTable)
+		strategy_recomendation,
+		action,
+		action_by
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) `, models.DocumentTable)
 	result, err := tx.ExecContext(ctx, query,
 		document.DocumentId,
 		document.UserId,
@@ -48,6 +50,8 @@ func (implementation *RepositoryDocumentImpl) Create(ctx context.Context, tx *sq
 		document.ImpactJustification,
 		document.StartegyAgreement,
 		document.StrategyRecomendation,
+		document.Action,
+		document.ActionBy,
 	)
 	if err != nil {
 		return document, err
@@ -77,6 +81,8 @@ func (implementation *RepositoryDocumentImpl) Update(ctx context.Context, tx *sq
 		impact_justification = ?,
 		strategy_agreement = ?,
 		strategy_recomendation = ?
+		action = ?
+		action_by = ?
 	WHERE id = ?`, models.DocumentTable)
 	_, err := tx.ExecContext(ctx, query,
 
@@ -92,6 +98,8 @@ func (implementation *RepositoryDocumentImpl) Update(ctx context.Context, tx *sq
 		document.ImpactJustification,
 		document.StartegyAgreement,
 		document.StrategyRecomendation,
+		document.Action,
+		document.ActionBy,
 
 		document.Id)
 	if err != nil {
@@ -126,7 +134,11 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 		likehood_justification,
 		impact_justification,
 		strategy_agreement,
-		strategy_recomendation
+		strategy_recomendation,
+		action,
+		action_by,
+		created_at,
+		updated_at
 	FROM %s WHERE id = ?`, models.DocumentTable)
 	rows, err := tx.QueryContext(ctx, query, id)
 	if err != nil {
@@ -150,6 +162,10 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 			&document.ImpactJustification,
 			&document.StartegyAgreement,
 			&document.StrategyRecomendation,
+			&document.Action,
+			&document.ActionBy,
+			&document.CreatedAt,
+			&document.UpdatedAt,
 		)
 		if err != nil {
 			return document, err
@@ -163,7 +179,6 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 
 func (implementation *RepositoryDocumentImpl) FindByDocumentId(ctx context.Context, tx *sql.Tx, documentId string) (models.Document, error) {
 	var document models.Document
-
 	query := fmt.Sprintf(`SELECT 
 		id,
 		document_id,
@@ -179,7 +194,11 @@ func (implementation *RepositoryDocumentImpl) FindByDocumentId(ctx context.Conte
 		likehood_justification,
 		impact_justification,
 		strategy_agreement,
-		strategy_recomendation
+		strategy_recomendation,
+		action,
+		action_by,
+		created_at,
+		updated_at
 	FROM %s WHERE document_id = ?`, models.DocumentTable)
 	rows, err := tx.QueryContext(ctx, query, documentId)
 	if err != nil {
@@ -203,6 +222,10 @@ func (implementation *RepositoryDocumentImpl) FindByDocumentId(ctx context.Conte
 			&document.ImpactJustification,
 			&document.StartegyAgreement,
 			&document.StrategyRecomendation,
+			&document.Action,
+			&document.ActionBy,
+			&document.CreatedAt,
+			&document.UpdatedAt,
 		)
 		if err != nil {
 			return document, err
@@ -231,6 +254,10 @@ func (implementation *RepositoryDocumentImpl) FindAllWithUserDetail(ctx context.
 		a.impact_justification,
 		a.strategy_agreement,
 		a.strategy_recomendation,
+		a.action,
+		a.action_by,
+		a.created_at,
+		a.updated_at,
 		b.id,
 		b.name,
 		b.nik
@@ -263,6 +290,10 @@ func (implementation *RepositoryDocumentImpl) FindAllWithUserDetail(ctx context.
 			&document.ImpactJustification,
 			&document.StartegyAgreement,
 			&document.StrategyRecomendation,
+			&document.Action,
+			&document.ActionBy,
+			&document.CreatedAt,
+			&document.UpdatedAt,
 			&user.Id,
 			&user.Name,
 			&user.Nik,
@@ -306,7 +337,11 @@ func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *s
 		likehood_justification,
 		impact_justification,
 		strategy_agreement,
-		strategy_recomendation
+		strategy_recomendation,
+		action,
+		action_by,
+		created_at,
+		updated_at
 	FROM %s ORDER BY id DESC`, models.DocumentTable)
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
@@ -331,6 +366,10 @@ func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *s
 			&document.ImpactJustification,
 			&document.StartegyAgreement,
 			&document.StrategyRecomendation,
+			&document.Action,
+			&document.ActionBy,
+			&document.CreatedAt,
+			&document.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err

@@ -32,6 +32,7 @@ func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx
 	helpers.PanicIfError(err)
 
 	request.UserId = userId
+	request.ActionBy = userId
 }
 
 func (implementation *DocumentMiddleware) Update(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestUpdate) {
@@ -47,6 +48,7 @@ func (implementation *DocumentMiddleware) Update(ctx context.Context, tx *sql.Tx
 	request.Id = document.Id
 	request.DocumentId = document.DocumentId
 	request.UserId = document.UserId
+	request.ActionBy = document.ActionBy
 }
 
 func (implementation *DocumentMiddleware) Delete(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestDelete) {

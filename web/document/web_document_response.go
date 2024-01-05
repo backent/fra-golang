@@ -1,25 +1,31 @@
 package document
 
 import (
+	"time"
+
 	"github.com/backent/fra-golang/models"
 )
 
 type DocumentResponse struct {
-	Id                     int    `json:"id"`                       // id
-	DocumentId             string `json:"document_id"`              // document_id
-	UserId                 int    `json:"user_id"`                  // user_id
-	RiskName               string `json:"risk_name"`                // risk_name
-	FraudSchema            string `json:"fraud_schema"`             // fraud_schema
-	FraudMotive            string `json:"fraud_motive"`             // fraud_motive
-	FraudTechnique         string `json:"fraud_technique"`          // fraud_technique
-	RiskSource             string `json:"risk_source"`              // risk_source
-	RootCause              string `json:"root_cause"`               // root_cause
-	BisproControlProcedure string `json:"bispro_control_procedure"` // bispro_control_procedure
-	QualitativeImpact      string `json:"qualitative_impact"`       // qualitative_impact
-	LikehoodJustification  string `json:"likehood_justification"`   // likehood_justification
-	ImpactJustification    string `json:"impact_justification"`     // impact_justification
-	StartegyAgreement      string `json:"strategy_agreement"`       // strategy_agreement
-	StrategyRecomendation  string `json:"strategy_recomendation"`   // strategy_recomendation
+	Id                     int       `json:"id"`                       // id
+	DocumentId             string    `json:"document_id"`              // document_id
+	UserId                 int       `json:"user_id"`                  // user_id
+	RiskName               string    `json:"risk_name"`                // risk_name
+	FraudSchema            string    `json:"fraud_schema"`             // fraud_schema
+	FraudMotive            string    `json:"fraud_motive"`             // fraud_motive
+	FraudTechnique         string    `json:"fraud_technique"`          // fraud_technique
+	RiskSource             string    `json:"risk_source"`              // risk_source
+	RootCause              string    `json:"root_cause"`               // root_cause
+	BisproControlProcedure string    `json:"bispro_control_procedure"` // bispro_control_procedure
+	QualitativeImpact      string    `json:"qualitative_impact"`       // qualitative_impact
+	LikehoodJustification  string    `json:"likehood_justification"`   // likehood_justification
+	ImpactJustification    string    `json:"impact_justification"`     // impact_justification
+	StartegyAgreement      string    `json:"strategy_agreement"`       // strategy_agreement
+	StrategyRecomendation  string    `json:"strategy_recomendation"`   // strategy_recomendation
+	Action                 string    `json:"action"`                   // action
+	ActionBy               int       `json:"action_by"`                // action_by
+	CreatedAt              time.Time `json:"created_at"`               // created_at
+	UpdatedAt              time.Time `json:"updated_at"`               // updated_at
 }
 
 func DocumentModelToDocumentResponse(document models.Document) DocumentResponse {
@@ -39,6 +45,10 @@ func DocumentModelToDocumentResponse(document models.Document) DocumentResponse 
 		ImpactJustification:    document.ImpactJustification,
 		StartegyAgreement:      document.StartegyAgreement,
 		StrategyRecomendation:  document.StrategyRecomendation,
+		Action:                 document.Action,
+		ActionBy:               document.ActionBy,
+		CreatedAt:              document.CreatedAt,
+		UpdatedAt:              document.UpdatedAt,
 	}
 }
 
@@ -51,21 +61,23 @@ func BulkDocumentModelToDocumentResponse(documents []models.Document) []Document
 }
 
 type DocumentResponseWithUserDetail struct {
-	Id                     int    `json:"id"`                       // id
-	DocumentId             string `json:"document_id"`              // document_id
-	UserId                 int    `json:"user_id"`                  // user_id
-	RiskName               string `json:"risk_name"`                // risk_name
-	FraudSchema            string `json:"fraud_schema"`             // fraud_schema
-	FraudMotive            string `json:"fraud_motive"`             // fraud_motive
-	FraudTechnique         string `json:"fraud_technique"`          // fraud_technique
-	RiskSource             string `json:"risk_source"`              // risk_source
-	RootCause              string `json:"root_cause"`               // root_cause
-	BisproControlProcedure string `json:"bispro_control_procedure"` // bispro_control_procedure
-	QualitativeImpact      string `json:"qualitative_impact"`       // qualitative_impact
-	LikehoodJustification  string `json:"likehood_justification"`   // likehood_justification
-	ImpactJustification    string `json:"impact_justification"`     // impact_justification
-	StartegyAgreement      string `json:"strategy_agreement"`       // strategy_agreement
-	StrategyRecomendation  string `json:"strategy_recomendation"`   // strategy_recomendation
+	Id                     int       `json:"id"`                       // id
+	DocumentId             string    `json:"document_id"`              // document_id
+	UserId                 int       `json:"user_id"`                  // user_id
+	RiskName               string    `json:"risk_name"`                // risk_name
+	FraudSchema            string    `json:"fraud_schema"`             // fraud_schema
+	FraudMotive            string    `json:"fraud_motive"`             // fraud_motive
+	FraudTechnique         string    `json:"fraud_technique"`          // fraud_technique
+	RiskSource             string    `json:"risk_source"`              // risk_source
+	RootCause              string    `json:"root_cause"`               // root_cause
+	BisproControlProcedure string    `json:"bispro_control_procedure"` // bispro_control_procedure
+	QualitativeImpact      string    `json:"qualitative_impact"`       // qualitative_impact
+	LikehoodJustification  string    `json:"likehood_justification"`   // likehood_justification
+	ImpactJustification    string    `json:"impact_justification"`     // impact_justification
+	StartegyAgreement      string    `json:"strategy_agreement"`       // strategy_agreement
+	StrategyRecomendation  string    `json:"strategy_recomendation"`   // strategy_recomendation
+	CreatedAt              time.Time `json:"created_at"`               // created_at
+	UpdatedAt              time.Time `json:"updated_at"`               // updated_at
 
 	UserDetail userResponse `json:"user_detail"` // user detail
 }
@@ -93,6 +105,8 @@ func DocumentModelToDocumentResponseWithUserDetail(document models.Document) Doc
 		ImpactJustification:    document.ImpactJustification,
 		StartegyAgreement:      document.StartegyAgreement,
 		StrategyRecomendation:  document.StrategyRecomendation,
+		CreatedAt:              document.CreatedAt,
+		UpdatedAt:              document.UpdatedAt,
 		UserDetail:             userModelToUserResponse(document.UserDetail),
 	}
 }

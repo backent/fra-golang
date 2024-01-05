@@ -13,9 +13,11 @@ type DocumentRequestCreate struct {
 	ImpactJustification    string `json:"impact_justification" validate:"required,max=1000"`     // impact_justification
 	StartegyAgreement      string `json:"strategy_agreement" validate:"required,max=1000"`       // strategy_agreement
 	StrategyRecomendation  string `json:"strategy_recomendation" validate:"required,max=1000"`   // strategy_recomendation
+	Action                 string `json:"action" validate:"required,max=50"`                     // action
 
 	DocumentId string
 	UserId     int
+	ActionBy   int
 }
 
 type DocumentRequestUpdate struct {
@@ -31,10 +33,12 @@ type DocumentRequestUpdate struct {
 	ImpactJustification    string `json:"impact_justification" validate:"required"`     // impact_justification
 	StartegyAgreement      string `json:"strategy_agreement" validate:"required"`       // strategy_agreement
 	StrategyRecomendation  string `json:"strategy_recomendation" validate:"required"`   // strategy_recomendation
+	Action                 string `json:"action" validate:"required"`                   // action
 
 	Id         int
 	DocumentId string
 	UserId     int
+	ActionBy   int
 }
 type DocumentRequestDelete struct {
 	Id int `json:"id"`
