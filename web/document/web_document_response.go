@@ -22,6 +22,9 @@ type DocumentResponse struct {
 	ImpactJustification    string    `json:"impact_justification"`     // impact_justification
 	StartegyAgreement      string    `json:"strategy_agreement"`       // strategy_agreement
 	StrategyRecomendation  string    `json:"strategy_recomendation"`   // strategy_recomendation
+	AssessmentLikehood     string    `json:"assessment_likehood"`      // assessment_likehood
+	AssessmentImpact       string    `json:"assessment_impact"`        // assessment_impact
+	AssessmentRiskLevel    string    `json:"assessment_risk_level"`    // assessment_risk_level
 	Action                 string    `json:"action"`                   // action
 	ActionBy               int       `json:"action_by"`                // action_by
 	CreatedAt              time.Time `json:"created_at"`               // created_at
@@ -45,6 +48,9 @@ func DocumentModelToDocumentResponse(document models.Document) DocumentResponse 
 		ImpactJustification:    document.ImpactJustification,
 		StartegyAgreement:      document.StartegyAgreement,
 		StrategyRecomendation:  document.StrategyRecomendation,
+		AssessmentLikehood:     document.AssessmentLikehood,
+		AssessmentImpact:       document.AssessmentImpact,
+		AssessmentRiskLevel:    document.AssessmentRiskLevel,
 		Action:                 document.Action,
 		ActionBy:               document.ActionBy,
 		CreatedAt:              document.CreatedAt,
@@ -76,6 +82,11 @@ type DocumentResponseWithUserDetail struct {
 	ImpactJustification    string    `json:"impact_justification"`     // impact_justification
 	StartegyAgreement      string    `json:"strategy_agreement"`       // strategy_agreement
 	StrategyRecomendation  string    `json:"strategy_recomendation"`   // strategy_recomendation
+	AssessmentLikehood     string    `json:"assessment_likehood"`      // assessment_likehood
+	AssessmentImpact       string    `json:"assessment_impact"`        // assessment_impact
+	AssessmentRiskLevel    string    `json:"assessment_risk_level"`    // assessment_risk_level
+	Action                 string    `json:"action"`                   // action
+	ActionBy               int       `json:"action_by"`                // action_by
 	CreatedAt              time.Time `json:"created_at"`               // created_at
 	UpdatedAt              time.Time `json:"updated_at"`               // updated_at
 
@@ -105,6 +116,11 @@ func DocumentModelToDocumentResponseWithUserDetail(document models.Document) Doc
 		ImpactJustification:    document.ImpactJustification,
 		StartegyAgreement:      document.StartegyAgreement,
 		StrategyRecomendation:  document.StrategyRecomendation,
+		AssessmentLikehood:     document.AssessmentLikehood,
+		AssessmentImpact:       document.AssessmentImpact,
+		AssessmentRiskLevel:    document.AssessmentRiskLevel,
+		Action:                 document.Action,
+		ActionBy:               document.ActionBy,
 		CreatedAt:              document.CreatedAt,
 		UpdatedAt:              document.UpdatedAt,
 		UserDetail:             userModelToUserResponse(document.UserDetail),

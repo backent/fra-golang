@@ -48,6 +48,9 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 		ImpactJustification:    request.ImpactJustification,
 		StartegyAgreement:      request.StartegyAgreement,
 		StrategyRecomendation:  request.StrategyRecomendation,
+		AssessmentLikehood:     request.AssessmentLikehood,
+		AssessmentImpact:       request.AssessmentImpact,
+		AssessmentRiskLevel:    request.AssessmentRiskLevel,
 		Action:                 request.Action,
 		ActionBy:               request.ActionBy,
 	}

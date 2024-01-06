@@ -19,6 +19,9 @@ type Document struct {
 	ImpactJustification    string    // impact_justification
 	StartegyAgreement      string    // strategy_agreement
 	StrategyRecomendation  string    // strategy_recomendation
+	AssessmentLikehood     string    // assessment_likehood
+	AssessmentImpact       string    // assessment_impact
+	AssessmentRiskLevel    string    // assessment_risk_level
 	Action                 string    // action
 	ActionBy               int       // action_by
 	CreatedAt              time.Time // created_at
