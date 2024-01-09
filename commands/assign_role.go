@@ -14,7 +14,7 @@ func main() {
 	var nik, role string
 	scanArg(&nik, &role)
 
-	err := godotenv.Load()
+	err := godotenv.Load("../.env")
 	helpers.PanicIfError(err)
 
 	sql := libs.NewDatabase()
