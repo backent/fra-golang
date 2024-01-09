@@ -122,7 +122,7 @@ func (implementation *ServiceDocumentImpl) FindAll(ctx context.Context, request 
 
 	implementation.DocumentMiddleware.FindAll(ctx, tx, &request)
 
-	documents, err := implementation.RepositoryDocumentInterface.FindAll(ctx, tx)
+	documents, err := implementation.RepositoryDocumentInterface.FindAll(ctx, tx, request.Take, request.Skip)
 	helpers.PanicIfError(err)
 
 	return webDocument.BulkDocumentModelToDocumentResponse(documents)
@@ -134,7 +134,7 @@ func (implementation *ServiceDocumentImpl) FindAllWithUserDetail(ctx context.Con
 
 	implementation.DocumentMiddleware.FindAll(ctx, tx, &request)
 
-	documents, err := implementation.RepositoryDocumentInterface.FindAllWithUserDetail(ctx, tx)
+	documents, err := implementation.RepositoryDocumentInterface.FindAllWithUserDetail(ctx, tx, request.GetTake(), request.GetSkip())
 	helpers.PanicIfError(err)
 
 	return webDocument.BulkDocumentModelToDocumentResponseWithUserDetail(documents)

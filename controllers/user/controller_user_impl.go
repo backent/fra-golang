@@ -108,6 +108,8 @@ func (implementation *ControllerUserImpl) FindAll(w http.ResponseWriter, r *http
 		request.WithDocument = withDocument
 	}
 
+	web.SetPagination(&request, r)
+
 	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	var findAllResponse interface{}

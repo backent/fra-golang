@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/backent/fra-golang/exceptions"
 	"github.com/backent/fra-golang/helpers"
@@ -31,6 +32,10 @@ func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
 
+	request.AssessmentImpact = strings.ToLower(request.AssessmentImpact)
+	request.AssessmentLikehood = strings.ToLower(request.AssessmentLikehood)
+	request.AssessmentRiskLevel = strings.ToLower(request.AssessmentRiskLevel)
+
 	request.UserId = userId
 	request.ActionBy = userId
 }
@@ -44,6 +49,10 @@ func (implementation *DocumentMiddleware) Update(ctx context.Context, tx *sql.Tx
 	if err != nil {
 		panic(exceptions.NewNotFoundError(err.Error()))
 	}
+
+	request.AssessmentImpact = strings.ToLower(request.AssessmentImpact)
+	request.AssessmentLikehood = strings.ToLower(request.AssessmentLikehood)
+	request.AssessmentRiskLevel = strings.ToLower(request.AssessmentRiskLevel)
 
 	request.Id = document.Id
 	request.DocumentId = document.DocumentId

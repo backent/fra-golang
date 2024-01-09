@@ -25,4 +25,19 @@ type UserRequestFindById struct {
 
 type UserRequestFindAll struct {
 	WithDocument bool
+	Take         int
+	Skip         int
+}
+
+func (implementation *UserRequestFindAll) SetSkip(skip int) {
+	implementation.Skip = skip
+}
+func (implementation *UserRequestFindAll) SetTake(take int) {
+	implementation.Take = take
+}
+func (implementation *UserRequestFindAll) GetSkip() int {
+	return implementation.Skip
+}
+func (implementation *UserRequestFindAll) GetTake() int {
+	return implementation.Take
 }

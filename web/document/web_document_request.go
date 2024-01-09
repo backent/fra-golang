@@ -1,5 +1,7 @@
 package document
 
+import "github.com/backent/fra-golang/web"
+
 type DocumentRequestCreate struct {
 	RiskName               string `json:"risk_name" validate:"required,max=50"`                  // risk_name
 	FraudSchema            string `json:"fraud_schema" validate:"required,max=1000"`             // fraud_schema
@@ -56,4 +58,26 @@ type DocumentRequestFindById struct {
 
 type DocumentRequestFindAll struct {
 	WithUser bool
+	Take     int
+	Skip     int
+}
+
+func NewDocumentRequestFindAll() web.RequestPagination {
+	return &DocumentRequestFindAll{}
+}
+
+func (implementation *DocumentRequestFindAll) SetSkip(skip int) {
+	implementation.Skip = skip
+}
+
+func (implementation *DocumentRequestFindAll) SetTake(take int) {
+	implementation.Take = take
+}
+
+func (implementation *DocumentRequestFindAll) GetTake() int {
+	return implementation.Take
+}
+
+func (implementation *DocumentRequestFindAll) GetSkip() int {
+	return implementation.Skip
 }

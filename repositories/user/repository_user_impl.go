@@ -71,11 +71,11 @@ func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.
 
 	return user, nil
 }
-func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.Tx) ([]models.User, error) {
+func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.Tx, take int, skip int) ([]models.User, error) {
 	var users []models.User
 
-	query := fmt.Sprintf("SELECT id, nik, name, password FROM %s ORDER BY id DESC", models.UserTable)
-	rows, err := tx.QueryContext(ctx, query)
+	query := fmt.Sprintf("SELECT id, nik, name, password FROM %s ORDER BY id DESC LIMIT ?, ?", models.UserTable)
+	rows, err := tx.QueryContext(ctx, query, skip, take)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql
 	return user, nil
 }
 
-func (implementation *RepositoryUserImpl) FindAllWithDocumentsDetail(ctx context.Context, tx *sql.Tx) ([]models.User, error) {
+func (implementation *RepositoryUserImpl) FindAllWithDocumentsDetail(ctx context.Context, tx *sql.Tx, take int, skip int) ([]models.User, error) {
 	query := fmt.Sprintf(`SELECT
 		a.id,
 		a.nik,
@@ -126,11 +126,10 @@ func (implementation *RepositoryUserImpl) FindAllWithDocumentsDetail(ctx context
 		b.user_id,
 		b.risk_name
 		FROM
-		%s a 
+		(SELECT * FROM %s ORDER BY id DESC LIMIT ?, ?) a 
 		LEFT JOIN %s b
-		ON a.id = b.user_id
-		ORDER BY b.document_id DESC`, models.UserTable, models.DocumentTable)
-	rows, err := tx.QueryContext(ctx, query)
+		ON a.id = b.user_id`, models.UserTable, models.DocumentTable)
+	rows, err := tx.QueryContext(ctx, query, skip, take)
 	if err != nil {
 		return nil, err
 	}
