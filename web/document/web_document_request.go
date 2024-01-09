@@ -62,8 +62,8 @@ type DocumentRequestFindById struct {
 
 type DocumentRequestFindAll struct {
 	WithUser       bool
-	Take           int
-	Skip           int
+	take           int
+	skip           int
 	orderBy        string
 	orderDirection string
 }
@@ -73,19 +73,19 @@ func NewDocumentRequestFindAll() web.RequestPagination {
 }
 
 func (implementation *DocumentRequestFindAll) SetSkip(skip int) {
-	implementation.Skip = skip
+	implementation.skip = skip
 }
 
 func (implementation *DocumentRequestFindAll) SetTake(take int) {
-	implementation.Take = take
+	implementation.take = take
 }
 
 func (implementation *DocumentRequestFindAll) GetTake() int {
-	return implementation.Take
+	return implementation.take
 }
 
 func (implementation *DocumentRequestFindAll) GetSkip() int {
-	return implementation.Skip
+	return implementation.skip
 }
 
 func (implementation *DocumentRequestFindAll) SetOrderBy(orderBy string) {

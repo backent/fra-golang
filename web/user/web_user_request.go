@@ -27,23 +27,23 @@ type UserRequestFindById struct {
 
 type UserRequestFindAll struct {
 	WithDocument   bool
-	Take           int
-	Skip           int
+	take           int
+	skip           int
 	orderBy        string
 	orderDirection string
 }
 
 func (implementation *UserRequestFindAll) SetSkip(skip int) {
-	implementation.Skip = skip
+	implementation.skip = skip
 }
 func (implementation *UserRequestFindAll) SetTake(take int) {
-	implementation.Take = take
+	implementation.take = take
 }
 func (implementation *UserRequestFindAll) GetSkip() int {
-	return implementation.Skip
+	return implementation.skip
 }
 func (implementation *UserRequestFindAll) GetTake() int {
-	return implementation.Take
+	return implementation.take
 }
 
 func (implementation *UserRequestFindAll) SetOrderBy(orderBy string) {
