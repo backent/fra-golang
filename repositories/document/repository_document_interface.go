@@ -13,6 +13,6 @@ type RepositoryDocumentInterface interface {
 	Delete(ctx context.Context, tx *sql.Tx, id int) error
 	FindById(ctx context.Context, tx *sql.Tx, id int) (models.Document, error)
 	FindByDocumentId(ctx context.Context, tx *sql.Tx, documentId string) (models.Document, error)
-	FindAll(ctx context.Context, tx *sql.Tx, take int, skip int) ([]models.Document, error)
-	FindAllWithUserDetail(ctx context.Context, tx *sql.Tx, take int, skip int) ([]models.Document, error)
+	FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, error)
+	FindAllWithUserDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, error)
 }

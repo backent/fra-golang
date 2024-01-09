@@ -34,3 +34,22 @@ func SetPagination(request RequestPagination, r *http.Request) {
 	}
 
 }
+
+type RequestOrder interface {
+	SetOrderBy(orderBy string)
+	SetOrderDirection(orderDirection string)
+	GetOrderBy() string
+	GetOrderDirection() string
+}
+
+func SetOrder(request RequestOrder, r *http.Request) {
+	if r.URL.Query().Has("orderBy") {
+		orderBy := r.URL.Query().Get("orderBy")
+		request.SetOrderBy(orderBy)
+	}
+
+	if r.URL.Query().Has("orderDirection") {
+		orderDirection := r.URL.Query().Get("orderDirection")
+		request.SetOrderDirection(orderDirection)
+	}
+}

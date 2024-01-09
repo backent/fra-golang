@@ -102,7 +102,7 @@ func (implementation *ServiceUserImpl) FindAll(ctx context.Context, request webU
 
 	implementation.UserMiddleware.FindAll(ctx, tx, &request)
 
-	users, err := implementation.RepositoryUserInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip())
+	users, err := implementation.RepositoryUserInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
 	helpers.PanicIfError(err)
 
 	return webUser.BulkUserModelToUserResponse(users)
@@ -115,7 +115,7 @@ func (implementation *ServiceUserImpl) FindAllWithDocumentsDetail(ctx context.Co
 
 	implementation.UserMiddleware.FindAll(ctx, tx, &request)
 
-	users, err := implementation.RepositoryUserInterface.FindAllWithDocumentsDetail(ctx, tx, request.GetTake(), request.GetSkip())
+	users, err := implementation.RepositoryUserInterface.FindAllWithDocumentsDetail(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
 	helpers.PanicIfError(err)
 
 	return webUser.BulkUserModelToUserResponseWithDocumentsDetail(users)

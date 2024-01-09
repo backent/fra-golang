@@ -1,6 +1,10 @@
 package document
 
-import "github.com/backent/fra-golang/web"
+import (
+	"strings"
+
+	"github.com/backent/fra-golang/web"
+)
 
 type DocumentRequestCreate struct {
 	RiskName               string `json:"risk_name" validate:"required,max=50"`                  // risk_name
@@ -57,9 +61,11 @@ type DocumentRequestFindById struct {
 }
 
 type DocumentRequestFindAll struct {
-	WithUser bool
-	Take     int
-	Skip     int
+	WithUser       bool
+	Take           int
+	Skip           int
+	orderBy        string
+	orderDirection string
 }
 
 func NewDocumentRequestFindAll() web.RequestPagination {
@@ -80,4 +86,28 @@ func (implementation *DocumentRequestFindAll) GetTake() int {
 
 func (implementation *DocumentRequestFindAll) GetSkip() int {
 	return implementation.Skip
+}
+
+func (implementation *DocumentRequestFindAll) SetOrderBy(orderBy string) {
+	implementation.orderBy = orderBy
+}
+
+func (implementation *DocumentRequestFindAll) SetOrderDirection(orderDirection string) {
+	implementation.orderDirection = strings.ToUpper(orderDirection)
+}
+
+func (implementation *DocumentRequestFindAll) GetOrderBy() string {
+	// set default order by
+	if implementation.orderBy == "" {
+		return "created_at"
+	}
+	return implementation.orderBy
+}
+
+func (implementation *DocumentRequestFindAll) GetOrderDirection() string {
+	// set default order direction
+	if implementation.orderDirection == "" {
+		return "DESC"
+	}
+	return implementation.orderDirection
 }

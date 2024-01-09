@@ -109,6 +109,7 @@ func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *
 	}
 
 	web.SetPagination(&request, r)
+	web.SetOrder(&request, r)
 
 	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 

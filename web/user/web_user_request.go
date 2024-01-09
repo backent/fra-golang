@@ -1,5 +1,7 @@
 package user
 
+import "strings"
+
 type UserRequestCreate struct {
 	Nik      string `json:"nik" validate:"required"`
 	Name     string `json:"name" validate:"required"`
@@ -24,9 +26,11 @@ type UserRequestFindById struct {
 }
 
 type UserRequestFindAll struct {
-	WithDocument bool
-	Take         int
-	Skip         int
+	WithDocument   bool
+	Take           int
+	Skip           int
+	orderBy        string
+	orderDirection string
 }
 
 func (implementation *UserRequestFindAll) SetSkip(skip int) {
@@ -40,4 +44,28 @@ func (implementation *UserRequestFindAll) GetSkip() int {
 }
 func (implementation *UserRequestFindAll) GetTake() int {
 	return implementation.Take
+}
+
+func (implementation *UserRequestFindAll) SetOrderBy(orderBy string) {
+	implementation.orderBy = orderBy
+}
+
+func (implementation *UserRequestFindAll) SetOrderDirection(orderDirection string) {
+	implementation.orderDirection = strings.ToUpper(orderDirection)
+}
+
+func (implementation *UserRequestFindAll) GetOrderBy() string {
+	// set default order by
+	if implementation.orderBy == "" {
+		return "created_at"
+	}
+	return implementation.orderBy
+}
+
+func (implementation *UserRequestFindAll) GetOrderDirection() string {
+	// set default order direction
+	if implementation.orderDirection == "" {
+		return "DESC"
+	}
+	return implementation.orderDirection
 }
