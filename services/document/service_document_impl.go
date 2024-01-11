@@ -115,27 +115,27 @@ func (implementation *ServiceDocumentImpl) FindById(ctx context.Context, request
 
 	return webDocument.DocumentModelToDocumentResponse(document)
 }
-func (implementation *ServiceDocumentImpl) FindAll(ctx context.Context, request webDocument.DocumentRequestFindAll) []webDocument.DocumentResponse {
+func (implementation *ServiceDocumentImpl) FindAll(ctx context.Context, request webDocument.DocumentRequestFindAll) ([]webDocument.DocumentResponse, int) {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
 	implementation.DocumentMiddleware.FindAll(ctx, tx, &request)
 
-	documents, err := implementation.RepositoryDocumentInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
+	documents, total, err := implementation.RepositoryDocumentInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
 	helpers.PanicIfError(err)
 
-	return webDocument.BulkDocumentModelToDocumentResponse(documents)
+	return webDocument.BulkDocumentModelToDocumentResponse(documents), total
 }
-func (implementation *ServiceDocumentImpl) FindAllWithUserDetail(ctx context.Context, request webDocument.DocumentRequestFindAll) []webDocument.DocumentResponseWithUserDetail {
+func (implementation *ServiceDocumentImpl) FindAllWithUserDetail(ctx context.Context, request webDocument.DocumentRequestFindAll) ([]webDocument.DocumentResponseWithUserDetail, int) {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
 	implementation.DocumentMiddleware.FindAll(ctx, tx, &request)
 
-	documents, err := implementation.RepositoryDocumentInterface.FindAllWithUserDetail(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
+	documents, total, err := implementation.RepositoryDocumentInterface.FindAllWithUserDetail(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
 	helpers.PanicIfError(err)
 
-	return webDocument.BulkDocumentModelToDocumentResponseWithUserDetail(documents)
+	return webDocument.BulkDocumentModelToDocumentResponseWithUserDetail(documents), total
 }

@@ -114,16 +114,23 @@ func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *
 	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	var findAllResponse interface{}
+	var total int
 	if request.WithUser {
-		findAllResponse = implementation.ServiceDocumentInterface.FindAllWithUserDetail(ctx, request)
+		findAllResponse, total = implementation.ServiceDocumentInterface.FindAllWithUserDetail(ctx, request)
 	} else {
-		findAllResponse = implementation.ServiceDocumentInterface.FindAll(ctx, request)
+		findAllResponse, total = implementation.ServiceDocumentInterface.FindAll(ctx, request)
+	}
+	pagination := web.Pagination{
+		Take:  request.GetTake(),
+		Skip:  request.GetSkip(),
+		Total: total,
 	}
 
 	response := web.WebResponse{
 		Status: "OK",
 		Code:   http.StatusOK,
 		Data:   findAllResponse,
+		Extras: pagination,
 	}
 
 	helpers.ReturnReponseJSON(w, response)

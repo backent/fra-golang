@@ -261,8 +261,12 @@ func (implementation *RepositoryDocumentImpl) FindByDocumentId(ctx context.Conte
 	return document, nil
 }
 
-func (implementation *RepositoryDocumentImpl) FindAllWithUserDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, error) {
-	query := fmt.Sprintf(`SELECT 
+func (implementation *RepositoryDocumentImpl) FindAllWithUserDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, int, error) {
+	query := fmt.Sprintf(`
+		WITH main_table AS (
+			SELECT * FROM %s
+		)
+		SELECT 
 		a.id,
 		a.document_id,
 		a.user_id,
@@ -287,14 +291,16 @@ func (implementation *RepositoryDocumentImpl) FindAllWithUserDetail(ctx context.
 		a.updated_at,
 		b.id,
 		b.name,
-		b.nik
-	FROM (SELECT * FROM %s ORDER BY %s %s  LIMIT ?, ?) a LEFT JOIN %s b ON a.user_id = b.id `, models.DocumentTable, orderBy, orderDirection, models.UserTable)
+		b.nik,
+		c.count
+	FROM (SELECT * FROM main_table ORDER BY %s %s  LIMIT ?, ?) a LEFT JOIN %s b ON a.user_id = b.id LEFT JOIN (SELECT COUNT(*) as count FROM main_table) c ON true `, models.DocumentTable, orderBy, orderDirection, models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, skip, take)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
+	var totalDocument int
 	var documents []*models.Document
 	documentsMap := make(map[int]*models.Document)
 
@@ -327,9 +333,10 @@ func (implementation *RepositoryDocumentImpl) FindAllWithUserDetail(ctx context.
 			&user.Id,
 			&user.Name,
 			&user.Nik,
+			&totalDocument,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		item, found := documentsMap[document.Id]
@@ -346,42 +353,48 @@ func (implementation *RepositoryDocumentImpl) FindAllWithUserDetail(ctx context.
 		documentsReturn = append(documentsReturn, *document)
 	}
 
-	return documentsReturn, nil
+	return documentsReturn, totalDocument, nil
 }
 
-func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, error) {
+func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, int, error) {
 	var documents []models.Document
 
-	query := fmt.Sprintf(`SELECT 
-		id,
-		document_id,
-		user_id,
-		risk_name,
-		fraud_schema,
-		fraud_motive,
-		fraud_technique,
-		risk_source,
-		root_cause,
-		bispro_control_procedure,
-		qualitative_impact,
-		likehood_justification,
-		impact_justification,
-		strategy_agreement,
-		strategy_recomendation,
-		assessment_likehood,
-		assessment_impact,
-		assessment_risk_level,
-		action,
-		action_by,
-		created_at,
-		updated_at
-	FROM %s ORDER BY %s %s LIMIT ?, ?`, models.DocumentTable, orderBy, orderDirection)
+	query := fmt.Sprintf(`
+		WITH main_table AS (
+			SELECT * FROM %s
+		)
+		SELECT 
+		a.id,
+		a.document_id,
+		a.user_id,
+		a.risk_name,
+		a.fraud_schema,
+		a.fraud_motive,
+		a.fraud_technique,
+		a.risk_source,
+		a.root_cause,
+		a.bispro_control_procedure,
+		a.qualitative_impact,
+		a.likehood_justification,
+		a.impact_justification,
+		a.strategy_agreement,
+		a.strategy_recomendation,
+		a.assessment_likehood,
+		a.assessment_impact,
+		a.assessment_risk_level,
+		a.action,
+		a.action_by,
+		a.created_at,
+		a.updated_at,
+		b.count
+	FROM (SELECT * FROM main_table ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table) b ON true`, models.DocumentTable, orderBy, orderDirection)
 	rows, err := tx.QueryContext(ctx, query, skip, take)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
+	var totalDocument int
 	for rows.Next() {
 		var document models.Document
 		err = rows.Scan(&document.Id,
@@ -406,12 +419,13 @@ func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *s
 			&document.ActionBy,
 			&document.CreatedAt,
 			&document.UpdatedAt,
+			&totalDocument,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		documents = append(documents, document)
 	}
 
-	return documents, nil
+	return documents, totalDocument, nil
 }
