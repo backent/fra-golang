@@ -22,11 +22,11 @@ func main() {
 	router := injector.InitializeRouter()
 
 	server := http.Server{
-		Addr:    "localhost:" + APP_PORT,
+		Addr:    ":" + APP_PORT,
 		Handler: router,
 	}
 
-	fmt.Println("serving on localhost:" + APP_PORT)
+	fmt.Println("serving on :" + APP_PORT)
 
 	server.ListenAndServe()
 }
