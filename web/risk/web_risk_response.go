@@ -1,4 +1,4 @@
-package document
+package risk
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 	"github.com/backent/fra-golang/models"
 )
 
-type DocumentResponse struct {
+type RiskResponse struct {
 	Id                     int       `json:"id"`                       // id
 	DocumentId             string    `json:"document_id"`              // document_id
 	UserId                 int       `json:"user_id"`                  // user_id
@@ -31,42 +31,42 @@ type DocumentResponse struct {
 	UpdatedAt              time.Time `json:"updated_at"`               // updated_at
 }
 
-func DocumentModelToDocumentResponse(document models.Document) DocumentResponse {
-	return DocumentResponse{
-		Id:                     document.Id,
-		DocumentId:             document.DocumentId,
-		UserId:                 document.UserId,
-		RiskName:               document.RiskName,
-		FraudSchema:            document.FraudSchema,
-		FraudMotive:            document.FraudMotive,
-		FraudTechnique:         document.FraudTechnique,
-		RiskSource:             document.RiskSource,
-		RootCause:              document.RootCause,
-		BisproControlProcedure: document.BisproControlProcedure,
-		QualitativeImpact:      document.QualitativeImpact,
-		LikehoodJustification:  document.LikehoodJustification,
-		ImpactJustification:    document.ImpactJustification,
-		StartegyAgreement:      document.StartegyAgreement,
-		StrategyRecomendation:  document.StrategyRecomendation,
-		AssessmentLikehood:     document.AssessmentLikehood,
-		AssessmentImpact:       document.AssessmentImpact,
-		AssessmentRiskLevel:    document.AssessmentRiskLevel,
-		Action:                 document.Action,
-		ActionBy:               document.ActionBy,
-		CreatedAt:              document.CreatedAt,
-		UpdatedAt:              document.UpdatedAt,
+func RiskModelToRiskResponse(risk models.Risk) RiskResponse {
+	return RiskResponse{
+		Id:                     risk.Id,
+		DocumentId:             risk.DocumentId,
+		UserId:                 risk.UserId,
+		RiskName:               risk.RiskName,
+		FraudSchema:            risk.FraudSchema,
+		FraudMotive:            risk.FraudMotive,
+		FraudTechnique:         risk.FraudTechnique,
+		RiskSource:             risk.RiskSource,
+		RootCause:              risk.RootCause,
+		BisproControlProcedure: risk.BisproControlProcedure,
+		QualitativeImpact:      risk.QualitativeImpact,
+		LikehoodJustification:  risk.LikehoodJustification,
+		ImpactJustification:    risk.ImpactJustification,
+		StartegyAgreement:      risk.StartegyAgreement,
+		StrategyRecomendation:  risk.StrategyRecomendation,
+		AssessmentLikehood:     risk.AssessmentLikehood,
+		AssessmentImpact:       risk.AssessmentImpact,
+		AssessmentRiskLevel:    risk.AssessmentRiskLevel,
+		Action:                 risk.Action,
+		ActionBy:               risk.ActionBy,
+		CreatedAt:              risk.CreatedAt,
+		UpdatedAt:              risk.UpdatedAt,
 	}
 }
 
-func BulkDocumentModelToDocumentResponse(documents []models.Document) []DocumentResponse {
-	var bulk []DocumentResponse
-	for _, document := range documents {
-		bulk = append(bulk, DocumentModelToDocumentResponse(document))
+func BulkRiskModelToRiskResponse(risks []models.Risk) []RiskResponse {
+	var bulk []RiskResponse
+	for _, risk := range risks {
+		bulk = append(bulk, RiskModelToRiskResponse(risk))
 	}
 	return bulk
 }
 
-type DocumentResponseWithUserDetail struct {
+type RiskResponseWithUserDetail struct {
 	Id                     int       `json:"id"`                       // id
 	DocumentId             string    `json:"document_id"`              // document_id
 	UserId                 int       `json:"user_id"`                  // user_id
@@ -99,38 +99,38 @@ type userResponse struct {
 	Name string `json:"name"`
 }
 
-func DocumentModelToDocumentResponseWithUserDetail(document models.Document) DocumentResponseWithUserDetail {
-	return DocumentResponseWithUserDetail{
-		Id:                     document.Id,
-		DocumentId:             document.DocumentId,
-		UserId:                 document.UserId,
-		RiskName:               document.RiskName,
-		FraudSchema:            document.FraudSchema,
-		FraudMotive:            document.FraudMotive,
-		FraudTechnique:         document.FraudTechnique,
-		RiskSource:             document.RiskSource,
-		RootCause:              document.RootCause,
-		BisproControlProcedure: document.BisproControlProcedure,
-		QualitativeImpact:      document.QualitativeImpact,
-		LikehoodJustification:  document.LikehoodJustification,
-		ImpactJustification:    document.ImpactJustification,
-		StartegyAgreement:      document.StartegyAgreement,
-		StrategyRecomendation:  document.StrategyRecomendation,
-		AssessmentLikehood:     document.AssessmentLikehood,
-		AssessmentImpact:       document.AssessmentImpact,
-		AssessmentRiskLevel:    document.AssessmentRiskLevel,
-		Action:                 document.Action,
-		ActionBy:               document.ActionBy,
-		CreatedAt:              document.CreatedAt,
-		UpdatedAt:              document.UpdatedAt,
-		UserDetail:             userModelToUserResponse(document.UserDetail),
+func RiskModelToRiskResponseWithUserDetail(risk models.Risk) RiskResponseWithUserDetail {
+	return RiskResponseWithUserDetail{
+		Id:                     risk.Id,
+		DocumentId:             risk.DocumentId,
+		UserId:                 risk.UserId,
+		RiskName:               risk.RiskName,
+		FraudSchema:            risk.FraudSchema,
+		FraudMotive:            risk.FraudMotive,
+		FraudTechnique:         risk.FraudTechnique,
+		RiskSource:             risk.RiskSource,
+		RootCause:              risk.RootCause,
+		BisproControlProcedure: risk.BisproControlProcedure,
+		QualitativeImpact:      risk.QualitativeImpact,
+		LikehoodJustification:  risk.LikehoodJustification,
+		ImpactJustification:    risk.ImpactJustification,
+		StartegyAgreement:      risk.StartegyAgreement,
+		StrategyRecomendation:  risk.StrategyRecomendation,
+		AssessmentLikehood:     risk.AssessmentLikehood,
+		AssessmentImpact:       risk.AssessmentImpact,
+		AssessmentRiskLevel:    risk.AssessmentRiskLevel,
+		Action:                 risk.Action,
+		ActionBy:               risk.ActionBy,
+		CreatedAt:              risk.CreatedAt,
+		UpdatedAt:              risk.UpdatedAt,
+		UserDetail:             userModelToUserResponse(risk.UserDetail),
 	}
 }
 
-func BulkDocumentModelToDocumentResponseWithUserDetail(documents []models.Document) []DocumentResponseWithUserDetail {
-	var bulk []DocumentResponseWithUserDetail
-	for _, document := range documents {
-		bulk = append(bulk, DocumentModelToDocumentResponseWithUserDetail(document))
+func BulkRiskModelToRiskResponseWithUserDetail(risks []models.Risk) []RiskResponseWithUserDetail {
+	var bulk []RiskResponseWithUserDetail
+	for _, risk := range risks {
+		bulk = append(bulk, RiskModelToRiskResponseWithUserDetail(risk))
 	}
 	return bulk
 }

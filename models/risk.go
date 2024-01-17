@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Document struct {
+type Risk struct {
 	Id                     int       // id
 	Status                 bool      // status
 	DocumentId             string    // document_id
@@ -30,4 +30,4 @@ type Document struct {
 	UserDetail User
 }
 
-var DocumentTable string = "documents"
+var RiskTable string = "risks"

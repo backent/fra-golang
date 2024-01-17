@@ -108,15 +108,15 @@ func (implementation *ServiceUserImpl) FindAll(ctx context.Context, request webU
 	return webUser.BulkUserModelToUserResponse(users)
 }
 
-func (implementation *ServiceUserImpl) FindAllWithDocumentsDetail(ctx context.Context, request webUser.UserRequestFindAll) []webUser.UserResponseWithDocumentsDetail {
+func (implementation *ServiceUserImpl) FindAllWithRisksDetail(ctx context.Context, request webUser.UserRequestFindAll) []webUser.UserResponseWithRisksDetail {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
 	implementation.UserMiddleware.FindAll(ctx, tx, &request)
 
-	users, err := implementation.RepositoryUserInterface.FindAllWithDocumentsDetail(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
+	users, err := implementation.RepositoryUserInterface.FindAllWithRisksDetail(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
 	helpers.PanicIfError(err)
 
-	return webUser.BulkUserModelToUserResponseWithDocumentsDetail(users)
+	return webUser.BulkUserModelToUserResponseWithRisksDetail(users)
 }

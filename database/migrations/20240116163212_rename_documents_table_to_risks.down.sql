@@ -1,0 +1,1 @@
+RENAME TABLE risks TO documents;

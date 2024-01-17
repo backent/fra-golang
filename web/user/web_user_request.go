@@ -26,7 +26,7 @@ type UserRequestFindById struct {
 }
 
 type UserRequestFindAll struct {
-	WithDocument   bool
+	WithRisk       bool
 	take           int
 	skip           int
 	orderBy        string

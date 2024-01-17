@@ -1,4 +1,4 @@
-package document
+package risk
 
 import (
 	"context"
@@ -6,29 +6,29 @@ import (
 	"strconv"
 
 	"github.com/backent/fra-golang/helpers"
-	servicesDocument "github.com/backent/fra-golang/services/document"
+	servicesRisk "github.com/backent/fra-golang/services/risk"
 	"github.com/backent/fra-golang/web"
-	webDocument "github.com/backent/fra-golang/web/document"
+	webRisk "github.com/backent/fra-golang/web/risk"
 	"github.com/julienschmidt/httprouter"
 )
 
-type ControllerDocumentImpl struct {
-	servicesDocument.ServiceDocumentInterface
+type ControllerRiskImpl struct {
+	servicesRisk.ServiceRiskInterface
 }
 
-func NewControllerDocumentImpl(servicesDocument servicesDocument.ServiceDocumentInterface) ControllerDocumentInterface {
-	return &ControllerDocumentImpl{
-		ServiceDocumentInterface: servicesDocument,
+func NewControllerRiskImpl(servicesRisk servicesRisk.ServiceRiskInterface) ControllerRiskInterface {
+	return &ControllerRiskImpl{
+		ServiceRiskInterface: servicesRisk,
 	}
 }
 
-func (implementation *ControllerDocumentImpl) Create(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	var request webDocument.DocumentRequestCreate
+func (implementation *ControllerRiskImpl) Create(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webRisk.RiskRequestCreate
 	helpers.DecodeRequest(r, &request)
 
 	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
-	createResponse := implementation.ServiceDocumentInterface.Create(ctx, request)
+	createResponse := implementation.ServiceRiskInterface.Create(ctx, request)
 
 	response := web.WebResponse{
 		Status: "OK",
@@ -39,8 +39,8 @@ func (implementation *ControllerDocumentImpl) Create(w http.ResponseWriter, r *h
 	helpers.ReturnReponseJSON(w, response)
 
 }
-func (implementation *ControllerDocumentImpl) Update(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	var request webDocument.DocumentRequestUpdate
+func (implementation *ControllerRiskImpl) Update(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webRisk.RiskRequestUpdate
 	helpers.DecodeRequest(r, &request)
 
 	id, err := strconv.Atoi(p.ByName("id"))
@@ -49,7 +49,7 @@ func (implementation *ControllerDocumentImpl) Update(w http.ResponseWriter, r *h
 
 	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
-	createResponse := implementation.ServiceDocumentInterface.Update(ctx, request)
+	createResponse := implementation.ServiceRiskInterface.Update(ctx, request)
 
 	response := web.WebResponse{
 		Status: "OK",
@@ -59,8 +59,8 @@ func (implementation *ControllerDocumentImpl) Update(w http.ResponseWriter, r *h
 
 	helpers.ReturnReponseJSON(w, response)
 }
-func (implementation *ControllerDocumentImpl) Delete(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	var request webDocument.DocumentRequestDelete
+func (implementation *ControllerRiskImpl) Delete(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webRisk.RiskRequestDelete
 
 	id, err := strconv.Atoi(p.ByName("id"))
 	helpers.PanicIfError(err)
@@ -68,7 +68,7 @@ func (implementation *ControllerDocumentImpl) Delete(w http.ResponseWriter, r *h
 
 	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
-	implementation.ServiceDocumentInterface.Delete(ctx, request)
+	implementation.ServiceRiskInterface.Delete(ctx, request)
 
 	response := web.WebResponse{
 		Status: "OK",
@@ -79,8 +79,8 @@ func (implementation *ControllerDocumentImpl) Delete(w http.ResponseWriter, r *h
 	helpers.ReturnReponseJSON(w, response)
 
 }
-func (implementation *ControllerDocumentImpl) FindById(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	var request webDocument.DocumentRequestFindById
+func (implementation *ControllerRiskImpl) FindById(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webRisk.RiskRequestFindById
 
 	id, err := strconv.Atoi(p.ByName("id"))
 	helpers.PanicIfError(err)
@@ -88,7 +88,7 @@ func (implementation *ControllerDocumentImpl) FindById(w http.ResponseWriter, r 
 
 	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
-	findByIdResponse := implementation.ServiceDocumentInterface.FindById(ctx, request)
+	findByIdResponse := implementation.ServiceRiskInterface.FindById(ctx, request)
 
 	response := web.WebResponse{
 		Status: "OK",
@@ -99,8 +99,8 @@ func (implementation *ControllerDocumentImpl) FindById(w http.ResponseWriter, r 
 	helpers.ReturnReponseJSON(w, response)
 
 }
-func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	var request webDocument.DocumentRequestFindAll
+func (implementation *ControllerRiskImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webRisk.RiskRequestFindAll
 
 	if r.URL.Query().Has("user") {
 		withUser, err := strconv.ParseBool(r.URL.Query().Get("user"))
@@ -116,9 +116,9 @@ func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *
 	var findAllResponse interface{}
 	var total int
 	if request.WithUser {
-		findAllResponse, total = implementation.ServiceDocumentInterface.FindAllWithUserDetail(ctx, request)
+		findAllResponse, total = implementation.ServiceRiskInterface.FindAllWithUserDetail(ctx, request)
 	} else {
-		findAllResponse, total = implementation.ServiceDocumentInterface.FindAll(ctx, request)
+		findAllResponse, total = implementation.ServiceRiskInterface.FindAll(ctx, request)
 	}
 	pagination := web.Pagination{
 		Take:  request.GetTake(),

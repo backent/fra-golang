@@ -14,5 +14,5 @@ type RepositoryUserInterface interface {
 	FindById(ctx context.Context, tx *sql.Tx, id int) (models.User, error)
 	FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.User, error)
 	FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.User, error)
-	FindAllWithDocumentsDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.User, error)
+	FindAllWithRisksDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.User, error)
 }

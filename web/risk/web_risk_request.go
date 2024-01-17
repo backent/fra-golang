@@ -1,4 +1,4 @@
-package document
+package risk
 
 import (
 	"strings"
@@ -6,7 +6,7 @@ import (
 	"github.com/backent/fra-golang/web"
 )
 
-type DocumentRequestCreate struct {
+type RiskRequestCreate struct {
 	RiskName               string `json:"risk_name" validate:"required,max=50"`                  // risk_name
 	FraudSchema            string `json:"fraud_schema" validate:"required,max=1000"`             // fraud_schema
 	FraudMotive            string `json:"fraud_motive" validate:"required,max=1000"`             // fraud_motive
@@ -29,7 +29,7 @@ type DocumentRequestCreate struct {
 	ActionBy   int
 }
 
-type DocumentRequestUpdate struct {
+type RiskRequestUpdate struct {
 	RiskName               string `json:"risk_name" validate:"required"`                // risk_name
 	FraudSchema            string `json:"fraud_schema" validate:"required"`             // fraud_schema
 	FraudMotive            string `json:"fraud_motive" validate:"required"`             // fraud_motive
@@ -52,15 +52,15 @@ type DocumentRequestUpdate struct {
 	UserId     int
 	ActionBy   int
 }
-type DocumentRequestDelete struct {
+type RiskRequestDelete struct {
 	Id int `json:"id"`
 }
 
-type DocumentRequestFindById struct {
+type RiskRequestFindById struct {
 	Id int `json:"id"`
 }
 
-type DocumentRequestFindAll struct {
+type RiskRequestFindAll struct {
 	WithUser       bool
 	take           int
 	skip           int
@@ -68,35 +68,35 @@ type DocumentRequestFindAll struct {
 	orderDirection string
 }
 
-func NewDocumentRequestFindAll() web.RequestPagination {
-	return &DocumentRequestFindAll{}
+func NewRiskRequestFindAll() web.RequestPagination {
+	return &RiskRequestFindAll{}
 }
 
-func (implementation *DocumentRequestFindAll) SetSkip(skip int) {
+func (implementation *RiskRequestFindAll) SetSkip(skip int) {
 	implementation.skip = skip
 }
 
-func (implementation *DocumentRequestFindAll) SetTake(take int) {
+func (implementation *RiskRequestFindAll) SetTake(take int) {
 	implementation.take = take
 }
 
-func (implementation *DocumentRequestFindAll) GetTake() int {
+func (implementation *RiskRequestFindAll) GetTake() int {
 	return implementation.take
 }
 
-func (implementation *DocumentRequestFindAll) GetSkip() int {
+func (implementation *RiskRequestFindAll) GetSkip() int {
 	return implementation.skip
 }
 
-func (implementation *DocumentRequestFindAll) SetOrderBy(orderBy string) {
+func (implementation *RiskRequestFindAll) SetOrderBy(orderBy string) {
 	implementation.orderBy = orderBy
 }
 
-func (implementation *DocumentRequestFindAll) SetOrderDirection(orderDirection string) {
+func (implementation *RiskRequestFindAll) SetOrderDirection(orderDirection string) {
 	implementation.orderDirection = strings.ToUpper(orderDirection)
 }
 
-func (implementation *DocumentRequestFindAll) GetOrderBy() string {
+func (implementation *RiskRequestFindAll) GetOrderBy() string {
 	// set default order by
 	if implementation.orderBy == "" {
 		return "created_at"
@@ -104,7 +104,7 @@ func (implementation *DocumentRequestFindAll) GetOrderBy() string {
 	return implementation.orderBy
 }
 
-func (implementation *DocumentRequestFindAll) GetOrderDirection() string {
+func (implementation *RiskRequestFindAll) GetOrderDirection() string {
 	// set default order direction
 	if implementation.orderDirection == "" {
 		return "DESC"

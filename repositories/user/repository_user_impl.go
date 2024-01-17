@@ -115,7 +115,7 @@ func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql
 	return user, nil
 }
 
-func (implementation *RepositoryUserImpl) FindAllWithDocumentsDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.User, error) {
+func (implementation *RepositoryUserImpl) FindAllWithRisksDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.User, error) {
 	query := fmt.Sprintf(`SELECT
 		a.id,
 		a.nik,
@@ -128,7 +128,7 @@ func (implementation *RepositoryUserImpl) FindAllWithDocumentsDetail(ctx context
 		FROM
 		(SELECT * FROM %s ORDER BY %s %s LIMIT ?, ?) a 
 		LEFT JOIN %s b
-		ON a.id = b.user_id`, models.UserTable, orderBy, orderDirection, models.DocumentTable)
+		ON a.id = b.user_id`, models.UserTable, orderBy, orderDirection, models.RiskTable)
 	rows, err := tx.QueryContext(ctx, query, skip, take)
 	if err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func (implementation *RepositoryUserImpl) FindAllWithDocumentsDetail(ctx context
 
 	for rows.Next() {
 		var user models.User
-		var document struct {
+		var risk struct {
 			Id         sql.NullInt32
 			DocumentId sql.NullString
 			UserId     sql.NullInt32
@@ -151,10 +151,10 @@ func (implementation *RepositoryUserImpl) FindAllWithDocumentsDetail(ctx context
 			&user.Nik,
 			&user.Name,
 			&user.Password,
-			&document.Id,
-			&document.DocumentId,
-			&document.UserId,
-			&document.RiskName,
+			&risk.Id,
+			&risk.DocumentId,
+			&risk.UserId,
+			&risk.RiskName,
 		)
 		if err != nil {
 			return nil, err
@@ -165,17 +165,17 @@ func (implementation *RepositoryUserImpl) FindAllWithDocumentsDetail(ctx context
 			usersMap[user.Id] = item
 			users = append(users, item)
 		}
-		if document.Id.Valid {
-			validDocument := models.Document{
-				Id:         int(document.Id.Int32),
-				DocumentId: document.DocumentId.String,
-				UserId:     int(document.UserId.Int32),
-				RiskName:   document.RiskName.String,
+		if risk.Id.Valid {
+			validRisk := models.Risk{
+				Id:         int(risk.Id.Int32),
+				DocumentId: risk.DocumentId.String,
+				UserId:     int(risk.UserId.Int32),
+				RiskName:   risk.RiskName.String,
 			}
-			if item.DocumentsDetail == nil {
-				item.DocumentsDetail = []models.Document{validDocument}
+			if item.RisksDetail == nil {
+				item.RisksDetail = []models.Risk{validRisk}
 			} else {
-				item.DocumentsDetail = append(item.DocumentsDetail, validDocument)
+				item.RisksDetail = append(item.RisksDetail, validRisk)
 			}
 		}
 	}

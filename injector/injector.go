@@ -5,15 +5,15 @@ package injector
 
 import (
 	controllersAuth "github.com/backent/fra-golang/controllers/auth"
-	controllersDocument "github.com/backent/fra-golang/controllers/document"
+	controllersRisk "github.com/backent/fra-golang/controllers/risk"
 	controllersUser "github.com/backent/fra-golang/controllers/user"
 	"github.com/backent/fra-golang/libs"
 	"github.com/backent/fra-golang/middlewares"
 	repositoriesAuth "github.com/backent/fra-golang/repositories/auth"
-	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
+	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	servicesAuth "github.com/backent/fra-golang/services/auth"
-	servicesDocument "github.com/backent/fra-golang/services/document"
+	servicesRisk "github.com/backent/fra-golang/services/risk"
 	servicesUser "github.com/backent/fra-golang/services/user"
 	"github.com/google/wire"
 	"github.com/julienschmidt/httprouter"
@@ -26,11 +26,11 @@ var UserSet = wire.NewSet(
 	middlewares.NewUserMiddleware,
 )
 
-var DocumentSet = wire.NewSet(
-	controllersDocument.NewControllerDocumentImpl,
-	servicesDocument.NewServiceDocumentImpl,
-	repositoriesDocument.NewRepositoryDocumentImpl,
-	middlewares.NewDocumentMiddleware,
+var RiskSet = wire.NewSet(
+	controllersRisk.NewControllerRiskImpl,
+	servicesRisk.NewServiceRiskImpl,
+	repositoriesRisk.NewRepositoryRiskImpl,
+	middlewares.NewRiskMiddleware,
 )
 
 var AuthSet = wire.NewSet(
@@ -46,7 +46,7 @@ func InitializeRouter() *httprouter.Router {
 		libs.NewRouter,
 		libs.NewValidator,
 		UserSet,
-		DocumentSet,
+		RiskSet,
 		AuthSet,
 	)
 
