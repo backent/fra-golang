@@ -8,14 +8,17 @@ package injector
 
 import (
 	auth3 "github.com/backent/fra-golang/controllers/auth"
+	document3 "github.com/backent/fra-golang/controllers/document"
 	risk3 "github.com/backent/fra-golang/controllers/risk"
 	user3 "github.com/backent/fra-golang/controllers/user"
 	"github.com/backent/fra-golang/libs"
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/repositories/auth"
+	"github.com/backent/fra-golang/repositories/document"
 	"github.com/backent/fra-golang/repositories/risk"
 	"github.com/backent/fra-golang/repositories/user"
 	auth2 "github.com/backent/fra-golang/services/auth"
+	document2 "github.com/backent/fra-golang/services/document"
 	risk2 "github.com/backent/fra-golang/services/risk"
 	user2 "github.com/backent/fra-golang/services/user"
 	"github.com/google/wire"
@@ -39,7 +42,11 @@ func InitializeRouter() *httprouter.Router {
 	authMiddleware := middlewares.NewAuthMiddleware(validate, repositoryUserInterface, repositoryAuthInterface)
 	serviceAuthInterface := auth2.NewServiceAuthImpl(db, repositoryAuthInterface, authMiddleware)
 	controllerAuthInterface := auth3.NewControllerAuthImpl(serviceAuthInterface)
-	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface)
+	repositoryDocumentInterface := document.NewRepositoryDocumentImpl()
+	documentMiddleware := middlewares.NewDocumentMiddleware(validate, repositoryDocumentInterface, repositoryAuthInterface)
+	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, repositoryDocumentInterface, documentMiddleware)
+	controllerDocumentInterface := document3.NewControllerDocumentImpl(serviceDocumentInterface)
+	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface, controllerDocumentInterface)
 	return router
 }
 
@@ -48,5 +55,7 @@ func InitializeRouter() *httprouter.Router {
 var UserSet = wire.NewSet(user3.NewControllerUserImpl, user2.NewServiceUserImpl, user.NewRepositoryUserImpl, middlewares.NewUserMiddleware)
 
 var RiskSet = wire.NewSet(risk3.NewControllerRiskImpl, risk2.NewServiceRiskImpl, risk.NewRepositoryRiskImpl, middlewares.NewRiskMiddleware)
+
+var DocumentSet = wire.NewSet(document3.NewControllerDocumentImpl, document2.NewServiceDocumentImpl, document.NewRepositoryDocumentImpl, middlewares.NewDocumentMiddleware)
 
 var AuthSet = wire.NewSet(auth3.NewControllerAuthImpl, auth2.NewServiceAuthImpl, auth.NewRepositoryAuthJWTImpl, middlewares.NewAuthMiddleware)

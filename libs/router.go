@@ -2,6 +2,7 @@ package libs
 
 import (
 	controllersAuth "github.com/backent/fra-golang/controllers/auth"
+	controllersDocument "github.com/backent/fra-golang/controllers/document"
 	controllersRisk "github.com/backent/fra-golang/controllers/risk"
 	controllersUser "github.com/backent/fra-golang/controllers/user"
 	"github.com/backent/fra-golang/exceptions"
@@ -12,6 +13,7 @@ func NewRouter(
 	controllersUser controllersUser.ControllerUserInterface,
 	controllersRisk controllersRisk.ControllerRiskInterface,
 	controllersAuth controllersAuth.ControllerAuthInterface,
+	controllersDocument controllersDocument.ControllerDocumentInterface,
 ) *httprouter.Router {
 	router := httprouter.New()
 
@@ -29,6 +31,12 @@ func NewRouter(
 	router.POST("/risks", controllersRisk.Create)
 	router.PUT("/risks/:id", controllersRisk.Update)
 	router.DELETE("/risks/:id", controllersRisk.Delete)
+
+	router.GET("/documents", controllersDocument.FindAll)
+	router.GET("/documents/:id", controllersDocument.FindById)
+	router.POST("/documents", controllersDocument.Create)
+	router.PUT("/documents/:id", controllersDocument.Update)
+	router.DELETE("/documents/:id", controllersDocument.Delete)
 
 	router.PanicHandler = exceptions.RouterPanicHandler
 	return router
