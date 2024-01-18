@@ -44,7 +44,7 @@ func InitializeRouter() *httprouter.Router {
 	controllerAuthInterface := auth3.NewControllerAuthImpl(serviceAuthInterface)
 	repositoryDocumentInterface := document.NewRepositoryDocumentImpl()
 	documentMiddleware := middlewares.NewDocumentMiddleware(validate, repositoryDocumentInterface, repositoryAuthInterface)
-	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, repositoryDocumentInterface, documentMiddleware)
+	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, repositoryDocumentInterface, documentMiddleware, repositoryRiskInterface)
 	controllerDocumentInterface := document3.NewControllerDocumentImpl(serviceDocumentInterface)
 	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface, controllerDocumentInterface)
 	return router

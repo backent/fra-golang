@@ -22,11 +22,6 @@ type RiskRequestCreate struct {
 	AssessmentLikehood     string `json:"assessment_likehood" validate:"required"`               // assessment_likehood
 	AssessmentImpact       string `json:"assessment_impact" validate:"required"`                 // assessment_impact
 	AssessmentRiskLevel    string `json:"assessment_risk_level" validate:"required"`             // assessment_risk_level
-	Action                 string `json:"action" validate:"required,max=50"`                     // action
-
-	DocumentId string
-	UserId     int
-	ActionBy   int
 }
 
 type RiskRequestUpdate struct {
@@ -42,15 +37,12 @@ type RiskRequestUpdate struct {
 	ImpactJustification    string `json:"impact_justification" validate:"required"`     // impact_justification
 	StartegyAgreement      string `json:"strategy_agreement" validate:"required"`       // strategy_agreement
 	StrategyRecomendation  string `json:"strategy_recomendation" validate:"required"`   // strategy_recomendation
-	Action                 string `json:"action" validate:"required"`                   // action
 	AssessmentLikehood     string `json:"assessment_likehood" validate:"required"`      // assessment_likehood
 	AssessmentImpact       string `json:"assessment_impact" validate:"required"`        // assessment_impact
 	AssessmentRiskLevel    string `json:"assessment_risk_level" validate:"required"`    // assessment_risk_level
 
 	Id         int
 	DocumentId string
-	UserId     int
-	ActionBy   int
 }
 type RiskRequestDelete struct {
 	Id int `json:"id"`

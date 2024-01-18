@@ -8,6 +8,7 @@ import (
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/models"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
+	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	webDocument "github.com/backent/fra-golang/web/document"
 	"github.com/google/uuid"
 )
@@ -16,13 +17,20 @@ type ServiceDocumentImpl struct {
 	DB *sql.DB
 	repositoriesDocument.RepositoryDocumentInterface
 	*middlewares.DocumentMiddleware
+	repositoriesRisk.RepositoryRiskInterface
 }
 
-func NewServiceDocumentImpl(db *sql.DB, repositoriesDocument repositoriesDocument.RepositoryDocumentInterface, documentMiddleware *middlewares.DocumentMiddleware) ServiceDocumentInterface {
+func NewServiceDocumentImpl(
+	db *sql.DB,
+	repositoriesDocument repositoriesDocument.RepositoryDocumentInterface,
+	documentMiddleware *middlewares.DocumentMiddleware,
+	repositoriesRisk repositoriesRisk.RepositoryRiskInterface,
+) ServiceDocumentInterface {
 	return &ServiceDocumentImpl{
 		DB:                          db,
 		RepositoryDocumentInterface: repositoriesDocument,
 		DocumentMiddleware:          documentMiddleware,
+		RepositoryRiskInterface:     repositoriesRisk,
 	}
 }
 
@@ -43,6 +51,30 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 
 	document, err = implementation.RepositoryDocumentInterface.Create(ctx, tx, document)
 	helpers.PanicIfError(err)
+
+	for _, riskRequest := range request.Risks {
+		risk := models.Risk{
+			DocumentId:             document.Id,
+			RiskName:               riskRequest.RiskName,
+			FraudSchema:            riskRequest.FraudSchema,
+			FraudMotive:            riskRequest.FraudMotive,
+			FraudTechnique:         riskRequest.FraudTechnique,
+			RiskSource:             riskRequest.RiskSource,
+			RootCause:              riskRequest.RootCause,
+			BisproControlProcedure: riskRequest.BisproControlProcedure,
+			QualitativeImpact:      riskRequest.QualitativeImpact,
+			LikehoodJustification:  riskRequest.LikehoodJustification,
+			ImpactJustification:    riskRequest.ImpactJustification,
+			StartegyAgreement:      riskRequest.StartegyAgreement,
+			StrategyRecomendation:  riskRequest.StrategyRecomendation,
+			AssessmentLikehood:     riskRequest.AssessmentLikehood,
+			AssessmentImpact:       riskRequest.AssessmentImpact,
+			AssessmentRiskLevel:    riskRequest.AssessmentRiskLevel,
+		}
+
+		_, err = implementation.RepositoryRiskInterface.Create(ctx, tx, risk)
+		helpers.PanicIfError(err)
+	}
 
 	return webDocument.DocumentModelToDocumentResponse(document)
 }

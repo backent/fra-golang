@@ -102,12 +102,6 @@ func (implementation *ControllerRiskImpl) FindById(w http.ResponseWriter, r *htt
 func (implementation *ControllerRiskImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var request webRisk.RiskRequestFindAll
 
-	if r.URL.Query().Has("user") {
-		withUser, err := strconv.ParseBool(r.URL.Query().Get("user"))
-		helpers.PanicIfError(err)
-		request.WithUser = withUser
-	}
-
 	web.SetPagination(&request, r)
 	web.SetOrder(&request, r)
 
@@ -115,11 +109,7 @@ func (implementation *ControllerRiskImpl) FindAll(w http.ResponseWriter, r *http
 
 	var findAllResponse interface{}
 	var total int
-	if request.WithUser {
-		findAllResponse, total = implementation.ServiceRiskInterface.FindAllWithUserDetail(ctx, request)
-	} else {
-		findAllResponse, total = implementation.ServiceRiskInterface.FindAll(ctx, request)
-	}
+	findAllResponse, total = implementation.ServiceRiskInterface.FindAll(ctx, request)
 	pagination := web.Pagination{
 		Take:  request.GetTake(),
 		Skip:  request.GetSkip(),

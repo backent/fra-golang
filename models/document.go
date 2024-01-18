@@ -12,7 +12,7 @@ type Document struct {
 	CreatedAt   time.Time // created_at
 	UpdatedAt   time.Time // updated_at
 
-	RiskDetail Risk
+	RiskDetail []Risk
 	UserDetail User
 }
 

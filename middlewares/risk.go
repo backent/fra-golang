@@ -28,7 +28,7 @@ func NewRiskMiddleware(validator *validator.Validate, repositoriesRisk repositor
 }
 
 func (implementation *RiskMiddleware) Create(ctx context.Context, tx *sql.Tx, request *webRisk.RiskRequestCreate) {
-	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
 
@@ -36,8 +36,6 @@ func (implementation *RiskMiddleware) Create(ctx context.Context, tx *sql.Tx, re
 	request.AssessmentLikehood = strings.ToLower(request.AssessmentLikehood)
 	request.AssessmentRiskLevel = strings.ToLower(request.AssessmentRiskLevel)
 
-	request.UserId = userId
-	request.ActionBy = userId
 }
 
 func (implementation *RiskMiddleware) Update(ctx context.Context, tx *sql.Tx, request *webRisk.RiskRequestUpdate) {
@@ -55,9 +53,7 @@ func (implementation *RiskMiddleware) Update(ctx context.Context, tx *sql.Tx, re
 	request.AssessmentRiskLevel = strings.ToLower(request.AssessmentRiskLevel)
 
 	request.Id = risk.Id
-	request.DocumentId = risk.DocumentId
-	request.UserId = risk.UserId
-	request.ActionBy = risk.ActionBy
+	request.DocumentId = "a" // temp handle with static value to remove error
 }
 
 func (implementation *RiskMiddleware) Delete(ctx context.Context, tx *sql.Tx, request *webRisk.RiskRequestDelete) {

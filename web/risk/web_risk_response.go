@@ -34,7 +34,7 @@ type RiskResponse struct {
 func RiskModelToRiskResponse(risk models.Risk) RiskResponse {
 	return RiskResponse{
 		Id:                     risk.Id,
-		DocumentId:             risk.DocumentId,
+		DocumentId:             "a", // temp handle with static value to remove error
 		UserId:                 risk.UserId,
 		RiskName:               risk.RiskName,
 		FraudSchema:            risk.FraudSchema,
@@ -51,8 +51,6 @@ func RiskModelToRiskResponse(risk models.Risk) RiskResponse {
 		AssessmentLikehood:     risk.AssessmentLikehood,
 		AssessmentImpact:       risk.AssessmentImpact,
 		AssessmentRiskLevel:    risk.AssessmentRiskLevel,
-		Action:                 risk.Action,
-		ActionBy:               risk.ActionBy,
 		CreatedAt:              risk.CreatedAt,
 		UpdatedAt:              risk.UpdatedAt,
 	}
@@ -102,7 +100,7 @@ type userResponse struct {
 func RiskModelToRiskResponseWithUserDetail(risk models.Risk) RiskResponseWithUserDetail {
 	return RiskResponseWithUserDetail{
 		Id:                     risk.Id,
-		DocumentId:             risk.DocumentId,
+		DocumentId:             "a", // temp handle with static value to remove error
 		UserId:                 risk.UserId,
 		RiskName:               risk.RiskName,
 		FraudSchema:            risk.FraudSchema,
@@ -119,8 +117,6 @@ func RiskModelToRiskResponseWithUserDetail(risk models.Risk) RiskResponseWithUse
 		AssessmentLikehood:     risk.AssessmentLikehood,
 		AssessmentImpact:       risk.AssessmentImpact,
 		AssessmentRiskLevel:    risk.AssessmentRiskLevel,
-		Action:                 risk.Action,
-		ActionBy:               risk.ActionBy,
 		CreatedAt:              risk.CreatedAt,
 		UpdatedAt:              risk.UpdatedAt,
 		UserDetail:             userModelToUserResponse(risk.UserDetail),

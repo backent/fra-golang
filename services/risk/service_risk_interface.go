@@ -12,5 +12,4 @@ type ServiceRiskInterface interface {
 	Delete(ctx context.Context, request risk.RiskRequestDelete)
 	FindById(ctx context.Context, request risk.RiskRequestFindById) risk.RiskResponse
 	FindAll(ctx context.Context, request risk.RiskRequestFindAll) ([]risk.RiskResponse, int)
-	FindAllWithUserDetail(ctx context.Context, request risk.RiskRequestFindAll) ([]risk.RiskResponseWithUserDetail, int)
 }

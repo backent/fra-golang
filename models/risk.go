@@ -4,8 +4,7 @@ import "time"
 
 type Risk struct {
 	Id                     int       // id
-	Status                 bool      // status
-	DocumentId             string    // document_id
+	DocumentId             int       // document_id
 	UserId                 int       // user_id
 	RiskName               string    // risk_name
 	FraudSchema            string    // fraud_schema
@@ -22,8 +21,6 @@ type Risk struct {
 	AssessmentLikehood     string    // assessment_likehood
 	AssessmentImpact       string    // assessment_impact
 	AssessmentRiskLevel    string    // assessment_risk_level
-	Action                 string    // action
-	ActionBy               int       // action_by
 	CreatedAt              time.Time // created_at
 	UpdatedAt              time.Time // updated_at
 

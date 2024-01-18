@@ -142,7 +142,7 @@ func (implementation *RepositoryUserImpl) FindAllWithRisksDetail(ctx context.Con
 		var user models.User
 		var risk struct {
 			Id         sql.NullInt32
-			DocumentId sql.NullString
+			DocumentId sql.NullInt32
 			UserId     sql.NullInt32
 			RiskName   sql.NullString
 		}
@@ -168,7 +168,7 @@ func (implementation *RepositoryUserImpl) FindAllWithRisksDetail(ctx context.Con
 		if risk.Id.Valid {
 			validRisk := models.Risk{
 				Id:         int(risk.Id.Int32),
-				DocumentId: risk.DocumentId.String,
+				DocumentId: int(risk.DocumentId.Int32),
 				UserId:     int(risk.UserId.Int32),
 				RiskName:   risk.RiskName.String,
 			}

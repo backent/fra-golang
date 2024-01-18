@@ -14,5 +14,4 @@ type RepositoryRiskInterface interface {
 	FindById(ctx context.Context, tx *sql.Tx, id int) (models.Risk, error)
 	FindByDocumentId(ctx context.Context, tx *sql.Tx, riskId string) (models.Risk, error)
 	FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Risk, int, error)
-	FindAllWithUserDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Risk, int, error)
 }

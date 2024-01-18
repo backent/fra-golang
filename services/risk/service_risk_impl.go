@@ -9,7 +9,6 @@ import (
 	"github.com/backent/fra-golang/models"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	webRisk "github.com/backent/fra-golang/web/risk"
-	"github.com/google/uuid"
 )
 
 type ServiceRiskImpl struct {
@@ -34,8 +33,7 @@ func (implementation *ServiceRiskImpl) Create(ctx context.Context, request webRi
 	implementation.RiskMiddleware.Create(ctx, tx, &request)
 
 	risk := models.Risk{
-		DocumentId:             uuid.New().String(),
-		UserId:                 request.UserId,
+		DocumentId:             1, // temp handle with static just to remove error
 		RiskName:               request.RiskName,
 		FraudSchema:            request.FraudSchema,
 		FraudMotive:            request.FraudMotive,
@@ -51,8 +49,6 @@ func (implementation *ServiceRiskImpl) Create(ctx context.Context, request webRi
 		AssessmentLikehood:     request.AssessmentLikehood,
 		AssessmentImpact:       request.AssessmentImpact,
 		AssessmentRiskLevel:    request.AssessmentRiskLevel,
-		Action:                 request.Action,
-		ActionBy:               request.ActionBy,
 	}
 
 	risk, err = implementation.RepositoryRiskInterface.Create(ctx, tx, risk)
@@ -80,14 +76,11 @@ func (implementation *ServiceRiskImpl) Update(ctx context.Context, request webRi
 		ImpactJustification:    request.ImpactJustification,
 		StartegyAgreement:      request.StartegyAgreement,
 		StrategyRecomendation:  request.StrategyRecomendation,
-		Action:                 request.Action,
-		ActionBy:               request.ActionBy,
 	}
 
 	risk, err = implementation.RepositoryRiskInterface.Update(ctx, tx, risk)
 	risk.Id = request.Id
-	risk.DocumentId = request.DocumentId
-	risk.UserId = request.UserId
+	risk.DocumentId = 1 // temp handle with static value to remove error
 	helpers.PanicIfError(err)
 
 	return webRisk.RiskModelToRiskResponse(risk)
@@ -126,16 +119,4 @@ func (implementation *ServiceRiskImpl) FindAll(ctx context.Context, request webR
 	helpers.PanicIfError(err)
 
 	return webRisk.BulkRiskModelToRiskResponse(risks), total
-}
-func (implementation *ServiceRiskImpl) FindAllWithUserDetail(ctx context.Context, request webRisk.RiskRequestFindAll) ([]webRisk.RiskResponseWithUserDetail, int) {
-	tx, err := implementation.DB.Begin()
-	helpers.PanicIfError(err)
-	defer helpers.CommitOrRollback(tx)
-
-	implementation.RiskMiddleware.FindAll(ctx, tx, &request)
-
-	risks, total, err := implementation.RepositoryRiskInterface.FindAllWithUserDetail(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
-	helpers.PanicIfError(err)
-
-	return webRisk.BulkRiskModelToRiskResponseWithUserDetail(risks), total
 }

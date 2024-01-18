@@ -4,11 +4,13 @@ import (
 	"strings"
 
 	"github.com/backent/fra-golang/web"
+	"github.com/backent/fra-golang/web/risk"
 )
 
 type DocumentRequestCreate struct {
-	Action      string `json:"action" validate:"required,max=40"`        // action
-	ProductName string `json:"product_name" validate:"required,max=100"` // product_name
+	Action      string                   `json:"action" validate:"required,max=40"`        // action
+	ProductName string                   `json:"product_name" validate:"required,max=100"` // product_name
+	Risks       []risk.RiskRequestCreate `json:"risks" validate:"required,gt=0,dive"`      // risks
 
 	Uuid      string
 	CreatedBy int
