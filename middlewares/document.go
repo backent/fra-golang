@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/backent/fra-golang/exceptions"
 	"github.com/backent/fra-golang/helpers"
@@ -30,6 +31,12 @@ func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx
 	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
+
+	for index := range request.Risks {
+		request.Risks[index].AssessmentImpact = strings.ToLower(request.Risks[index].AssessmentImpact)
+		request.Risks[index].AssessmentLikehood = strings.ToLower(request.Risks[index].AssessmentLikehood)
+		request.Risks[index].AssessmentRiskLevel = strings.ToLower(request.Risks[index].AssessmentRiskLevel)
+	}
 
 	request.CreatedBy = userId
 	request.ActionBy = userId
