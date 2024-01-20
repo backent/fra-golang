@@ -35,7 +35,7 @@ type DocumentRequestFindById struct {
 }
 
 type DocumentRequestFindAll struct {
-	WithUser       bool
+	WithDetail     bool
 	take           int
 	skip           int
 	orderBy        string

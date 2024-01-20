@@ -102,10 +102,10 @@ func (implementation *ControllerDocumentImpl) FindById(w http.ResponseWriter, r 
 func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var request webDocument.DocumentRequestFindAll
 
-	if r.URL.Query().Has("user") {
-		withUser, err := strconv.ParseBool(r.URL.Query().Get("user"))
+	if r.URL.Query().Has("detail") {
+		withDetail, err := strconv.ParseBool(r.URL.Query().Get("detail"))
 		helpers.PanicIfError(err)
-		request.WithUser = withUser
+		request.WithDetail = withDetail
 	}
 
 	web.SetPagination(&request, r)
@@ -115,7 +115,7 @@ func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *
 
 	var findAllResponse interface{}
 	var total int
-	if request.WithUser {
+	if request.WithDetail {
 		findAllResponse, total = implementation.ServiceDocumentInterface.FindAllWithDetail(ctx, request)
 	} else {
 		findAllResponse, total = implementation.ServiceDocumentInterface.FindAll(ctx, request)

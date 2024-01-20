@@ -172,8 +172,30 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 		b.id,
 		b.name,
 		b.nik,
-		c.count
-	FROM (SELECT * FROM main_table ORDER BY %s %s  LIMIT ?, ?) a LEFT JOIN %s b ON a.created_by = b.id LEFT JOIN (SELECT COUNT(*) as count FROM main_table) c ON true `, models.DocumentTable, orderBy, orderDirection, models.UserTable)
+		c.id,
+		c.document_id,
+		c.risk_name,
+		c.fraud_schema,
+		c.fraud_motive,
+		c.fraud_technique,
+		c.risk_source,
+		c.root_cause,
+		c.bispro_control_procedure,
+		c.qualitative_impact,
+		c.likehood_justification,
+		c.impact_justification,
+		c.strategy_agreement,
+		c.strategy_recomendation,
+		c.assessment_likehood,
+		c.assessment_impact,
+		c.assessment_risk_level,
+		c.created_at,
+		c.updated_at,
+		z.count
+	FROM (SELECT * FROM main_table ORDER BY %s %s  LIMIT ?, ?) a
+	LEFT JOIN %s b ON a.created_by = b.id
+	LEFT JOIN %s c ON a.id = c.document_id
+	LEFT JOIN (SELECT COUNT(*) as count FROM main_table) z ON true `, models.DocumentTable, orderBy, orderDirection, models.UserTable, models.RiskTable)
 	rows, err := tx.QueryContext(ctx, query, skip, take)
 	if err != nil {
 		return nil, 0, err
@@ -187,6 +209,7 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 	for rows.Next() {
 		var document models.Document
 		var user models.User
+		var nullAbleRisk models.NullAbleRisk
 
 		err = rows.Scan(
 			&document.Id,
@@ -200,6 +223,25 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 			&user.Id,
 			&user.Name,
 			&user.Nik,
+			&nullAbleRisk.Id,
+			&nullAbleRisk.DocumentId,
+			&nullAbleRisk.RiskName,
+			&nullAbleRisk.FraudSchema,
+			&nullAbleRisk.FraudMotive,
+			&nullAbleRisk.FraudTechnique,
+			&nullAbleRisk.RiskSource,
+			&nullAbleRisk.RootCause,
+			&nullAbleRisk.BisproControlProcedure,
+			&nullAbleRisk.QualitativeImpact,
+			&nullAbleRisk.LikehoodJustification,
+			&nullAbleRisk.ImpactJustification,
+			&nullAbleRisk.StartegyAgreement,
+			&nullAbleRisk.StrategyRecomendation,
+			&nullAbleRisk.AssessmentLikehood,
+			&nullAbleRisk.AssessmentImpact,
+			&nullAbleRisk.AssessmentRiskLevel,
+			&nullAbleRisk.CreatedAt,
+			&nullAbleRisk.UpdatedAt,
 			&totalDocument,
 		)
 		if err != nil {
@@ -213,6 +255,9 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 			documents = append(documents, item)
 		}
 		item.UserDetail = user
+		if nullAbleRisk.Id.Valid {
+			item.RiskDetail = append(item.RiskDetail, models.NullAbleRiskToRisk(nullAbleRisk))
+		}
 	}
 
 	var documentsReturn []models.Document
