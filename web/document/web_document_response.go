@@ -81,6 +81,12 @@ type riskResponse struct {
 }
 
 func DocumentModelToDocumentResponseWithDetail(document models.Document) DocumentResponseWithDetail {
+	var riskDetail []riskResponse
+	if temp := riskBulkToRiskResponseBulk(document.RiskDetail); len(temp) > 0 {
+		riskDetail = temp
+	} else {
+		riskDetail = make([]riskResponse, 0)
+	}
 	return DocumentResponseWithDetail{
 		Id:          document.Id,
 		Uuid:        document.Uuid,
@@ -91,7 +97,7 @@ func DocumentModelToDocumentResponseWithDetail(document models.Document) Documen
 		CreatedAt:   document.CreatedAt,
 		UpdatedAt:   document.UpdatedAt,
 		UserDetail:  userModelToUserResponse(document.UserDetail),
-		RiskDetail:  riskBulkToRiskResponseBulk(document.RiskDetail),
+		RiskDetail:  riskDetail,
 	}
 }
 
