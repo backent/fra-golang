@@ -5,7 +5,6 @@ import "time"
 type Risk struct {
 	Id                     int       // id
 	DocumentId             int       // document_id
-	UserId                 int       // user_id
 	RiskName               string    // risk_name
 	FraudSchema            string    // fraud_schema
 	FraudMotive            string    // fraud_motive

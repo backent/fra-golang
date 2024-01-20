@@ -169,7 +169,6 @@ func (implementation *RepositoryUserImpl) FindAllWithRisksDetail(ctx context.Con
 			validRisk := models.Risk{
 				Id:         int(risk.Id.Int32),
 				DocumentId: int(risk.DocumentId.Int32),
-				UserId:     int(risk.UserId.Int32),
 				RiskName:   risk.RiskName.String,
 			}
 			if item.RisksDetail == nil {

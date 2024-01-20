@@ -35,7 +35,6 @@ func RiskModelToRiskResponse(risk models.Risk) RiskResponse {
 	return RiskResponse{
 		Id:                     risk.Id,
 		DocumentId:             "a", // temp handle with static value to remove error
-		UserId:                 risk.UserId,
 		RiskName:               risk.RiskName,
 		FraudSchema:            risk.FraudSchema,
 		FraudMotive:            risk.FraudMotive,
@@ -101,7 +100,6 @@ func RiskModelToRiskResponseWithUserDetail(risk models.Risk) RiskResponseWithUse
 	return RiskResponseWithUserDetail{
 		Id:                     risk.Id,
 		DocumentId:             "a", // temp handle with static value to remove error
-		UserId:                 risk.UserId,
 		RiskName:               risk.RiskName,
 		FraudSchema:            risk.FraudSchema,
 		FraudMotive:            risk.FraudMotive,
