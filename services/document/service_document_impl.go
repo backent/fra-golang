@@ -110,7 +110,7 @@ func (implementation *ServiceDocumentImpl) Delete(ctx context.Context, request w
 	helpers.PanicIfError(err)
 
 }
-func (implementation *ServiceDocumentImpl) FindById(ctx context.Context, request webDocument.DocumentRequestFindById) webDocument.DocumentResponse {
+func (implementation *ServiceDocumentImpl) FindById(ctx context.Context, request webDocument.DocumentRequestFindById) webDocument.DocumentResponseWithDetail {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
@@ -120,7 +120,7 @@ func (implementation *ServiceDocumentImpl) FindById(ctx context.Context, request
 	document, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
 	helpers.PanicIfError(err)
 
-	return webDocument.DocumentModelToDocumentResponse(document)
+	return webDocument.DocumentModelToDocumentResponseWithDetail(document)
 }
 func (implementation *ServiceDocumentImpl) FindAll(ctx context.Context, request webDocument.DocumentRequestFindAll) ([]webDocument.DocumentResponse, int) {
 	tx, err := implementation.DB.Begin()

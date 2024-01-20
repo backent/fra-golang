@@ -79,23 +79,58 @@ func (implementation *RepositoryDocumentImpl) Delete(ctx context.Context, tx *sq
 func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *sql.Tx, id int) (models.Document, error) {
 	var document models.Document
 
-	query := fmt.Sprintf(`SELECT 
-		id,
-		uuid,
-		created_by,
-		action_by,
-		action,
-		product_name,
-		created_at,
-		updated_at
-	FROM %s WHERE id = ?`, models.DocumentTable)
+	query := fmt.Sprintf(`
+		WITH main_table AS (
+			SELECT * FROM %s WHERE id = ?
+		)
+		SELECT 
+		a.id,
+		a.uuid,
+		a.created_by,
+		a.action_by,
+		a.action,
+		a.product_name,
+		a.created_at,
+		a.updated_at,
+		b.id,
+		b.name,
+		b.nik,
+		c.id,
+		c.document_id,
+		c.risk_name,
+		c.fraud_schema,
+		c.fraud_motive,
+		c.fraud_technique,
+		c.risk_source,
+		c.root_cause,
+		c.bispro_control_procedure,
+		c.qualitative_impact,
+		c.likehood_justification,
+		c.impact_justification,
+		c.strategy_agreement,
+		c.strategy_recomendation,
+		c.assessment_likehood,
+		c.assessment_impact,
+		c.assessment_risk_level,
+		c.created_at,
+		c.updated_at
+	FROM (SELECT * FROM main_table) a
+	LEFT JOIN %s b ON a.created_by = b.id
+	LEFT JOIN %s c ON a.id = c.document_id `, models.DocumentTable, models.UserTable, models.RiskTable)
 	rows, err := tx.QueryContext(ctx, query, id)
 	if err != nil {
 		return document, err
 	}
 	defer rows.Close()
 
-	if rows.Next() {
+	var documents []*models.Document
+	documentsMap := make(map[int]*models.Document)
+
+	for rows.Next() {
+		var document models.Document
+		var user models.User
+		var nullAbleRisk models.NullAbleRisk
+
 		err = rows.Scan(
 			&document.Id,
 			&document.Uuid,
@@ -105,15 +140,55 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 			&document.ProductName,
 			&document.CreatedAt,
 			&document.UpdatedAt,
+			&user.Id,
+			&user.Name,
+			&user.Nik,
+			&nullAbleRisk.Id,
+			&nullAbleRisk.DocumentId,
+			&nullAbleRisk.RiskName,
+			&nullAbleRisk.FraudSchema,
+			&nullAbleRisk.FraudMotive,
+			&nullAbleRisk.FraudTechnique,
+			&nullAbleRisk.RiskSource,
+			&nullAbleRisk.RootCause,
+			&nullAbleRisk.BisproControlProcedure,
+			&nullAbleRisk.QualitativeImpact,
+			&nullAbleRisk.LikehoodJustification,
+			&nullAbleRisk.ImpactJustification,
+			&nullAbleRisk.StartegyAgreement,
+			&nullAbleRisk.StrategyRecomendation,
+			&nullAbleRisk.AssessmentLikehood,
+			&nullAbleRisk.AssessmentImpact,
+			&nullAbleRisk.AssessmentRiskLevel,
+			&nullAbleRisk.CreatedAt,
+			&nullAbleRisk.UpdatedAt,
 		)
 		if err != nil {
 			return document, err
 		}
-	} else {
+
+		item, found := documentsMap[document.Id]
+		if !found {
+			item = &document
+			documentsMap[document.Id] = item
+			documents = append(documents, item)
+		}
+		item.UserDetail = user
+		if nullAbleRisk.Id.Valid {
+			item.RiskDetail = append(item.RiskDetail, models.NullAbleRiskToRisk(nullAbleRisk))
+		}
+	}
+
+	if len(documents) < 1 {
 		return document, errors.New("not found document")
 	}
 
-	return document, nil
+	var documentsReturn []models.Document
+	for _, document := range documents {
+		documentsReturn = append(documentsReturn, *document)
+	}
+
+	return documentsReturn[0], nil
 }
 
 func (implementation *RepositoryDocumentImpl) FindByUUID(ctx context.Context, tx *sql.Tx, documentUuid string) (models.Document, error) {
