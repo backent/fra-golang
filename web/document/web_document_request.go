@@ -42,6 +42,9 @@ type DocumentRequestFindAll struct {
 	orderDirection string
 }
 
+type DocumentRequestGetProductDistinct struct {
+}
+
 func NewDocumentRequestFindAll() web.RequestPagination {
 	return &DocumentRequestFindAll{}
 }

@@ -389,3 +389,39 @@ func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *s
 
 	return documents, totalDocument, nil
 }
+
+func (implementation *RepositoryDocumentImpl) GetProductDistinct(ctx context.Context, tx *sql.Tx) ([]models.Document, error) {
+	query := fmt.Sprintf(`
+	WITH main_table AS (
+		SELECT * FROM %s
+	)
+	SELECT d1.id, d1.product_name
+	FROM main_table d1
+	JOIN (
+			SELECT product_name, MAX(id) AS max_id
+			FROM main_table
+			GROUP BY product_name
+	) d2 ON d1.product_name = d2.product_name AND d1.id = d2.max_id`, models.DocumentTable)
+
+	rows, err := tx.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var documents []models.Document
+	for rows.Next() {
+		var document models.Document
+		err := rows.Scan(
+			&document.Id,
+			&document.ProductName,
+		)
+		if err != nil {
+			return nil, err
+		}
+		documents = append(documents, document)
+	}
+
+	return documents, nil
+
+}

@@ -136,3 +136,20 @@ func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerDocumentImpl) GetProductDistinct(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webDocument.DocumentRequestGetProductDistinct
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	documents := implementation.ServiceDocumentInterface.GetProductDistinct(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   documents,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}

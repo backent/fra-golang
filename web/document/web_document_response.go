@@ -148,3 +148,23 @@ func riskBulkToRiskResponseBulk(risks []models.Risk) []riskResponse {
 	}
 	return risksResponse
 }
+
+type DocumentResponseGetProductDistinct struct {
+	Id          int    `json:"id"`
+	ProductName string `json:"product_name"`
+}
+
+func DocumentModelToDocumentResponseGetProductDistinct(document models.Document) DocumentResponseGetProductDistinct {
+	return DocumentResponseGetProductDistinct{
+		Id:          document.Id,
+		ProductName: document.ProductName,
+	}
+}
+
+func BulkDocumentModelToBulkDocumentResponseGetProductDistinct(documents []models.Document) []DocumentResponseGetProductDistinct {
+	var bulkDocumentResponseGetProductDistinct []DocumentResponseGetProductDistinct
+	for _, document := range documents {
+		bulkDocumentResponseGetProductDistinct = append(bulkDocumentResponseGetProductDistinct, DocumentModelToDocumentResponseGetProductDistinct(document))
+	}
+	return bulkDocumentResponseGetProductDistinct
+}

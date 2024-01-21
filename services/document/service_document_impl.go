@@ -9,6 +9,7 @@ import (
 	"github.com/backent/fra-golang/models"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
+	"github.com/backent/fra-golang/web/document"
 	webDocument "github.com/backent/fra-golang/web/document"
 	"github.com/google/uuid"
 )
@@ -149,4 +150,17 @@ func (implementation *ServiceDocumentImpl) FindAllWithDetail(ctx context.Context
 		return []webDocument.DocumentResponseWithDetail{}, total
 	}
 
+}
+
+func (implementation *ServiceDocumentImpl) GetProductDistinct(ctx context.Context, request document.DocumentRequestGetProductDistinct) []document.DocumentResponseGetProductDistinct {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.DocumentMiddleware.GetProductDistinct(ctx, tx, &request)
+
+	documents, err := implementation.RepositoryDocumentInterface.GetProductDistinct(ctx, tx)
+	helpers.PanicIfError(err)
+
+	return webDocument.BulkDocumentModelToBulkDocumentResponseGetProductDistinct(documents)
 }

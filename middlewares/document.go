@@ -79,3 +79,7 @@ func (implementation *DocumentMiddleware) FindById(ctx context.Context, tx *sql.
 func (implementation *DocumentMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestFindAll) {
 	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 }
+
+func (implementation *DocumentMiddleware) GetProductDistinct(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestGetProductDistinct) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+}

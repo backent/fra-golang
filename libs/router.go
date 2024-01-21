@@ -38,6 +38,8 @@ func NewRouter(
 	router.PUT("/documents/:id", controllersDocument.Update)
 	router.DELETE("/documents/:id", controllersDocument.Delete)
 
+	router.GET("/documents-product-name", controllersDocument.GetProductDistinct)
+
 	router.PanicHandler = exceptions.RouterPanicHandler
 	return router
 }
