@@ -130,8 +130,12 @@ func (implementation *ServiceDocumentImpl) FindAll(ctx context.Context, request 
 
 	implementation.DocumentMiddleware.FindAll(ctx, tx, &request)
 
-	documents, total, err := implementation.RepositoryDocumentInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
+	documents, total, err := implementation.RepositoryDocumentInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection(), request.CreatedBy, request.QueryAction)
 	helpers.PanicIfError(err)
+
+	if documents == nil {
+		return []webDocument.DocumentResponse{}, total
+	}
 
 	return webDocument.BulkDocumentModelToDocumentResponse(documents), total
 }

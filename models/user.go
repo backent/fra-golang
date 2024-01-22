@@ -5,6 +5,7 @@ type User struct {
 	Nik         string
 	Name        string
 	Password    string
+	Role        string
 	RisksDetail []Risk
 }
 

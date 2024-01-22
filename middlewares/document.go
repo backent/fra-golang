@@ -9,6 +9,7 @@ import (
 	"github.com/backent/fra-golang/helpers"
 	repositoriesAuth "github.com/backent/fra-golang/repositories/auth"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
+	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	webDocument "github.com/backent/fra-golang/web/document"
 	"github.com/go-playground/validator/v10"
 )
@@ -17,13 +18,20 @@ type DocumentMiddleware struct {
 	Validate *validator.Validate
 	repositoriesDocument.RepositoryDocumentInterface
 	repositoriesAuth.RepositoryAuthInterface
+	repositoriesUser.RepositoryUserInterface
 }
 
-func NewDocumentMiddleware(validator *validator.Validate, repositoriesDocument repositoriesDocument.RepositoryDocumentInterface, repositoriesAuth repositoriesAuth.RepositoryAuthInterface) *DocumentMiddleware {
+func NewDocumentMiddleware(
+	validator *validator.Validate,
+	repositoriesDocument repositoriesDocument.RepositoryDocumentInterface,
+	repositoriesAuth repositoriesAuth.RepositoryAuthInterface,
+	repositoriesUser repositoriesUser.RepositoryUserInterface,
+) *DocumentMiddleware {
 	return &DocumentMiddleware{
 		Validate:                    validator,
 		RepositoryDocumentInterface: repositoriesDocument,
 		RepositoryAuthInterface:     repositoriesAuth,
+		RepositoryUserInterface:     repositoriesUser,
 	}
 }
 
@@ -77,7 +85,14 @@ func (implementation *DocumentMiddleware) FindById(ctx context.Context, tx *sql.
 }
 
 func (implementation *DocumentMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestFindAll) {
-	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+	user, _ := implementation.RepositoryUserInterface.FindById(ctx, tx, userId)
+	if user.Role == "author" {
+		request.CreatedBy = user.Id
+	} else {
+		request.QueryAction = "submit"
+	}
+
 }
 
 func (implementation *DocumentMiddleware) GetProductDistinct(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestGetProductDistinct) {

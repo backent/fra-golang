@@ -40,6 +40,8 @@ type DocumentRequestFindAll struct {
 	skip           int
 	orderBy        string
 	orderDirection string
+	CreatedBy      int
+	QueryAction    string
 }
 
 type DocumentRequestGetProductDistinct struct {

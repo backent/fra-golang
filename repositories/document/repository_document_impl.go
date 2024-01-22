@@ -343,12 +343,37 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 	return documentsReturn, totalDocument, nil
 }
 
-func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, int, error) {
+func (implementation *RepositoryDocumentImpl) FindAll(
+	ctx context.Context,
+	tx *sql.Tx,
+	take int,
+	skip int,
+	orderBy string,
+	orderDirection string,
+	userId int,
+	documentAction string,
+) ([]models.Document, int, error) {
 	var documents []models.Document
+
+	var conditionalQueryUser string
+	if userId == 0 {
+		userId = 1
+		conditionalQueryUser = "AND 1 = ?"
+	} else {
+		conditionalQueryUser = "AND created_by = ?"
+	}
+
+	var conditionalQueryAction string
+	if documentAction == "" {
+		documentAction = "1"
+		conditionalQueryAction = "AND 1 = ?"
+	} else {
+		conditionalQueryAction = "AND action = ?"
+	}
 
 	query := fmt.Sprintf(`
 		WITH main_table AS (
-			SELECT * FROM %s
+			SELECT * FROM %s WHERE 1 = 1 %s %s
 		)
 		SELECT 
 		a.id,
@@ -360,8 +385,8 @@ func (implementation *RepositoryDocumentImpl) FindAll(ctx context.Context, tx *s
 		a.created_at,
 		a.updated_at,
 		b.count
-	FROM (SELECT * FROM main_table ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table) b ON true`, models.DocumentTable, orderBy, orderDirection)
-	rows, err := tx.QueryContext(ctx, query, skip, take)
+	FROM (SELECT * FROM main_table ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table) b ON true`, models.DocumentTable, conditionalQueryUser, conditionalQueryAction, orderBy, orderDirection)
+	rows, err := tx.QueryContext(ctx, query, userId, documentAction, skip, take)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -53,7 +53,7 @@ func (implementation *RepositoryUserImpl) Delete(ctx context.Context, tx *sql.Tx
 func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.Tx, id int) (models.User, error) {
 	var user models.User
 
-	query := fmt.Sprintf("SELECT id, nik, name, password FROM %s WHERE id = ?", models.UserTable)
+	query := fmt.Sprintf("SELECT id, nik, name, role, password FROM %s WHERE id = ?", models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, id)
 	if err != nil {
 		return user, err
@@ -61,7 +61,7 @@ func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Password)
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Role, &user.Password)
 		if err != nil {
 			return user, err
 		}
@@ -74,7 +74,7 @@ func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.
 func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.User, error) {
 	var users []models.User
 
-	query := fmt.Sprintf("SELECT id, nik, name, password FROM %s ORDER BY %s %s LIMIT ?, ?", models.UserTable, orderBy, orderDirection)
+	query := fmt.Sprintf("SELECT id, nik, name, role, password FROM %s ORDER BY %s %s LIMIT ?, ?", models.UserTable, orderBy, orderDirection)
 	rows, err := tx.QueryContext(ctx, query, skip, take)
 	if err != nil {
 		return nil, err
@@ -83,7 +83,7 @@ func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.T
 
 	for rows.Next() {
 		var user models.User
-		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Password)
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Role, &user.Password)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.T
 func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.User, error) {
 	var user models.User
 
-	query := fmt.Sprintf("SELECT id, nik, name, password FROM %s WHERE nik = ?", models.UserTable)
+	query := fmt.Sprintf("SELECT id, nik, name, role, password FROM %s WHERE nik = ?", models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, nik)
 	if err != nil {
 		return user, err
@@ -104,7 +104,7 @@ func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Password)
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Role, &user.Password)
 		if err != nil {
 			return user, err
 		}
@@ -120,6 +120,7 @@ func (implementation *RepositoryUserImpl) FindAllWithRisksDetail(ctx context.Con
 		a.id,
 		a.nik,
 		a.name,
+		a.role,
 		a.password,
 		b.id,
 		b.document_id,
@@ -150,6 +151,7 @@ func (implementation *RepositoryUserImpl) FindAllWithRisksDetail(ctx context.Con
 			&user.Id,
 			&user.Nik,
 			&user.Name,
+			&user.Role,
 			&user.Password,
 			&risk.Id,
 			&risk.DocumentId,
