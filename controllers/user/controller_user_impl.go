@@ -130,3 +130,20 @@ func (implementation *ControllerUserImpl) FindAll(w http.ResponseWriter, r *http
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerUserImpl) CurrentUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUser.UserRequestCurrentUser
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	userResponse := implementation.ServiceUserInterface.CurrentUser(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   userResponse,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}

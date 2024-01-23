@@ -12,4 +12,5 @@ type ControllerUserInterface interface {
 	Delete(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	FindById(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params)
+	CurrentUser(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 }

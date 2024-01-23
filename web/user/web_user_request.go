@@ -69,3 +69,7 @@ func (implementation *UserRequestFindAll) GetOrderDirection() string {
 	}
 	return implementation.orderDirection
 }
+
+type UserRequestCurrentUser struct {
+	UserId int
+}

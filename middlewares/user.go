@@ -76,3 +76,8 @@ func (implementation *UserMiddleware) FindById(ctx context.Context, tx *sql.Tx, 
 func (implementation *UserMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestFindAll) {
 	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 }
+
+func (implementation *UserMiddleware) CurrentUser(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestCurrentUser) {
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+	request.UserId = userId
+}

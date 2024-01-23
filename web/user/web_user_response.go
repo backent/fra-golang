@@ -8,6 +8,7 @@ type UserResponse struct {
 	Id   int    `json:"id"`
 	Nik  string `json:"nik"`
 	Name string `json:"name"`
+	Role string `json:"role"`
 }
 
 func UserModelToUserResponse(user models.User) UserResponse {
@@ -15,6 +16,7 @@ func UserModelToUserResponse(user models.User) UserResponse {
 		Id:   user.Id,
 		Name: user.Name,
 		Nik:  user.Nik,
+		Role: user.Role,
 	}
 }
 

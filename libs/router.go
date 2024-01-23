@@ -20,6 +20,7 @@ func NewRouter(
 	router.POST("/login", controllersAuth.Login)
 	router.POST("/register", controllersAuth.Register)
 
+	router.GET("/current-user", controllersUser.CurrentUser)
 	router.GET("/users", controllersUser.FindAll)
 	router.GET("/users/:id", controllersUser.FindById)
 	router.POST("/users", controllersUser.Create)

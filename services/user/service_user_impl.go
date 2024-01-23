@@ -120,3 +120,15 @@ func (implementation *ServiceUserImpl) FindAllWithRisksDetail(ctx context.Contex
 
 	return webUser.BulkUserModelToUserResponseWithRisksDetail(users)
 }
+func (implementation *ServiceUserImpl) CurrentUser(ctx context.Context, request webUser.UserRequestCurrentUser) webUser.UserResponse {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.UserMiddleware.CurrentUser(ctx, tx, &request)
+
+	user, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.UserId)
+	helpers.PanicIfError(err)
+
+	return webUser.UserModelToUserResponse(user)
+}

@@ -13,4 +13,5 @@ type ServiceUserInterface interface {
 	FindById(ctx context.Context, request user.UserRequestFindById) user.UserResponse
 	FindAll(ctx context.Context, request user.UserRequestFindAll) []user.UserResponse
 	FindAllWithRisksDetail(ctx context.Context, request user.UserRequestFindAll) []user.UserResponseWithRisksDetail
+	CurrentUser(ctx context.Context, request user.UserRequestCurrentUser) user.UserResponse
 }
