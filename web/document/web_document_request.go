@@ -8,11 +8,11 @@ import (
 )
 
 type DocumentRequestCreate struct {
+	Uuid        string                   `json:"uuid"`
 	Action      string                   `json:"action" validate:"required,max=40"`        // action
 	ProductName string                   `json:"product_name" validate:"required,max=100"` // product_name
 	Risks       []risk.RiskRequestCreate `json:"risks" validate:"required,gt=0,dive"`      // risks
 
-	Uuid      string
 	CreatedBy int
 	ActionBy  int
 }

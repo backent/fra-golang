@@ -210,10 +210,10 @@ func (implementation *RepositoryDocumentImpl) FindByUUID(ctx context.Context, tx
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.Scan(&document.Id,
+		err = rows.Scan(
 			&document.Id,
 			&document.Uuid,
-			&document.CreatedAt,
+			&document.CreatedBy,
 			&document.ActionBy,
 			&document.Action,
 			&document.ProductName,
@@ -373,7 +373,17 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 
 	query := fmt.Sprintf(`
 		WITH main_table AS (
-			SELECT * FROM %s WHERE 1 = 1 %s %s
+			SELECT * FROM %s 
+		), group_by_uuid AS (
+			SELECT d1.*
+			FROM main_table d1
+			JOIN (
+					SELECT uuid, MAX(id) AS max_id
+					FROM main_table
+					GROUP BY uuid
+			) d2 ON d1.uuid = d2.uuid AND d1.id = d2.max_id
+		), main_table_after_grouped AS (
+			SELECT * FROM group_by_uuid WHERE 1 = 1 %s %s
 		)
 		SELECT 
 		a.id,
@@ -385,7 +395,7 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 		a.created_at,
 		a.updated_at,
 		b.count
-	FROM (SELECT * FROM main_table ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table) b ON true`, models.DocumentTable, conditionalQueryUser, conditionalQueryAction, orderBy, orderDirection)
+	FROM (SELECT * FROM main_table_after_grouped ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table_after_grouped) b ON true`, models.DocumentTable, conditionalQueryUser, conditionalQueryAction, orderBy, orderDirection)
 	rows, err := tx.QueryContext(ctx, query, userId, documentAction, skip, take)
 	if err != nil {
 		return nil, 0, err

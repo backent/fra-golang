@@ -11,7 +11,6 @@ import (
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	"github.com/backent/fra-golang/web/document"
 	webDocument "github.com/backent/fra-golang/web/document"
-	"github.com/google/uuid"
 )
 
 type ServiceDocumentImpl struct {
@@ -43,7 +42,7 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 	implementation.DocumentMiddleware.Create(ctx, tx, &request)
 
 	document := models.Document{
-		Uuid:        uuid.New().String(),
+		Uuid:        request.Uuid,
 		CreatedBy:   request.CreatedBy,
 		ActionBy:    request.ActionBy,
 		Action:      request.Action,

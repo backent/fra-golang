@@ -12,6 +12,7 @@ import (
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	webDocument "github.com/backent/fra-golang/web/document"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type DocumentMiddleware struct {
@@ -46,7 +47,17 @@ func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx
 		request.Risks[index].AssessmentRiskLevel = strings.ToLower(request.Risks[index].AssessmentRiskLevel)
 	}
 
-	request.CreatedBy = userId
+	if request.Uuid != "" {
+		document, err := implementation.RepositoryDocumentInterface.FindByUUID(ctx, tx, request.Uuid)
+		if err != nil {
+			panic(exceptions.NewNotFoundError(err.Error()))
+		}
+		request.CreatedBy = document.CreatedBy
+	} else {
+		request.Uuid = uuid.New().String()
+		request.CreatedBy = userId
+	}
+
 	request.ActionBy = userId
 }
 
