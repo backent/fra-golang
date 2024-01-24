@@ -9,7 +9,6 @@ import (
 	"github.com/backent/fra-golang/models"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
-	"github.com/backent/fra-golang/web/document"
 	webDocument "github.com/backent/fra-golang/web/document"
 )
 
@@ -155,7 +154,7 @@ func (implementation *ServiceDocumentImpl) FindAllWithDetail(ctx context.Context
 
 }
 
-func (implementation *ServiceDocumentImpl) GetProductDistinct(ctx context.Context, request document.DocumentRequestGetProductDistinct) []document.DocumentResponseGetProductDistinct {
+func (implementation *ServiceDocumentImpl) GetProductDistinct(ctx context.Context, request webDocument.DocumentRequestGetProductDistinct) []webDocument.DocumentResponseGetProductDistinct {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
@@ -166,4 +165,40 @@ func (implementation *ServiceDocumentImpl) GetProductDistinct(ctx context.Contex
 	helpers.PanicIfError(err)
 
 	return webDocument.BulkDocumentModelToBulkDocumentResponseGetProductDistinct(documents)
+}
+
+func (implementation *ServiceDocumentImpl) Approve(ctx context.Context, request webDocument.DocumentRequestApprove) {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.DocumentMiddleware.Approve(ctx, tx, &request)
+
+	document, err := implementation.RepositoryDocumentInterface.Create(ctx, tx, request.Document)
+	helpers.PanicIfError(err)
+
+	for _, riskRequest := range request.Document.RiskDetail {
+		risk := models.Risk{
+			DocumentId:             document.Id,
+			RiskName:               riskRequest.RiskName,
+			FraudSchema:            riskRequest.FraudSchema,
+			FraudMotive:            riskRequest.FraudMotive,
+			FraudTechnique:         riskRequest.FraudTechnique,
+			RiskSource:             riskRequest.RiskSource,
+			RootCause:              riskRequest.RootCause,
+			BisproControlProcedure: riskRequest.BisproControlProcedure,
+			QualitativeImpact:      riskRequest.QualitativeImpact,
+			LikehoodJustification:  riskRequest.LikehoodJustification,
+			ImpactJustification:    riskRequest.ImpactJustification,
+			StartegyAgreement:      riskRequest.StartegyAgreement,
+			StrategyRecomendation:  riskRequest.StrategyRecomendation,
+			AssessmentLikehood:     riskRequest.AssessmentLikehood,
+			AssessmentImpact:       riskRequest.AssessmentImpact,
+			AssessmentRiskLevel:    riskRequest.AssessmentRiskLevel,
+		}
+
+		_, err = implementation.RepositoryRiskInterface.Create(ctx, tx, risk)
+		helpers.PanicIfError(err)
+	}
+
 }

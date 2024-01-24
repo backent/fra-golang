@@ -3,7 +3,7 @@ package document
 import (
 	"strings"
 
-	"github.com/backent/fra-golang/web"
+	"github.com/backent/fra-golang/models"
 	"github.com/backent/fra-golang/web/risk"
 )
 
@@ -44,13 +44,6 @@ type DocumentRequestFindAll struct {
 	QueryAction    string
 }
 
-type DocumentRequestGetProductDistinct struct {
-}
-
-func NewDocumentRequestFindAll() web.RequestPagination {
-	return &DocumentRequestFindAll{}
-}
-
 func (implementation *DocumentRequestFindAll) SetSkip(skip int) {
 	implementation.skip = skip
 }
@@ -89,4 +82,13 @@ func (implementation *DocumentRequestFindAll) GetOrderDirection() string {
 		return "DESC"
 	}
 	return implementation.orderDirection
+}
+
+type DocumentRequestGetProductDistinct struct {
+}
+
+type DocumentRequestApprove struct {
+	Id int `json:"id" validate:"required"`
+
+	Document models.Document
 }

@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/models"
 )
 
@@ -364,11 +366,17 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 	}
 
 	var conditionalQueryAction string
+	var conditionalQueryValue []interface{}
 	if documentAction == "" {
 		documentAction = "1"
 		conditionalQueryAction = "AND 1 = ?"
+		conditionalQueryValue = append(conditionalQueryValue, "1")
 	} else {
-		conditionalQueryAction = "AND action = ?"
+		for _, val := range strings.Split(documentAction, ",") {
+			conditionalQueryValue = append(conditionalQueryValue, val)
+		}
+		helpers.Placeholders(len(conditionalQueryValue))
+		conditionalQueryAction = fmt.Sprintf("AND action IN (%s)", helpers.Placeholders(len(conditionalQueryValue)))
 	}
 
 	query := fmt.Sprintf(`
@@ -396,7 +404,12 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 		a.updated_at,
 		b.count
 	FROM (SELECT * FROM main_table_after_grouped ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table_after_grouped) b ON true`, models.DocumentTable, conditionalQueryUser, conditionalQueryAction, orderBy, orderDirection)
-	rows, err := tx.QueryContext(ctx, query, userId, documentAction, skip, take)
+
+	var args []interface{}
+	args = append(args, userId)
+	args = append(args, conditionalQueryValue...)
+	args = append(args, skip, take)
+	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -40,6 +40,7 @@ func NewRouter(
 	router.DELETE("/documents/:id", controllersDocument.Delete)
 
 	router.GET("/documents-product-name", controllersDocument.GetProductDistinct)
+	router.POST("/documents-approve", controllersDocument.Approve)
 
 	router.PanicHandler = exceptions.RouterPanicHandler
 	return router

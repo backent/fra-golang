@@ -13,4 +13,5 @@ type ControllerDocumentInterface interface {
 	FindById(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	GetProductDistinct(w http.ResponseWriter, r *http.Request, p httprouter.Params)
+	Approve(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 }

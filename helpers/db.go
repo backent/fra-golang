@@ -1,6 +1,9 @@
 package helpers
 
-import "database/sql"
+import (
+	"database/sql"
+	"strings"
+)
 
 func CommitOrRollback(tx *sql.Tx) {
 	err := recover()
@@ -12,4 +15,12 @@ func CommitOrRollback(tx *sql.Tx) {
 		errCommit := tx.Commit()
 		PanicIfError(errCommit)
 	}
+}
+
+func Placeholders(n int) string {
+	ps := make([]string, n)
+	for i := 0; i < n; i++ {
+		ps[i] = "?"
+	}
+	return strings.Join(ps, ",")
 }

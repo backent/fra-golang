@@ -101,11 +101,27 @@ func (implementation *DocumentMiddleware) FindAll(ctx context.Context, tx *sql.T
 	if user.Role == "author" {
 		request.CreatedBy = user.Id
 	} else {
-		request.QueryAction = "submit"
+		request.QueryAction = "submit,approve,reject"
 	}
 
 }
 
 func (implementation *DocumentMiddleware) GetProductDistinct(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestGetProductDistinct) {
 	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+}
+
+func (implementation *DocumentMiddleware) Approve(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestApprove) {
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+	err := implementation.Validate.Struct(request)
+	helpers.PanicIfError(err)
+
+	document, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
+	if err != nil {
+		panic(exceptions.NewNotFoundError(err.Error()))
+	}
+
+	document.Action = "approve"
+	document.ActionBy = userId
+	request.Document = document
+
 }

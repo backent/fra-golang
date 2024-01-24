@@ -153,3 +153,21 @@ func (implementation *ControllerDocumentImpl) GetProductDistinct(w http.Response
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerDocumentImpl) Approve(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webDocument.DocumentRequestApprove
+	helpers.DecodeRequest(r, &request)
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	implementation.ServiceDocumentInterface.Approve(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   nil,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}
