@@ -3,7 +3,6 @@ package document
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/middlewares"
@@ -234,7 +233,6 @@ func (implementation *ServiceDocumentImpl) Reject(ctx context.Context, request w
 
 		// use previous risk id to find the correct reject note
 		rejectNote, found := rejectNoteMap[requestRiskId]
-		fmt.Println(found)
 		if found {
 			rejectNoteModel := models.RejectNote{
 				DocumentId:             document.Id,
