@@ -78,6 +78,22 @@ type riskResponse struct {
 	AssessmentRiskLevel    string    `json:"assessment_risk_level"`    // assessment_risk_level
 	CreatedAt              time.Time `json:"created_at"`               // created_at
 	UpdatedAt              time.Time `json:"updated_at"`               // updated_at
+
+	RejectNoteDetail *RejectNoteResponse `json:"reject_note_detail"`
+}
+
+type RejectNoteResponse struct {
+	Id                     int    `json:"id"`                       // id
+	DocumentId             int    `json:"document_id"`              // document_id
+	RiskId                 int    `json:"risk_id"`                  // risk_id
+	Fraud                  string `json:"fraud"`                    // fraud
+	RiskSource             string `json:"risk_source"`              // risk_source
+	RootCause              string `json:"root_cause"`               // root_cause
+	BisproControlProcedure string `json:"bispro_control_procedure"` // bispro_control_procedure
+	QualitativeImpact      string `json:"qualitative_impact"`       // qualitative_impact
+	Assessment             string `json:"assessment"`               // assessment
+	Justification          string `json:"justification"`            // justification
+	Strategy               string `json:"strategy"`                 // strategy
 }
 
 func DocumentModelToDocumentResponseWithDetail(document models.Document) DocumentResponseWithDetail {
@@ -118,6 +134,13 @@ func userModelToUserResponse(user models.User) userResponse {
 }
 
 func riskToRiskResponse(risk models.Risk) riskResponse {
+	var rejectNoteResponse *RejectNoteResponse
+	if risk.RejectNoteDetail.Id != 0 {
+		rejectNoteResponse = rejectNoteToRejectNoteResponse(risk.RejectNoteDetail)
+	} else {
+		rejectNoteResponse = nil
+	}
+
 	return riskResponse{
 		Id:                     risk.Id,
 		DocumentId:             risk.DocumentId,
@@ -138,6 +161,7 @@ func riskToRiskResponse(risk models.Risk) riskResponse {
 		AssessmentRiskLevel:    risk.AssessmentRiskLevel,
 		CreatedAt:              risk.CreatedAt,
 		UpdatedAt:              risk.UpdatedAt,
+		RejectNoteDetail:       rejectNoteResponse,
 	}
 }
 
@@ -147,6 +171,22 @@ func riskBulkToRiskResponseBulk(risks []models.Risk) []riskResponse {
 		risksResponse = append(risksResponse, riskToRiskResponse(risk))
 	}
 	return risksResponse
+}
+
+func rejectNoteToRejectNoteResponse(rejectNote models.RejectNote) *RejectNoteResponse {
+	return &RejectNoteResponse{
+		Id:                     rejectNote.Id,
+		DocumentId:             rejectNote.DocumentId,
+		RiskId:                 rejectNote.RiskId,
+		Fraud:                  rejectNote.Fraud,
+		RiskSource:             rejectNote.RiskSource,
+		RootCause:              rejectNote.RootCause,
+		BisproControlProcedure: rejectNote.BisproControlProcedure,
+		QualitativeImpact:      rejectNote.QualitativeImpact,
+		Assessment:             rejectNote.Assessment,
+		Justification:          rejectNote.Justification,
+		Strategy:               rejectNote.Strategy,
+	}
 }
 
 type DocumentResponseGetProductDistinct struct {

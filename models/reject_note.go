@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type RejectNote struct {
 	Id                     int       // id
@@ -16,6 +19,22 @@ type RejectNote struct {
 	Strategy               string    // strategy
 	CreatedAt              time.Time // created_at
 	UpdatedAt              time.Time // updated_at
+}
+
+type NullAbleRejectNote struct {
+	Id                     sql.NullInt32  // id
+	DocumentId             sql.NullInt32  // document_id
+	RiskId                 sql.NullInt32  // risk_id
+	Fraud                  sql.NullString // fraud
+	RiskSource             sql.NullString // risk_source
+	RootCause              sql.NullString // root_cause
+	BisproControlProcedure sql.NullString // bispro_control_procedure
+	QualitativeImpact      sql.NullString // qualitative_impact
+	Assessment             sql.NullString // assessment
+	Justification          sql.NullString // justification
+	Strategy               sql.NullString // strategy
+	CreatedAt              sql.NullTime   // created_at
+	UpdatedAt              sql.NullTime   // updated_at
 }
 
 var RejectNoteTable = "reject_notes"

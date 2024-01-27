@@ -84,6 +84,20 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 	query := fmt.Sprintf(`
 		WITH main_table AS (
 			SELECT * FROM %s WHERE id = ?
+		),
+		risk_with_reject_note AS (
+			SELECT
+			a.*,
+			b.id as reject_note_id,
+			b.fraud as reject_note_fraud,
+			b.risk_source as reject_note_risk_source,
+			b.root_cause as reject_note_root_cause,
+			b.bispro_control_procedure as reject_note_bispro_control_procedure,
+			b.qualitative_impact as reject_note_qualitative_impact,
+			b.assessment as reject_note_assessment,
+			b.justification as reject_note_justification,
+			b.strategy as reject_note_strategy 
+			FROM %s a LEFT JOIN %s b ON a.id = b.risk_id
 		)
 		SELECT 
 		a.id,
@@ -114,11 +128,20 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 		c.assessment_likehood,
 		c.assessment_impact,
 		c.assessment_risk_level,
+		c.reject_note_id,
+		c.reject_note_fraud,
+		c.reject_note_risk_source,
+		c.reject_note_root_cause,
+		c.reject_note_bispro_control_procedure,
+		c.reject_note_qualitative_impact,
+		c.reject_note_assessment,
+		c.reject_note_justification,
+		c.reject_note_strategy,
 		c.created_at,
 		c.updated_at
 	FROM (SELECT * FROM main_table) a
 	LEFT JOIN %s b ON a.created_by = b.id
-	LEFT JOIN %s c ON a.id = c.document_id `, models.DocumentTable, models.UserTable, models.RiskTable)
+	LEFT JOIN risk_with_reject_note c ON a.id = c.document_id `, models.DocumentTable, models.RiskTable, models.RejectNoteTable, models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, id)
 	if err != nil {
 		return document, err
@@ -132,6 +155,7 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 		var document models.Document
 		var user models.User
 		var nullAbleRisk models.NullAbleRisk
+		var nullAbleRejectNote models.NullAbleRejectNote
 
 		err = rows.Scan(
 			&document.Id,
@@ -162,6 +186,15 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 			&nullAbleRisk.AssessmentLikehood,
 			&nullAbleRisk.AssessmentImpact,
 			&nullAbleRisk.AssessmentRiskLevel,
+			&nullAbleRejectNote.Id,
+			&nullAbleRejectNote.Fraud,
+			&nullAbleRejectNote.RiskSource,
+			&nullAbleRejectNote.RootCause,
+			&nullAbleRejectNote.BisproControlProcedure,
+			&nullAbleRejectNote.QualitativeImpact,
+			&nullAbleRejectNote.Assessment,
+			&nullAbleRejectNote.Justification,
+			&nullAbleRejectNote.Strategy,
 			&nullAbleRisk.CreatedAt,
 			&nullAbleRisk.UpdatedAt,
 		)
@@ -177,7 +210,21 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 		}
 		item.UserDetail = user
 		if nullAbleRisk.Id.Valid {
-			item.RiskDetail = append(item.RiskDetail, models.NullAbleRiskToRisk(nullAbleRisk))
+			riskDetail := models.NullAbleRiskToRisk(nullAbleRisk)
+			if nullAbleRejectNote.Id.Valid {
+				riskDetail.RejectNoteDetail.Id = int(nullAbleRejectNote.Id.Int32)
+				riskDetail.RejectNoteDetail.DocumentId = item.Id
+				riskDetail.RejectNoteDetail.RiskId = riskDetail.Id
+				riskDetail.RejectNoteDetail.Fraud = nullAbleRejectNote.Fraud.String
+				riskDetail.RejectNoteDetail.RiskSource = nullAbleRejectNote.RiskSource.String
+				riskDetail.RejectNoteDetail.RootCause = nullAbleRejectNote.RootCause.String
+				riskDetail.RejectNoteDetail.BisproControlProcedure = nullAbleRejectNote.BisproControlProcedure.String
+				riskDetail.RejectNoteDetail.QualitativeImpact = nullAbleRejectNote.QualitativeImpact.String
+				riskDetail.RejectNoteDetail.Assessment = nullAbleRejectNote.Assessment.String
+				riskDetail.RejectNoteDetail.Justification = nullAbleRejectNote.Justification.String
+				riskDetail.RejectNoteDetail.Strategy = nullAbleRejectNote.Strategy.String
+			}
+			item.RiskDetail = append(item.RiskDetail, riskDetail)
 		}
 	}
 

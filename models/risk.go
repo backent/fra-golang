@@ -26,7 +26,8 @@ type Risk struct {
 	CreatedAt              time.Time // created_at
 	UpdatedAt              time.Time // updated_at
 
-	UserDetail User
+	UserDetail       User
+	RejectNoteDetail RejectNote
 }
 
 type NullAbleRisk struct {
