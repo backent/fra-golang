@@ -15,6 +15,7 @@ import (
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/repositories/auth"
 	"github.com/backent/fra-golang/repositories/document"
+	"github.com/backent/fra-golang/repositories/rejectnote"
 	"github.com/backent/fra-golang/repositories/risk"
 	"github.com/backent/fra-golang/repositories/user"
 	auth2 "github.com/backent/fra-golang/services/auth"
@@ -43,8 +44,9 @@ func InitializeRouter() *httprouter.Router {
 	serviceAuthInterface := auth2.NewServiceAuthImpl(db, repositoryAuthInterface, authMiddleware)
 	controllerAuthInterface := auth3.NewControllerAuthImpl(serviceAuthInterface)
 	repositoryDocumentInterface := document.NewRepositoryDocumentImpl()
-	documentMiddleware := middlewares.NewDocumentMiddleware(validate, repositoryDocumentInterface, repositoryAuthInterface, repositoryUserInterface)
-	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, repositoryDocumentInterface, documentMiddleware, repositoryRiskInterface)
+	documentMiddleware := middlewares.NewDocumentMiddleware(validate, repositoryDocumentInterface, repositoryAuthInterface, repositoryUserInterface, repositoryRiskInterface)
+	repositoryRejectNoteInterface := rejectnote.NewRepositoryRejectNote()
+	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, repositoryDocumentInterface, documentMiddleware, repositoryRiskInterface, repositoryRejectNoteInterface)
 	controllerDocumentInterface := document3.NewControllerDocumentImpl(serviceDocumentInterface)
 	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface, controllerDocumentInterface)
 	return router
@@ -59,3 +61,5 @@ var RiskSet = wire.NewSet(risk3.NewControllerRiskImpl, risk2.NewServiceRiskImpl,
 var DocumentSet = wire.NewSet(document3.NewControllerDocumentImpl, document2.NewServiceDocumentImpl, document.NewRepositoryDocumentImpl, middlewares.NewDocumentMiddleware)
 
 var AuthSet = wire.NewSet(auth3.NewControllerAuthImpl, auth2.NewServiceAuthImpl, auth.NewRepositoryAuthJWTImpl, middlewares.NewAuthMiddleware)
+
+var RejectNoteSet = wire.NewSet(rejectnote.NewRepositoryRejectNote)

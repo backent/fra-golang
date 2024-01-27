@@ -171,3 +171,21 @@ func (implementation *ControllerDocumentImpl) Approve(w http.ResponseWriter, r *
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerDocumentImpl) Reject(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webDocument.DocumentRequestReject
+	helpers.DecodeRequest(r, &request)
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	implementation.ServiceDocumentInterface.Reject(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   nil,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}

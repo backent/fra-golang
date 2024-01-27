@@ -12,6 +12,7 @@ import (
 	"github.com/backent/fra-golang/middlewares"
 	repositoriesAuth "github.com/backent/fra-golang/repositories/auth"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
+	repositoriesRejectNote "github.com/backent/fra-golang/repositories/rejectnote"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	servicesAuth "github.com/backent/fra-golang/services/auth"
@@ -50,6 +51,10 @@ var AuthSet = wire.NewSet(
 	middlewares.NewAuthMiddleware,
 )
 
+var RejectNoteSet = wire.NewSet(
+	repositoriesRejectNote.NewRepositoryRejectNote,
+)
+
 func InitializeRouter() *httprouter.Router {
 	wire.Build(
 		libs.NewDatabase,
@@ -59,6 +64,7 @@ func InitializeRouter() *httprouter.Router {
 		RiskSet,
 		AuthSet,
 		DocumentSet,
+		RejectNoteSet,
 	)
 
 	return nil

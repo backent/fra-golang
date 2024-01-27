@@ -15,4 +15,5 @@ type ServiceDocumentInterface interface {
 	FindAllWithDetail(ctx context.Context, request document.DocumentRequestFindAll) ([]document.DocumentResponseWithDetail, int)
 	GetProductDistinct(ctx context.Context, request document.DocumentRequestGetProductDistinct) []document.DocumentResponseGetProductDistinct
 	Approve(ctx context.Context, request document.DocumentRequestApprove)
+	Reject(ctx context.Context, request document.DocumentRequestReject)
 }

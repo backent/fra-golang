@@ -3,11 +3,13 @@ package document
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/models"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
+	repositoriesRejectNote "github.com/backent/fra-golang/repositories/rejectnote"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	webDocument "github.com/backent/fra-golang/web/document"
 )
@@ -17,6 +19,7 @@ type ServiceDocumentImpl struct {
 	repositoriesDocument.RepositoryDocumentInterface
 	*middlewares.DocumentMiddleware
 	repositoriesRisk.RepositoryRiskInterface
+	repositoriesRejectNote.RepositoryRejectNoteInterface
 }
 
 func NewServiceDocumentImpl(
@@ -24,12 +27,14 @@ func NewServiceDocumentImpl(
 	repositoriesDocument repositoriesDocument.RepositoryDocumentInterface,
 	documentMiddleware *middlewares.DocumentMiddleware,
 	repositoriesRisk repositoriesRisk.RepositoryRiskInterface,
+	repositoriesRejectNote repositoriesRejectNote.RepositoryRejectNoteInterface,
 ) ServiceDocumentInterface {
 	return &ServiceDocumentImpl{
-		DB:                          db,
-		RepositoryDocumentInterface: repositoriesDocument,
-		DocumentMiddleware:          documentMiddleware,
-		RepositoryRiskInterface:     repositoriesRisk,
+		DB:                            db,
+		RepositoryDocumentInterface:   repositoriesDocument,
+		DocumentMiddleware:            documentMiddleware,
+		RepositoryRiskInterface:       repositoriesRisk,
+		RepositoryRejectNoteInterface: repositoriesRejectNote,
 	}
 }
 
@@ -201,4 +206,52 @@ func (implementation *ServiceDocumentImpl) Approve(ctx context.Context, request 
 		helpers.PanicIfError(err)
 	}
 
+}
+
+func (implementation *ServiceDocumentImpl) Reject(ctx context.Context, request webDocument.DocumentRequestReject) {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.DocumentMiddleware.Reject(ctx, tx, &request)
+
+	document, err := implementation.RepositoryDocumentInterface.Create(ctx, tx, request.Document)
+	helpers.PanicIfError(err)
+
+	rejectNoteMap := make(map[int]webDocument.RejectNoteRequest)
+	for _, rejectNote := range request.RejectNote {
+		rejectNoteMap[rejectNote.RiskId] = rejectNote
+	}
+
+	for _, risk := range document.RiskDetail {
+		// store risk id to use when find original id from request
+		requestRiskId := risk.Id
+
+		// create new risk
+		risk.DocumentId = document.Id
+		risk, err = implementation.RepositoryRiskInterface.Create(ctx, tx, risk)
+		helpers.PanicIfError(err)
+
+		// use previous risk id to find the correct reject note
+		rejectNote, found := rejectNoteMap[requestRiskId]
+		fmt.Println(found)
+		if found {
+			rejectNoteModel := models.RejectNote{
+				DocumentId:             document.Id,
+				RiskId:                 risk.Id,
+				Fraud:                  rejectNote.Fraud,
+				RiskSource:             rejectNote.RiskSource,
+				RootCause:              rejectNote.RootCause,
+				BisproControlProcedure: rejectNote.BisproControlProcedure,
+				QualitativeImpact:      rejectNote.QualitativeImpact,
+				Assessment:             rejectNote.Assessment,
+				Justification:          rejectNote.Justification,
+				Strategy:               rejectNote.Strategy,
+			}
+
+			_, err = implementation.RepositoryRejectNoteInterface.Create(ctx, tx, rejectNoteModel)
+			helpers.PanicIfError(err)
+
+		}
+	}
 }

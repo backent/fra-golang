@@ -92,3 +92,23 @@ type DocumentRequestApprove struct {
 
 	Document models.Document
 }
+
+type DocumentRequestReject struct {
+	Id int `json:"id" validate:"required"`
+
+	RejectNote []RejectNoteRequest `json:"reject_note" validate:"required,gt=0,dive"`
+	Document   models.Document
+}
+
+type RejectNoteRequest struct {
+	RiskId                 int    `json:"risk_id" validate:"required"` // risk_id
+	Fraud                  string `json:"fraud"`                       // fraud
+	RiskSource             string `json:"risk_source"`                 // risk_source
+	RootCause              string `json:"root_cause"`                  // root_cause
+	BisproControlProcedure string `json:"bispro_control_procedure"`    // bispro_control_procedure
+	QualitativeImpact      string `json:"qualitative_impact"`          // qualitative_impact
+	Assessment             string `json:"assessment"`                  // assessment
+	Justification          string `json:"justification"`               // justification
+	Strategy               string `json:"strategy"`                    // strategy
+
+}

@@ -41,6 +41,7 @@ func NewRouter(
 
 	router.GET("/documents-product-name", controllersDocument.GetProductDistinct)
 	router.POST("/documents-approve", controllersDocument.Approve)
+	router.POST("/documents-reject", controllersDocument.Reject)
 
 	router.PanicHandler = exceptions.RouterPanicHandler
 	return router

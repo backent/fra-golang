@@ -9,6 +9,7 @@ import (
 	"github.com/backent/fra-golang/helpers"
 	repositoriesAuth "github.com/backent/fra-golang/repositories/auth"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
+	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	webDocument "github.com/backent/fra-golang/web/document"
 	"github.com/go-playground/validator/v10"
@@ -20,6 +21,7 @@ type DocumentMiddleware struct {
 	repositoriesDocument.RepositoryDocumentInterface
 	repositoriesAuth.RepositoryAuthInterface
 	repositoriesUser.RepositoryUserInterface
+	repositoriesRisk.RepositoryRiskInterface
 }
 
 func NewDocumentMiddleware(
@@ -27,12 +29,14 @@ func NewDocumentMiddleware(
 	repositoriesDocument repositoriesDocument.RepositoryDocumentInterface,
 	repositoriesAuth repositoriesAuth.RepositoryAuthInterface,
 	repositoriesUser repositoriesUser.RepositoryUserInterface,
+	repositoriesRisk repositoriesRisk.RepositoryRiskInterface,
 ) *DocumentMiddleware {
 	return &DocumentMiddleware{
 		Validate:                    validator,
 		RepositoryDocumentInterface: repositoriesDocument,
 		RepositoryAuthInterface:     repositoriesAuth,
 		RepositoryUserInterface:     repositoriesUser,
+		RepositoryRiskInterface:     repositoriesRisk,
 	}
 }
 
@@ -123,5 +127,31 @@ func (implementation *DocumentMiddleware) Approve(ctx context.Context, tx *sql.T
 	document.Action = "approve"
 	document.ActionBy = userId
 	request.Document = document
+
+}
+
+func (implementation *DocumentMiddleware) Reject(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestReject) {
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+	err := implementation.Validate.Struct(request)
+	helpers.PanicIfError(err)
+
+	document, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
+	if err != nil {
+		panic(exceptions.NewNotFoundError(err.Error()))
+	}
+
+	for idx := range request.RejectNote {
+		risk, err := implementation.RepositoryRiskInterface.FindById(ctx, tx, request.RejectNote[idx].RiskId)
+		if err != nil {
+			panic(exceptions.NewNotFoundError(err.Error()))
+		}
+		if document.Id != risk.DocumentId {
+			panic(exceptions.NewBadRequestError("mismatch document id and risk id"))
+		}
+	}
+
+	request.Document = document
+	request.Document.Action = "reject"
+	request.Document.ActionBy = userId
 
 }
