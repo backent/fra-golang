@@ -48,8 +48,9 @@ type DocumentResponseWithDetail struct {
 	CreatedAt   time.Time `json:"created_at"`   // created_at
 	UpdatedAt   time.Time `json:"updated_at"`   // updated_at
 
-	UserDetail userResponse   `json:"user_detail"` // user detail
-	RiskDetail []riskResponse `json:"risk_detail"` // risk detail
+	UserDetail            userResponse              `json:"user_detail"`             // user detail
+	RiskDetail            []riskResponse            `json:"risk_detail"`             // risk detail
+	RelatedDocumentDetail []RelatedDocumentResponse `json:"related_document_detail"` // related document detail
 }
 
 type userResponse struct {
@@ -96,6 +97,11 @@ type RejectNoteResponse struct {
 	Strategy               string `json:"strategy"`                 // strategy
 }
 
+type RelatedDocumentResponse struct {
+	Id        int       `json:"id"`
+	CreatedBy time.Time `json:"created_by"`
+}
+
 func DocumentModelToDocumentResponseWithDetail(document models.Document) DocumentResponseWithDetail {
 	var riskDetail []riskResponse
 	if temp := riskBulkToRiskResponseBulk(document.RiskDetail); len(temp) > 0 {
@@ -103,17 +109,25 @@ func DocumentModelToDocumentResponseWithDetail(document models.Document) Documen
 	} else {
 		riskDetail = make([]riskResponse, 0)
 	}
+
+	var relatedDocumentDetail []RelatedDocumentResponse
+	if len(document.RelatedDocumentDetail) > 0 {
+		relatedDocumentDetail = bulkRelatedDocumentToRelatedDocumentResponse(document.RelatedDocumentDetail)
+	} else {
+		relatedDocumentDetail = make([]RelatedDocumentResponse, 0)
+	}
 	return DocumentResponseWithDetail{
-		Id:          document.Id,
-		Uuid:        document.Uuid,
-		CreatedBy:   document.CreatedBy,
-		ActionBy:    document.ActionBy,
-		Action:      document.Action,
-		ProductName: document.ProductName,
-		CreatedAt:   document.CreatedAt,
-		UpdatedAt:   document.UpdatedAt,
-		UserDetail:  userModelToUserResponse(document.UserDetail),
-		RiskDetail:  riskDetail,
+		Id:                    document.Id,
+		Uuid:                  document.Uuid,
+		CreatedBy:             document.CreatedBy,
+		ActionBy:              document.ActionBy,
+		Action:                document.Action,
+		ProductName:           document.ProductName,
+		CreatedAt:             document.CreatedAt,
+		UpdatedAt:             document.UpdatedAt,
+		UserDetail:            userModelToUserResponse(document.UserDetail),
+		RiskDetail:            riskDetail,
+		RelatedDocumentDetail: relatedDocumentDetail,
 	}
 }
 
@@ -171,6 +185,22 @@ func riskBulkToRiskResponseBulk(risks []models.Risk) []riskResponse {
 		risksResponse = append(risksResponse, riskToRiskResponse(risk))
 	}
 	return risksResponse
+}
+
+func relatedDocumentToRelatedDocumentResponse(relatedDocument models.RelatedDocument) RelatedDocumentResponse {
+	return RelatedDocumentResponse{
+		Id:        relatedDocument.Id,
+		CreatedBy: relatedDocument.CreatedAt,
+	}
+}
+
+func bulkRelatedDocumentToRelatedDocumentResponse(relatedDocument []models.RelatedDocument) []RelatedDocumentResponse {
+	var bulk []RelatedDocumentResponse
+	for _, item := range relatedDocument {
+		bulk = append(bulk, relatedDocumentToRelatedDocumentResponse(item))
+	}
+
+	return bulk
 }
 
 func rejectNoteToRejectNoteResponse(rejectNote models.RejectNote) *RejectNoteResponse {

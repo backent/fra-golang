@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"database/sql"
+	"strconv"
 	"strings"
 )
 
@@ -23,4 +24,26 @@ func Placeholders(n int) string {
 		ps[i] = "?"
 	}
 	return strings.Join(ps, ",")
+}
+
+func PrintStringIDRelation(a ...interface{}) string {
+	var printtedString string
+	for _, item := range a {
+		var argString string
+		switch v := item.(type) {
+		case string:
+			argString = v
+		case int:
+			argString = strconv.Itoa(v)
+		default:
+		}
+
+		if printtedString == "" {
+			printtedString += argString
+		} else {
+			printtedString += "-" + argString
+		}
+	}
+
+	return printtedString
 }

@@ -98,6 +98,9 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 			b.justification as reject_note_justification,
 			b.strategy as reject_note_strategy 
 			FROM %s a LEFT JOIN %s b ON a.id = b.risk_id
+		),
+		related_document AS (
+			SELECT * FROM %s WHERE action != 'draft'
 		)
 		SELECT 
 		a.id,
@@ -138,10 +141,13 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 		c.reject_note_justification,
 		c.reject_note_strategy,
 		c.created_at,
-		c.updated_at
+		c.updated_at,
+		d.id,
+		d.created_at
 	FROM (SELECT * FROM main_table) a
 	LEFT JOIN %s b ON a.created_by = b.id
-	LEFT JOIN risk_with_reject_note c ON a.id = c.document_id `, models.DocumentTable, models.RiskTable, models.RejectNoteTable, models.UserTable)
+	LEFT JOIN risk_with_reject_note c ON a.id = c.document_id 
+	LEFT JOIN related_document d ON a.uuid = d.uuid AND a.id != d.id`, models.DocumentTable, models.RiskTable, models.RejectNoteTable, models.DocumentTable, models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, id)
 	if err != nil {
 		return document, err
@@ -150,12 +156,15 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 
 	var documents []*models.Document
 	documentsMap := make(map[int]*models.Document)
+	documentWithRiskMap := make(map[string]bool)
+	documentWithRelatedMap := make(map[string][]models.RelatedDocument)
 
 	for rows.Next() {
 		var document models.Document
 		var user models.User
 		var nullAbleRisk models.NullAbleRisk
 		var nullAbleRejectNote models.NullAbleRejectNote
+		var nullAbleRelatedDocument models.NullAbleRelatedDocument
 
 		err = rows.Scan(
 			&document.Id,
@@ -197,6 +206,8 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 			&nullAbleRejectNote.Strategy,
 			&nullAbleRisk.CreatedAt,
 			&nullAbleRisk.UpdatedAt,
+			&nullAbleRelatedDocument.Id,
+			&nullAbleRelatedDocument.CreatedAt,
 		)
 		if err != nil {
 			return document, err
@@ -224,7 +235,16 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 				riskDetail.RejectNoteDetail.Justification = nullAbleRejectNote.Justification.String
 				riskDetail.RejectNoteDetail.Strategy = nullAbleRejectNote.Strategy.String
 			}
-			item.RiskDetail = append(item.RiskDetail, riskDetail)
+			if _, foundRisk := documentWithRiskMap[helpers.PrintStringIDRelation(document.Id, riskDetail.Id)]; !foundRisk {
+				documentWithRiskMap[helpers.PrintStringIDRelation(document.Id, riskDetail.Id)] = true
+				item.RiskDetail = append(item.RiskDetail, riskDetail)
+			}
+		}
+		if nullAbleRelatedDocument.Id.Valid {
+			if _, found := documentWithRelatedMap[helpers.PrintStringIDRelation(document.Id, int(nullAbleRelatedDocument.Id.Int32))]; !found {
+				documentWithRelatedMap[helpers.PrintStringIDRelation(document.Id, int(nullAbleRelatedDocument.Id.Int32))] = append(documentWithRelatedMap[helpers.PrintStringIDRelation(document.Id, int(nullAbleRelatedDocument.Id.Int32))], models.NullAbleRelatedDocumentToRelatedDocument(nullAbleRelatedDocument))
+				item.RelatedDocumentDetail = append(item.RelatedDocumentDetail, models.NullAbleRelatedDocumentToRelatedDocument(nullAbleRelatedDocument))
+			}
 		}
 	}
 
