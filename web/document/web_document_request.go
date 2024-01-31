@@ -112,3 +112,54 @@ type RejectNoteRequest struct {
 	Strategy               string `json:"strategy"`                    // strategy
 
 }
+
+type DocumentRequestMonitoringList struct {
+	WithDetail     bool
+	take           int
+	skip           int
+	orderBy        string
+	orderDirection string
+	QueryAction    string
+	QueryPeriod    int
+	QueryName      string
+}
+
+func (implementation *DocumentRequestMonitoringList) SetSkip(skip int) {
+	implementation.skip = skip
+}
+
+func (implementation *DocumentRequestMonitoringList) SetTake(take int) {
+	implementation.take = take
+}
+
+func (implementation *DocumentRequestMonitoringList) GetTake() int {
+	return implementation.take
+}
+
+func (implementation *DocumentRequestMonitoringList) GetSkip() int {
+	return implementation.skip
+}
+
+func (implementation *DocumentRequestMonitoringList) SetOrderBy(orderBy string) {
+	implementation.orderBy = orderBy
+}
+
+func (implementation *DocumentRequestMonitoringList) SetOrderDirection(orderDirection string) {
+	implementation.orderDirection = strings.ToUpper(orderDirection)
+}
+
+func (implementation *DocumentRequestMonitoringList) GetOrderBy() string {
+	// set default order by
+	if implementation.orderBy == "" {
+		return "created_at"
+	}
+	return implementation.orderBy
+}
+
+func (implementation *DocumentRequestMonitoringList) GetOrderDirection() string {
+	// set default order direction
+	if implementation.orderDirection == "" {
+		return "DESC"
+	}
+	return implementation.orderDirection
+}

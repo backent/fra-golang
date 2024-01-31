@@ -105,7 +105,7 @@ func (implementation *DocumentMiddleware) FindAll(ctx context.Context, tx *sql.T
 	if user.Role == "author" {
 		request.CreatedBy = user.Id
 	} else {
-		request.QueryAction = "submit,approve,reject"
+		request.QueryAction = "submit,approve,reject,update"
 	}
 
 }
@@ -154,4 +154,10 @@ func (implementation *DocumentMiddleware) Reject(ctx context.Context, tx *sql.Tx
 	request.Document.Action = "reject"
 	request.Document.ActionBy = userId
 
+}
+
+func (implementation *DocumentMiddleware) MonitoringList(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestMonitoringList) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+
+	request.QueryAction = "submit,approve,reject,update"
 }

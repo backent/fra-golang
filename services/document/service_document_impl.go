@@ -253,3 +253,20 @@ func (implementation *ServiceDocumentImpl) Reject(ctx context.Context, request w
 		}
 	}
 }
+
+func (implementation *ServiceDocumentImpl) MonitoringList(ctx context.Context, request webDocument.DocumentRequestMonitoringList) ([]webDocument.DocumentResponse, int) {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.DocumentMiddleware.MonitoringList(ctx, tx, &request)
+
+	documents, total, err := implementation.RepositoryDocumentInterface.FindAllNoGroup(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection(), request.QueryAction, request.QueryPeriod, request.QueryName)
+	helpers.PanicIfError(err)
+
+	if documents == nil {
+		return []webDocument.DocumentResponse{}, total
+	}
+
+	return webDocument.BulkDocumentModelToDocumentResponse(documents), total
+}

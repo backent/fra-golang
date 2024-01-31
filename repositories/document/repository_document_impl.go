@@ -540,3 +540,99 @@ func (implementation *RepositoryDocumentImpl) GetProductDistinct(ctx context.Con
 	return documents, nil
 
 }
+
+func (implementation *RepositoryDocumentImpl) FindAllNoGroup(
+	ctx context.Context,
+	tx *sql.Tx,
+	take int,
+	skip int,
+	orderBy string,
+	orderDirection string,
+	documentAction string,
+	month int,
+	name string,
+) ([]models.Document, int, error) {
+	var documents []models.Document
+
+	var conditionalQueryAction string
+	var conditionalQueryValue []interface{}
+	if documentAction == "" {
+		documentAction = "1"
+		conditionalQueryAction = "AND 1 = ?"
+		conditionalQueryValue = append(conditionalQueryValue, "1")
+	} else {
+		for _, val := range strings.Split(documentAction, ",") {
+			conditionalQueryValue = append(conditionalQueryValue, val)
+		}
+		helpers.Placeholders(len(conditionalQueryValue))
+		conditionalQueryAction = fmt.Sprintf("AND action IN (%s)", helpers.Placeholders(len(conditionalQueryValue)))
+	}
+
+	var conditionalQueryPeriod string
+	var conditionalQueryPeriodValue int
+	if month == 0 {
+		conditionalQueryPeriod = "AND 1 = ?"
+		conditionalQueryPeriodValue = 1
+	} else {
+		conditionalQueryPeriod = "AND MONTH(created_at) = ?"
+		conditionalQueryPeriodValue = month
+	}
+
+	var conditionalQueryName string
+	var conditionalQueryNameValue string
+	if name == "" {
+		conditionalQueryName = "AND 1 = ?"
+		conditionalQueryNameValue = "1"
+	} else {
+		conditionalQueryName = "AND product_name LIKE ?"
+		conditionalQueryNameValue = "%" + name + "%"
+	}
+
+	query := fmt.Sprintf(`
+		WITH main_table AS (
+			SELECT * FROM %s WHERE 1 = 1 AND YEAR(created_at) = YEAR(NOW()) %s %s %s
+		)
+		SELECT 
+		a.id,
+		a.uuid,
+		a.created_by,
+		a.action_by,
+		a.action,
+		a.product_name,
+		a.created_at,
+		a.updated_at,
+		b.count
+	FROM (SELECT * FROM main_table ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table) b ON true`, models.DocumentTable, conditionalQueryAction, conditionalQueryPeriod, conditionalQueryName, orderBy, orderDirection)
+	var args []interface{}
+	args = append(args, conditionalQueryValue...)
+	args = append(args, conditionalQueryPeriodValue)
+	args = append(args, conditionalQueryNameValue)
+	args = append(args, skip, take)
+	rows, err := tx.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var totalDocument int
+	for rows.Next() {
+		var document models.Document
+		err = rows.Scan(
+			&document.Id,
+			&document.Uuid,
+			&document.CreatedBy,
+			&document.ActionBy,
+			&document.Action,
+			&document.ProductName,
+			&document.CreatedAt,
+			&document.UpdatedAt,
+			&totalDocument,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+		documents = append(documents, document)
+	}
+
+	return documents, totalDocument, nil
+}

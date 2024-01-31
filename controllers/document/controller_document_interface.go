@@ -15,4 +15,5 @@ type ControllerDocumentInterface interface {
 	GetProductDistinct(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	Approve(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	Reject(w http.ResponseWriter, r *http.Request, p httprouter.Params)
+	MonitoringList(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 }

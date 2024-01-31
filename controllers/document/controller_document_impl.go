@@ -189,3 +189,47 @@ func (implementation *ControllerDocumentImpl) Reject(w http.ResponseWriter, r *h
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerDocumentImpl) MonitoringList(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webDocument.DocumentRequestMonitoringList
+
+	if r.URL.Query().Has("detail") {
+		withDetail, err := strconv.ParseBool(r.URL.Query().Get("detail"))
+		helpers.PanicIfError(err)
+		request.WithDetail = withDetail
+	}
+
+	if r.URL.Query().Has("month") {
+		month, err := strconv.Atoi(r.URL.Query().Get("month"))
+		if err != nil {
+			panic(err)
+		}
+		request.QueryPeriod = month
+	}
+
+	if r.URL.Query().Has("name") {
+		request.QueryName = r.URL.Query().Get("name")
+	}
+
+	web.SetPagination(&request, r)
+	web.SetOrder(&request, r)
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	findAllResponse, total := implementation.ServiceDocumentInterface.MonitoringList(ctx, request)
+	pagination := web.Pagination{
+		Take:  request.GetTake(),
+		Skip:  request.GetSkip(),
+		Total: total,
+	}
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   findAllResponse,
+		Extras: pagination,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}

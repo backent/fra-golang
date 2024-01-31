@@ -43,6 +43,8 @@ func NewRouter(
 	router.POST("/documents-approve", controllersDocument.Approve)
 	router.POST("/documents-reject", controllersDocument.Reject)
 
+	router.GET("/documents-monitoring", controllersDocument.MonitoringList)
+
 	router.PanicHandler = exceptions.RouterPanicHandler
 	return router
 }

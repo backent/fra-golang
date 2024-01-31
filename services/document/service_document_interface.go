@@ -16,4 +16,5 @@ type ServiceDocumentInterface interface {
 	GetProductDistinct(ctx context.Context, request document.DocumentRequestGetProductDistinct) []document.DocumentResponseGetProductDistinct
 	Approve(ctx context.Context, request document.DocumentRequestApprove)
 	Reject(ctx context.Context, request document.DocumentRequestReject)
+	MonitoringList(ctx context.Context, request document.DocumentRequestMonitoringList) ([]document.DocumentResponse, int)
 }
