@@ -99,7 +99,7 @@ type RejectNoteResponse struct {
 
 type RelatedDocumentResponse struct {
 	Id        int       `json:"id"`
-	CreatedBy time.Time `json:"created_by"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func DocumentModelToDocumentResponseWithDetail(document models.Document) DocumentResponseWithDetail {
@@ -190,7 +190,7 @@ func riskBulkToRiskResponseBulk(risks []models.Risk) []riskResponse {
 func relatedDocumentToRelatedDocumentResponse(relatedDocument models.RelatedDocument) RelatedDocumentResponse {
 	return RelatedDocumentResponse{
 		Id:        relatedDocument.Id,
-		CreatedBy: relatedDocument.CreatedAt,
+		CreatedAt: relatedDocument.CreatedAt,
 	}
 }
 
