@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"github.com/backent/fra-golang/exceptions"
@@ -55,6 +56,13 @@ func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx
 		document, err := implementation.RepositoryDocumentInterface.FindByUUID(ctx, tx, request.Uuid)
 		if err != nil {
 			panic(exceptions.NewNotFoundError(err.Error()))
+		}
+		if strings.ToLower(request.Action) == "submit" {
+			nonDraftDocument, err := implementation.RepositoryDocumentInterface.GetNonDraftProductByUUID(ctx, tx, request.Uuid)
+			helpers.PanicIfError(err)
+			if len(nonDraftDocument) > 0 {
+				fmt.Println("succeed")
+			}
 		}
 		request.CreatedBy = document.CreatedBy
 	} else {

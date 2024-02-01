@@ -100,7 +100,7 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 			FROM %s a LEFT JOIN %s b ON a.id = b.risk_id
 		),
 		related_document AS (
-			SELECT * FROM %s WHERE action != 'draft'
+			SELECT * FROM %s WHERE action != 'draft' ORDER BY id DESC
 		)
 		SELECT 
 		a.id,
@@ -147,7 +147,8 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 	FROM (SELECT * FROM main_table) a
 	LEFT JOIN %s b ON a.created_by = b.id
 	LEFT JOIN risk_with_reject_note c ON a.id = c.document_id 
-	LEFT JOIN related_document d ON a.uuid = d.uuid AND a.id != d.id`, models.DocumentTable, models.RiskTable, models.RejectNoteTable, models.DocumentTable, models.UserTable)
+	LEFT JOIN related_document d ON a.uuid = d.uuid AND a.id != d.id
+	ORDER BY d.id DESC, c.id ASC`, models.DocumentTable, models.RiskTable, models.RejectNoteTable, models.DocumentTable, models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, id)
 	if err != nil {
 		return document, err
@@ -635,4 +636,34 @@ func (implementation *RepositoryDocumentImpl) FindAllNoGroup(
 	}
 
 	return documents, totalDocument, nil
+}
+
+func (implementation *RepositoryDocumentImpl) GetNonDraftProductByUUID(ctx context.Context, tx *sql.Tx, uuid string) ([]models.Document, error) {
+	query := fmt.Sprintf(`
+		SELECT
+			id,
+			product_name,
+			uuid,
+			action
+		FROM %s WHERE action != 'draft' AND uuid = ?
+	`, models.DocumentTable)
+
+	rows, err := tx.QueryContext(ctx, query, uuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var documents []models.Document
+	for rows.Next() {
+		var document models.Document
+		err = rows.Scan(&document.Id, &document.ProductName, &document.Uuid, &document.Action)
+		if err != nil {
+			return nil, err
+		}
+		documents = append(documents, document)
+	}
+
+	return documents, nil
+
 }
