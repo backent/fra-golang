@@ -3,7 +3,6 @@ package middlewares
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 
 	"github.com/backent/fra-golang/exceptions"
@@ -61,7 +60,7 @@ func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx
 			nonDraftDocument, err := implementation.RepositoryDocumentInterface.GetNonDraftProductByUUID(ctx, tx, request.Uuid)
 			helpers.PanicIfError(err)
 			if len(nonDraftDocument) > 0 {
-				fmt.Println("succeed")
+				request.Action = "update"
 			}
 		}
 		request.CreatedBy = document.CreatedBy
@@ -168,4 +167,8 @@ func (implementation *DocumentMiddleware) MonitoringList(ctx context.Context, tx
 	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 
 	request.QueryAction = "submit,approve,reject,update"
+}
+
+func (implementation *DocumentMiddleware) TrackerProduct(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestTrackerProduct) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 }

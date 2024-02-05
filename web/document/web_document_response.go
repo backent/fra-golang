@@ -238,3 +238,67 @@ func BulkDocumentModelToBulkDocumentResponseGetProductDistinct(documents []model
 	}
 	return bulkDocumentResponseGetProductDistinct
 }
+
+type DocumentTrackerProduct struct {
+	Id                   int                             `json:"id"`           // id
+	ProductName          string                          `json:"product_name"` // product_name
+	Uuid                 string                          `json:"uuid"`         // uuid
+	Action               string                          `json:"action"`
+	UserDetail           userResponse                    `json:"user_detail"`             // user_detail
+	RelatedProductDetail []DocumentTrackerRelatedProduct `json:"related_document_detail"` // related_document_detail
+}
+
+type DocumentTrackerRelatedProduct struct {
+	Id          int          `json:"id"`           // id
+	ProductName string       `json:"product_name"` // product_name
+	Uuid        string       `json:"uuid"`         // uuid
+	Action      string       `json:"action"`       // action
+	CreatedAt   time.Time    `json:"created_at"`   // created_at
+	UserDetail  userResponse `json:"user_detail"`  // user_detail
+}
+
+func DocumetModelToDocumentTrackerProduct(document models.Document) DocumentTrackerProduct {
+	var relatedProductDetail []DocumentTrackerRelatedProduct
+	if len(document.RelatedDocumentDetail) > 0 {
+		relatedProductDetail = BulkRelatedDocumentToDocumentTrackerRelatedProduct(document.RelatedDocumentDetail)
+	} else {
+		relatedProductDetail = make([]DocumentTrackerRelatedProduct, 0)
+	}
+
+	return DocumentTrackerProduct{
+		Id:                   document.Id,
+		ProductName:          document.ProductName,
+		Uuid:                 document.Uuid,
+		Action:               document.Action,
+		UserDetail:           userModelToUserResponse(document.UserDetail),
+		RelatedProductDetail: relatedProductDetail,
+	}
+}
+
+func BulkDocumetModelToDocumentTrackerProduct(documents []models.Document) []DocumentTrackerProduct {
+	var bulk []DocumentTrackerProduct
+	for _, document := range documents {
+		bulk = append(bulk, DocumetModelToDocumentTrackerProduct(document))
+	}
+	return bulk
+}
+
+func RelatedDocumentToDocumentTrackerRelatedProduct(relatedDocument models.RelatedDocument) DocumentTrackerRelatedProduct {
+	return DocumentTrackerRelatedProduct{
+		Id:          relatedDocument.Id,
+		ProductName: relatedDocument.ProductName,
+		Uuid:        relatedDocument.Uuid,
+		Action:      relatedDocument.Action,
+		CreatedAt:   relatedDocument.CreatedAt,
+		UserDetail:  userModelToUserResponse(relatedDocument.UserDetail),
+	}
+}
+
+func BulkRelatedDocumentToDocumentTrackerRelatedProduct(relatedDocuments []models.RelatedDocument) []DocumentTrackerRelatedProduct {
+	var bulk []DocumentTrackerRelatedProduct
+	for _, relatedDocument := range relatedDocuments {
+		bulk = append(bulk, RelatedDocumentToDocumentTrackerRelatedProduct(relatedDocument))
+	}
+
+	return bulk
+}

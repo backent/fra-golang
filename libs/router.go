@@ -44,6 +44,7 @@ func NewRouter(
 	router.POST("/documents-reject", controllersDocument.Reject)
 
 	router.GET("/documents-monitoring", controllersDocument.MonitoringList)
+	router.GET("/documents-tracker/:name", controllersDocument.TrackerProduct)
 
 	router.PanicHandler = exceptions.RouterPanicHandler
 	return router

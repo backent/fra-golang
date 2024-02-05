@@ -270,3 +270,19 @@ func (implementation *ServiceDocumentImpl) MonitoringList(ctx context.Context, r
 
 	return webDocument.BulkDocumentModelToDocumentResponse(documents), total
 }
+
+func (implementation *ServiceDocumentImpl) TrackerProduct(ctx context.Context, request webDocument.DocumentRequestTrackerProduct) []webDocument.DocumentTrackerProduct {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.DocumentMiddleware.TrackerProduct(ctx, tx, &request)
+
+	documents, err := implementation.RepositoryDocumentInterface.TrackerProductByName(ctx, tx, request.QuerySearch)
+	helpers.PanicIfError(err)
+
+	if documents == nil {
+		return []webDocument.DocumentTrackerProduct{}
+	}
+	return webDocument.BulkDocumetModelToDocumentTrackerProduct(documents)
+}

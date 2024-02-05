@@ -233,3 +233,22 @@ func (implementation *ControllerDocumentImpl) MonitoringList(w http.ResponseWrit
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerDocumentImpl) TrackerProduct(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webDocument.DocumentRequestTrackerProduct
+
+	request.QuerySearch = p.ByName("name")
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	findAllResponse := implementation.ServiceDocumentInterface.TrackerProduct(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   findAllResponse,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}

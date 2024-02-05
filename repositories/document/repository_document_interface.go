@@ -18,4 +18,5 @@ type RepositoryDocumentInterface interface {
 	GetProductDistinct(ctx context.Context, tx *sql.Tx) ([]models.Document, error)
 	FindAllNoGroup(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string, documentAction string, month int, name string) ([]models.Document, int, error)
 	GetNonDraftProductByUUID(ctx context.Context, tx *sql.Tx, uuid string) ([]models.Document, error)
+	TrackerProductByName(ctx context.Context, tx *sql.Tx, name string) ([]models.Document, error)
 }

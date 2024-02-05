@@ -163,3 +163,7 @@ func (implementation *DocumentRequestMonitoringList) GetOrderDirection() string 
 	}
 	return implementation.orderDirection
 }
+
+type DocumentRequestTrackerProduct struct {
+	QuerySearch string
+}

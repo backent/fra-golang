@@ -17,4 +17,5 @@ type ServiceDocumentInterface interface {
 	Approve(ctx context.Context, request document.DocumentRequestApprove)
 	Reject(ctx context.Context, request document.DocumentRequestReject)
 	MonitoringList(ctx context.Context, request document.DocumentRequestMonitoringList) ([]document.DocumentResponse, int)
+	TrackerProduct(ctx context.Context, request document.DocumentRequestTrackerProduct) []document.DocumentTrackerProduct
 }

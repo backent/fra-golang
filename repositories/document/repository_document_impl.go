@@ -667,3 +667,106 @@ func (implementation *RepositoryDocumentImpl) GetNonDraftProductByUUID(ctx conte
 	return documents, nil
 
 }
+
+func (implementation *RepositoryDocumentImpl) TrackerProductByName(ctx context.Context, tx *sql.Tx, name string) ([]models.Document, error) {
+	query := fmt.Sprintf(`
+		WITH main_table AS (
+			SELECT * FROM %s 
+		), group_by_uuid AS (
+			SELECT d1.*
+			FROM main_table d1
+			JOIN (
+					SELECT uuid, MAX(id) AS max_id
+					FROM main_table
+					GROUP BY uuid
+			) d2 ON d1.uuid = d2.uuid AND d1.id = d2.max_id
+		), main_table_after_grouped AS (
+			SELECT * FROM group_by_uuid WHERE product_name LIKE ?
+		),
+		related_document AS (
+			SELECT a.*, b.nik, b.name FROM %s a LEFT JOIN %s b ON a.action_by = b.id WHERE action != 'draft' ORDER BY id DESC
+		)
+		SELECT 
+		a.id,
+		a.uuid,
+		a.action,
+		a.product_name,
+		a.created_at,
+		b.id,
+		b.uuid,
+		b.action,
+		b.product_name,
+		b.created_at,
+		b.nik,
+		b.name,
+		c.nik,
+		c.name
+	FROM main_table_after_grouped a
+	LEFT JOIN related_document b ON a.uuid = b.uuid
+	LEFT JOIN %s c on a.action_by = c.id
+	ORDER BY a.id DESC, b.id ASC`, models.DocumentTable, models.DocumentTable, models.UserTable, models.UserTable)
+
+	var likeArg = "%" + name + "%"
+	rows, err := tx.QueryContext(ctx, query, likeArg)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var documents []*models.Document
+	documentsMap := make(map[int]*models.Document)
+
+	for rows.Next() {
+		var document models.Document
+		var nullAbleRelatedDocument models.NullAbleRelatedDocument
+		var nullAbleUser models.NullAbleUser
+		var user models.User
+
+		err = rows.Scan(
+			&document.Id,
+			&document.Uuid,
+			&document.Action,
+			&document.ProductName,
+			&document.CreatedAt,
+			&nullAbleRelatedDocument.Id,
+			&nullAbleRelatedDocument.Uuid,
+			&nullAbleRelatedDocument.Action,
+			&nullAbleRelatedDocument.ProductName,
+			&nullAbleRelatedDocument.CreatedAt,
+			&nullAbleUser.Nik,
+			&nullAbleUser.Name,
+			&user.Nik,
+			&user.Name,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		item, found := documentsMap[document.Id]
+		if !found {
+			item = &models.Document{}
+			documentsMap[document.Id] = item
+			documents = append(documents, item)
+		}
+
+		if document.Id == int(nullAbleRelatedDocument.Id.Int32) {
+			item.Id = document.Id
+			item.Uuid = document.Uuid
+			item.Action = document.Action
+			item.ProductName = document.ProductName
+			item.CreatedAt = document.CreatedAt
+			item.UserDetail = user
+		} else {
+			relatedDocument := models.NullAbleRelatedDocumentToRelatedDocument(nullAbleRelatedDocument)
+			relatedDocument.UserDetail = models.NullAbleUserToUser(nullAbleUser)
+			item.RelatedDocumentDetail = append(item.RelatedDocumentDetail, relatedDocument)
+		}
+	}
+
+	var documentsReturn []models.Document
+	for _, document := range documents {
+		documentsReturn = append(documentsReturn, *document)
+	}
+	return documentsReturn, nil
+}
