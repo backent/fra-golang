@@ -4,12 +4,15 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/backent/fra-golang/config"
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/models"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
+	repositoriesNotification "github.com/backent/fra-golang/repositories/notification"
 	repositoriesRejectNote "github.com/backent/fra-golang/repositories/rejectnote"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
+	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	webDocument "github.com/backent/fra-golang/web/document"
 )
 
@@ -19,6 +22,8 @@ type ServiceDocumentImpl struct {
 	*middlewares.DocumentMiddleware
 	repositoriesRisk.RepositoryRiskInterface
 	repositoriesRejectNote.RepositoryRejectNoteInterface
+	repositoriesUser.RepositoryUserInterface
+	repositoriesNotification.RepositoryNotificationInterface
 }
 
 func NewServiceDocumentImpl(
@@ -27,13 +32,17 @@ func NewServiceDocumentImpl(
 	documentMiddleware *middlewares.DocumentMiddleware,
 	repositoriesRisk repositoriesRisk.RepositoryRiskInterface,
 	repositoriesRejectNote repositoriesRejectNote.RepositoryRejectNoteInterface,
+	repositoriesUser repositoriesUser.RepositoryUserInterface,
+	repositoriesNotification repositoriesNotification.RepositoryNotificationInterface,
 ) ServiceDocumentInterface {
 	return &ServiceDocumentImpl{
-		DB:                            db,
-		RepositoryDocumentInterface:   repositoriesDocument,
-		DocumentMiddleware:            documentMiddleware,
-		RepositoryRiskInterface:       repositoriesRisk,
-		RepositoryRejectNoteInterface: repositoriesRejectNote,
+		DB:                              db,
+		RepositoryDocumentInterface:     repositoriesDocument,
+		DocumentMiddleware:              documentMiddleware,
+		RepositoryRiskInterface:         repositoriesRisk,
+		RepositoryRejectNoteInterface:   repositoriesRejectNote,
+		RepositoryUserInterface:         repositoriesUser,
+		RepositoryNotificationInterface: repositoriesNotification,
 	}
 }
 
@@ -78,6 +87,8 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 		_, err = implementation.RepositoryRiskInterface.Create(ctx, tx, risk)
 		helpers.PanicIfError(err)
 	}
+
+	blastNotification(ctx, tx, document, implementation.RepositoryUserInterface, implementation.RepositoryNotificationInterface)
 
 	return webDocument.DocumentModelToDocumentResponse(document)
 }
@@ -205,6 +216,8 @@ func (implementation *ServiceDocumentImpl) Approve(ctx context.Context, request 
 		helpers.PanicIfError(err)
 	}
 
+	blastNotification(ctx, tx, document, implementation.RepositoryUserInterface, implementation.RepositoryNotificationInterface)
+
 }
 
 func (implementation *ServiceDocumentImpl) Reject(ctx context.Context, request webDocument.DocumentRequestReject) {
@@ -252,6 +265,8 @@ func (implementation *ServiceDocumentImpl) Reject(ctx context.Context, request w
 
 		}
 	}
+
+	blastNotification(ctx, tx, document, implementation.RepositoryUserInterface, implementation.RepositoryNotificationInterface)
 }
 
 func (implementation *ServiceDocumentImpl) MonitoringList(ctx context.Context, request webDocument.DocumentRequestMonitoringList) ([]webDocument.DocumentResponse, int) {
@@ -285,4 +300,26 @@ func (implementation *ServiceDocumentImpl) TrackerProduct(ctx context.Context, r
 		return []webDocument.DocumentTrackerProduct{}
 	}
 	return webDocument.BulkDocumetModelToDocumentTrackerProduct(documents)
+}
+
+func blastNotification(ctx context.Context, tx *sql.Tx, document models.Document, repositoryUserInterface repositoriesUser.RepositoryUserInterface, repositoryNotificationInterface repositoriesNotification.RepositoryNotificationInterface) {
+	// get all users
+
+	users, err := repositoryUserInterface.FindAll(ctx, tx, 99999, 0, "id", "asc")
+	helpers.PanicIfError(err)
+
+	// blast notifications
+	for _, user := range users {
+		title, subtitle, err := config.NotificationGenerator(user.Role, document.Action, document.ProductName)
+		if err == nil {
+			notification := models.Notification{
+				UserId:     user.Id,
+				DocumentId: document.Id,
+				Title:      title,
+				Subtitle:   subtitle,
+				Action:     document.Action,
+			}
+			repositoryNotificationInterface.Create(ctx, tx, notification)
+		}
+	}
 }
