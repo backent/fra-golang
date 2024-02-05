@@ -420,18 +420,9 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 	skip int,
 	orderBy string,
 	orderDirection string,
-	userId int,
 	documentAction string,
 ) ([]models.Document, int, error) {
 	var documents []models.Document
-
-	var conditionalQueryUser string
-	if userId == 0 {
-		userId = 1
-		conditionalQueryUser = "AND 1 = ?"
-	} else {
-		conditionalQueryUser = "AND created_by = ?"
-	}
 
 	var conditionalQueryAction string
 	var conditionalQueryValue []interface{}
@@ -449,7 +440,7 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 
 	query := fmt.Sprintf(`
 		WITH main_table AS (
-			SELECT * FROM %s 
+			SELECT * FROM %s WHERE 1 = 1 %s
 		), group_by_uuid AS (
 			SELECT d1.*
 			FROM main_table d1
@@ -459,7 +450,7 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 					GROUP BY uuid
 			) d2 ON d1.uuid = d2.uuid AND d1.id = d2.max_id
 		), main_table_after_grouped AS (
-			SELECT * FROM group_by_uuid WHERE 1 = 1 %s %s
+			SELECT * FROM group_by_uuid
 		)
 		SELECT 
 		a.id,
@@ -471,10 +462,9 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 		a.created_at,
 		a.updated_at,
 		b.count
-	FROM (SELECT * FROM main_table_after_grouped ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table_after_grouped) b ON true`, models.DocumentTable, conditionalQueryUser, conditionalQueryAction, orderBy, orderDirection)
+	FROM (SELECT * FROM main_table_after_grouped ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table_after_grouped) b ON true`, models.DocumentTable, conditionalQueryAction, orderBy, orderDirection)
 
 	var args []interface{}
-	args = append(args, userId)
 	args = append(args, conditionalQueryValue...)
 	args = append(args, skip, take)
 	rows, err := tx.QueryContext(ctx, query, args...)
@@ -509,7 +499,7 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 func (implementation *RepositoryDocumentImpl) GetProductDistinct(ctx context.Context, tx *sql.Tx) ([]models.Document, error) {
 	query := fmt.Sprintf(`
 	WITH main_table AS (
-		SELECT * FROM %s
+		SELECT * FROM %s WHERE action = 'approve'
 	)
 	SELECT d1.id, d1.product_name
 	FROM main_table d1

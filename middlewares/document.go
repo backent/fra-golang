@@ -109,9 +109,7 @@ func (implementation *DocumentMiddleware) FindById(ctx context.Context, tx *sql.
 func (implementation *DocumentMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestFindAll) {
 	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
 	user, _ := implementation.RepositoryUserInterface.FindById(ctx, tx, userId)
-	if user.Role == "author" {
-		request.CreatedBy = user.Id
-	} else {
+	if user.Role == "reviewer" {
 		request.QueryAction = "submit,approve,reject,update"
 	}
 
