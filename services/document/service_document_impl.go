@@ -59,6 +59,7 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 		ActionBy:    request.ActionBy,
 		Action:      request.Action,
 		ProductName: request.ProductName,
+		Category:    request.Category,
 	}
 
 	document, err = implementation.RepositoryDocumentInterface.Create(ctx, tx, document)
@@ -143,7 +144,7 @@ func (implementation *ServiceDocumentImpl) FindAll(ctx context.Context, request 
 
 	implementation.DocumentMiddleware.FindAll(ctx, tx, &request)
 
-	documents, total, err := implementation.RepositoryDocumentInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection(), request.QueryAction)
+	documents, total, err := implementation.RepositoryDocumentInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection(), request.QueryAction, request.QueryCategory)
 	helpers.PanicIfError(err)
 
 	if documents == nil {

@@ -24,14 +24,16 @@ func (implementation *RepositoryDocumentImpl) Create(ctx context.Context, tx *sq
 		created_by,
 		action_by,
 		action,
-		product_name
-		) VALUES (?, ?, ?, ?, ?) `, models.DocumentTable)
+		product_name,
+		category
+		) VALUES (?, ?, ?, ?, ?, ?) `, models.DocumentTable)
 	result, err := tx.ExecContext(ctx, query,
 		document.Uuid,
 		document.CreatedBy,
 		document.ActionBy,
 		document.Action,
 		document.ProductName,
+		document.Category,
 	)
 	if err != nil {
 		return document, err
@@ -109,6 +111,7 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 		a.action_by,
 		a.action,
 		a.product_name,
+		a.category,
 		a.created_at,
 		a.updated_at,
 		b.id,
@@ -174,6 +177,7 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 			&document.ActionBy,
 			&document.Action,
 			&document.ProductName,
+			&document.Category,
 			&document.CreatedAt,
 			&document.UpdatedAt,
 			&user.Id,
@@ -421,6 +425,7 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 	orderBy string,
 	orderDirection string,
 	documentAction string,
+	documentCategory string,
 ) ([]models.Document, int, error) {
 	var documents []models.Document
 
@@ -438,9 +443,23 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 		conditionalQueryAction = fmt.Sprintf("AND action IN (%s)", helpers.Placeholders(len(conditionalQueryValue)))
 	}
 
+	var conditionalQueryCategory string
+	var conditionalQueryCategoryValue []interface{}
+	if documentCategory == "" {
+		documentCategory = "1"
+		conditionalQueryCategory = "AND 1 = ?"
+		conditionalQueryCategoryValue = append(conditionalQueryCategoryValue, "1")
+	} else {
+		for _, val := range strings.Split(documentCategory, ",") {
+			conditionalQueryCategoryValue = append(conditionalQueryCategoryValue, val)
+		}
+		helpers.Placeholders(len(conditionalQueryCategoryValue))
+		conditionalQueryCategory = fmt.Sprintf("AND category IN (%s)", helpers.Placeholders(len(conditionalQueryCategoryValue)))
+	}
+
 	query := fmt.Sprintf(`
 		WITH main_table AS (
-			SELECT * FROM %s WHERE 1 = 1 %s
+			SELECT * FROM %s WHERE 1 = 1 %s %s
 		), group_by_uuid AS (
 			SELECT d1.*
 			FROM main_table d1
@@ -462,10 +481,11 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 		a.created_at,
 		a.updated_at,
 		b.count
-	FROM (SELECT * FROM main_table_after_grouped ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table_after_grouped) b ON true`, models.DocumentTable, conditionalQueryAction, orderBy, orderDirection)
+	FROM (SELECT * FROM main_table_after_grouped ORDER BY %s %s LIMIT ?, ?) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table_after_grouped) b ON true`, models.DocumentTable, conditionalQueryAction, conditionalQueryCategory, orderBy, orderDirection)
 
 	var args []interface{}
 	args = append(args, conditionalQueryValue...)
+	args = append(args, conditionalQueryCategoryValue...)
 	args = append(args, skip, take)
 	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {

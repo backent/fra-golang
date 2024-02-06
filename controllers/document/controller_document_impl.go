@@ -108,6 +108,10 @@ func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *
 		request.WithDetail = withDetail
 	}
 
+	if r.URL.Query().Has("category") {
+		request.QueryCategory = r.URL.Query().Get("category")
+	}
+
 	web.SetPagination(&request, r)
 	web.SetOrder(&request, r)
 

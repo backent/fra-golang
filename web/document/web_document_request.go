@@ -12,7 +12,8 @@ type DocumentRequestCreate struct {
 	Uuid        string                   `json:"uuid"`
 	Action      string                   `json:"action" validate:"required,max=40"`        // action
 	ProductName string                   `json:"product_name" validate:"required,max=100"` // product_name
-	Risks       []risk.RiskRequestCreate `json:"risks" validate:"required,gt=0,dive"`      // risks
+	Category    string                   `json:"category" validate:"required,oneof=communication datacomm wireless internet"`
+	Risks       []risk.RiskRequestCreate `json:"risks" validate:"required,gt=0,dive"` // risks
 
 	CreatedBy int
 	ActionBy  int
@@ -43,6 +44,7 @@ type DocumentRequestFindAll struct {
 	orderDirection string
 	CreatedBy      int
 	QueryAction    string
+	QueryCategory  string
 }
 
 func (implementation *DocumentRequestFindAll) SetSkip(skip int) {

@@ -45,6 +45,7 @@ type DocumentResponseWithDetail struct {
 	ActionBy    int       `json:"action_by"`    // action_by
 	Action      string    `json:"action"`       // action
 	ProductName string    `json:"product_name"` // product_name
+	Category    string    `json:"category"`     // category
 	CreatedAt   time.Time `json:"created_at"`   // created_at
 	UpdatedAt   time.Time `json:"updated_at"`   // updated_at
 
@@ -123,6 +124,7 @@ func DocumentModelToDocumentResponseWithDetail(document models.Document) Documen
 		ActionBy:              document.ActionBy,
 		Action:                document.Action,
 		ProductName:           document.ProductName,
+		Category:              document.Category,
 		CreatedAt:             document.CreatedAt,
 		UpdatedAt:             document.UpdatedAt,
 		UserDetail:            userModelToUserResponse(document.UserDetail),

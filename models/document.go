@@ -12,6 +12,7 @@ type Document struct {
 	ActionBy    int       // action_by
 	Action      string    // action
 	ProductName string    // product_name
+	Category    string    // category
 	CreatedAt   time.Time // created_at
 	UpdatedAt   time.Time // updated_at
 
