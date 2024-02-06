@@ -12,7 +12,7 @@ type RepositoryDocumentInterface interface {
 	Update(ctx context.Context, tx *sql.Tx, document models.Document) (models.Document, error)
 	Delete(ctx context.Context, tx *sql.Tx, id int) error
 	FindById(ctx context.Context, tx *sql.Tx, id int) (models.Document, error)
-	FindByUUID(ctx context.Context, tx *sql.Tx, documentUuid string) (models.Document, error)
+	FindByUUID(ctx context.Context, tx *sql.Tx, documentUuid string) ([]models.Document, error)
 	FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string, documentAction string) ([]models.Document, int, error)
 	FindAllWithDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, int, error)
 	GetProductDistinct(ctx context.Context, tx *sql.Tx) ([]models.Document, error)

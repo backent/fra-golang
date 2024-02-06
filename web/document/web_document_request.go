@@ -8,6 +8,7 @@ import (
 )
 
 type DocumentRequestCreate struct {
+	Id          int                      `json:"id" validate:"numeric"` // id
 	Uuid        string                   `json:"uuid"`
 	Action      string                   `json:"action" validate:"required,max=40"`        // action
 	ProductName string                   `json:"product_name" validate:"required,max=100"` // product_name

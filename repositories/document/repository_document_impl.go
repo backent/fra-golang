@@ -261,8 +261,7 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 	return documentsReturn[0], nil
 }
 
-func (implementation *RepositoryDocumentImpl) FindByUUID(ctx context.Context, tx *sql.Tx, documentUuid string) (models.Document, error) {
-	var document models.Document
+func (implementation *RepositoryDocumentImpl) FindByUUID(ctx context.Context, tx *sql.Tx, documentUuid string) ([]models.Document, error) {
 	query := fmt.Sprintf(`SELECT 
 	id,
 	uuid,
@@ -272,14 +271,16 @@ func (implementation *RepositoryDocumentImpl) FindByUUID(ctx context.Context, tx
 	product_name,
 	created_at,
 	updated_at
-	FROM %s WHERE uuid = ?`, models.DocumentTable)
+	FROM %s WHERE uuid = ? ORDER BY id DESC`, models.DocumentTable)
 	rows, err := tx.QueryContext(ctx, query, documentUuid)
 	if err != nil {
-		return document, err
+		return nil, err
 	}
 	defer rows.Close()
 
-	if rows.Next() {
+	var documents []models.Document
+	for rows.Next() {
+		var document models.Document
 		err = rows.Scan(
 			&document.Id,
 			&document.Uuid,
@@ -291,13 +292,12 @@ func (implementation *RepositoryDocumentImpl) FindByUUID(ctx context.Context, tx
 			&document.UpdatedAt,
 		)
 		if err != nil {
-			return document, err
+			return nil, err
 		}
-	} else {
-		return document, errors.New("not found document")
+		documents = append(documents, document)
 	}
 
-	return document, nil
+	return documents, nil
 }
 
 func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, int, error) {

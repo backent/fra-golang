@@ -52,10 +52,18 @@ func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx
 	}
 
 	if request.Uuid != "" {
-		document, err := implementation.RepositoryDocumentInterface.FindByUUID(ctx, tx, request.Uuid)
-		if err != nil {
+		documents, err := implementation.RepositoryDocumentInterface.FindByUUID(ctx, tx, request.Uuid)
+
+		// check if uuid is present, is there any document with that uuid or not
+		if err != nil || len(documents) == 0 {
 			panic(exceptions.NewNotFoundError(err.Error()))
 		}
+
+		// check if uuid is present, is the latest document older / newer than now
+		if documents[0].Id != request.Id {
+			panic(exceptions.NewConflictError("version mismatch"))
+		}
+
 		if strings.ToLower(request.Action) == "submit" {
 			nonDraftDocument, err := implementation.RepositoryDocumentInterface.GetNonDraftProductByUUID(ctx, tx, request.Uuid)
 			helpers.PanicIfError(err)
@@ -63,7 +71,7 @@ func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx
 				request.Action = "update"
 			}
 		}
-		request.CreatedBy = document.CreatedBy
+		request.CreatedBy = documents[0].CreatedBy
 	} else {
 		request.Uuid = uuid.New().String()
 		request.CreatedBy = userId
@@ -129,6 +137,12 @@ func (implementation *DocumentMiddleware) Approve(ctx context.Context, tx *sql.T
 		panic(exceptions.NewNotFoundError(err.Error()))
 	}
 
+	documents, err := implementation.RepositoryDocumentInterface.FindByUUID(ctx, tx, document.Uuid)
+	helpers.PanicIfError(err)
+	if documents[0].Id != request.Id {
+		panic(exceptions.NewConflictError("version mismatch"))
+	}
+
 	document.Action = "approve"
 	document.ActionBy = userId
 	request.Document = document
@@ -143,6 +157,12 @@ func (implementation *DocumentMiddleware) Reject(ctx context.Context, tx *sql.Tx
 	document, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
 	if err != nil {
 		panic(exceptions.NewNotFoundError(err.Error()))
+	}
+
+	documents, err := implementation.RepositoryDocumentInterface.FindByUUID(ctx, tx, document.Uuid)
+	helpers.PanicIfError(err)
+	if documents[0].Id != request.Id {
+		panic(exceptions.NewConflictError("version mismatch"))
 	}
 
 	for idx := range request.RejectNote {

@@ -35,6 +35,12 @@ func RouterPanicHandler(w http.ResponseWriter, r *http.Request, i interface{}) {
 			Status: "NOT FOUND",
 			Data:   err.Error(),
 		}
+	} else if err, ok := i.(ConflictError); ok {
+		response = web.WebResponse{
+			Code:   http.StatusConflict,
+			Status: "Conflict",
+			Data:   err.Error(),
+		}
 	} else if err, ok := i.(error); ok {
 		response = web.WebResponse{
 			Code:   http.StatusInternalServerError,
