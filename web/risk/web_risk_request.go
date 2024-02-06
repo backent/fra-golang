@@ -7,7 +7,7 @@ import (
 )
 
 type RiskRequestCreate struct {
-	RiskName               string `json:"risk_name" validate:"required,max=50"`                  // risk_name
+	RiskName               string `json:"risk_name" validate:"required,max=200"`                 // risk_name
 	FraudSchema            string `json:"fraud_schema" validate:"required,max=1000"`             // fraud_schema
 	FraudMotive            string `json:"fraud_motive" validate:"required,max=1000"`             // fraud_motive
 	FraudTechnique         string `json:"fraud_technique" validate:"required,max=1000"`          // fraud_technique
@@ -18,7 +18,7 @@ type RiskRequestCreate struct {
 	LikehoodJustification  string `json:"likehood_justification" validate:"required,max=1000"`   // likehood_justification
 	ImpactJustification    string `json:"impact_justification" validate:"required,max=1000"`     // impact_justification
 	StartegyAgreement      string `json:"strategy_agreement" validate:"required,max=1000"`       // strategy_agreement
-	StrategyRecomendation  string `json:"strategy_recomendation" validate:"required,max=1000"`   // strategy_recomendation
+	StrategyRecomendation  string `json:"strategy_recomendation" validate:"max=1000"`            // strategy_recomendation
 	AssessmentLikehood     string `json:"assessment_likehood" validate:"required"`               // assessment_likehood
 	AssessmentImpact       string `json:"assessment_impact" validate:"required"`                 // assessment_impact
 	AssessmentRiskLevel    string `json:"assessment_risk_level" validate:"required"`             // assessment_risk_level

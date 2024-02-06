@@ -1,0 +1,2 @@
+ALTER TABLE risks
+MODIFY risk_name VARCHAR(50) NOT NULL
