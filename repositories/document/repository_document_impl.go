@@ -681,7 +681,7 @@ func (implementation *RepositoryDocumentImpl) GetNonDraftProductByUUID(ctx conte
 func (implementation *RepositoryDocumentImpl) TrackerProductByName(ctx context.Context, tx *sql.Tx, name string) ([]models.Document, error) {
 	query := fmt.Sprintf(`
 		WITH main_table AS (
-			SELECT * FROM %s 
+			SELECT * FROM %s WHERE action != 'draft'
 		), group_by_uuid AS (
 			SELECT d1.*
 			FROM main_table d1
