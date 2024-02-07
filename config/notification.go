@@ -28,8 +28,8 @@ func init() {
 	}
 
 	notificationMapping["reject"]["author"] = func(documentTitle string) (string, string, error) {
-		title := "Your assessment has been Rejected"
-		subtitle := fmt.Sprintf(`Your assessment "%s" has been Rejected`, documentTitle)
+		title := "Your assessment has been Returned"
+		subtitle := fmt.Sprintf(`Your assessment "%s" has been Returned`, documentTitle)
 		return title, subtitle, nil
 	}
 	notificationMapping["reject"]["reviewer"] = func(documentTitle string) (string, string, error) {
