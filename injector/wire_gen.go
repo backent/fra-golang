@@ -12,6 +12,7 @@ import (
 	notification3 "github.com/backent/fra-golang/controllers/notification"
 	risk3 "github.com/backent/fra-golang/controllers/risk"
 	user3 "github.com/backent/fra-golang/controllers/user"
+	user_registration3 "github.com/backent/fra-golang/controllers/user_registration"
 	"github.com/backent/fra-golang/libs"
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/repositories/auth"
@@ -20,11 +21,13 @@ import (
 	"github.com/backent/fra-golang/repositories/rejectnote"
 	"github.com/backent/fra-golang/repositories/risk"
 	"github.com/backent/fra-golang/repositories/user"
+	"github.com/backent/fra-golang/repositories/user_registration"
 	auth2 "github.com/backent/fra-golang/services/auth"
 	document2 "github.com/backent/fra-golang/services/document"
 	notification2 "github.com/backent/fra-golang/services/notification"
 	risk2 "github.com/backent/fra-golang/services/risk"
 	user2 "github.com/backent/fra-golang/services/user"
+	user_registration2 "github.com/backent/fra-golang/services/user_registration"
 	"github.com/google/wire"
 	"github.com/julienschmidt/httprouter"
 )
@@ -55,7 +58,11 @@ func InitializeRouter() *httprouter.Router {
 	notificationMiddleware := middlewares.NewNotificationMiddleware(validate, repositoryNotificationInterface, repositoryAuthInterface, repositoryUserInterface, repositoryRiskInterface)
 	serviceNotificationInterface := notification2.NewServiceNotificationImpl(db, repositoryNotificationInterface, notificationMiddleware, repositoryRiskInterface, repositoryRejectNoteInterface)
 	controllerNotificationInterface := notification3.NewControllerNotificationImpl(serviceNotificationInterface)
-	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface, controllerDocumentInterface, controllerNotificationInterface)
+	repositoryUserRegistrationInterface := user_registration.NewRepositoryUserRegistrationImpl()
+	userRegistrationMiddleware := middlewares.NewUserRegistrationMiddleware(validate, repositoryUserRegistrationInterface, repositoryAuthInterface, repositoryUserInterface)
+	serviceUserRegistrationInterface := user_registration2.NewServiceUserRegistrationImpl(db, repositoryUserRegistrationInterface, userRegistrationMiddleware)
+	controllerUserRegistrationInterface := user_registration3.NewControllerUserRegistrationImpl(serviceUserRegistrationInterface)
+	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface, controllerDocumentInterface, controllerNotificationInterface, controllerUserRegistrationInterface)
 	return router
 }
 
@@ -72,3 +79,5 @@ var NotificationSet = wire.NewSet(notification3.NewControllerNotificationImpl, n
 var AuthSet = wire.NewSet(auth3.NewControllerAuthImpl, auth2.NewServiceAuthImpl, auth.NewRepositoryAuthJWTImpl, middlewares.NewAuthMiddleware)
 
 var RejectNoteSet = wire.NewSet(rejectnote.NewRepositoryRejectNote)
+
+var UserRegistrationSet = wire.NewSet(user_registration3.NewControllerUserRegistrationImpl, user_registration2.NewServiceUserRegistrationImpl, user_registration.NewRepositoryUserRegistrationImpl, middlewares.NewUserRegistrationMiddleware)

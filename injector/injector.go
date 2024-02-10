@@ -9,6 +9,7 @@ import (
 	controllersNotification "github.com/backent/fra-golang/controllers/notification"
 	controllersRisk "github.com/backent/fra-golang/controllers/risk"
 	controllersUser "github.com/backent/fra-golang/controllers/user"
+	controllersUserRegistration "github.com/backent/fra-golang/controllers/user_registration"
 	"github.com/backent/fra-golang/libs"
 	"github.com/backent/fra-golang/middlewares"
 	repositoriesAuth "github.com/backent/fra-golang/repositories/auth"
@@ -17,11 +18,13 @@ import (
 	repositoriesRejectNote "github.com/backent/fra-golang/repositories/rejectnote"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
+	repositoriesUserRegistration "github.com/backent/fra-golang/repositories/user_registration"
 	servicesAuth "github.com/backent/fra-golang/services/auth"
 	servicesDocument "github.com/backent/fra-golang/services/document"
 	servicesNotification "github.com/backent/fra-golang/services/notification"
 	servicesRisk "github.com/backent/fra-golang/services/risk"
 	servicesUser "github.com/backent/fra-golang/services/user"
+	servicesUserRegistration "github.com/backent/fra-golang/services/user_registration"
 	"github.com/google/wire"
 	"github.com/julienschmidt/httprouter"
 )
@@ -65,6 +68,13 @@ var RejectNoteSet = wire.NewSet(
 	repositoriesRejectNote.NewRepositoryRejectNote,
 )
 
+var UserRegistrationSet = wire.NewSet(
+	controllersUserRegistration.NewControllerUserRegistrationImpl,
+	servicesUserRegistration.NewServiceUserRegistrationImpl,
+	repositoriesUserRegistration.NewRepositoryUserRegistrationImpl,
+	middlewares.NewUserRegistrationMiddleware,
+)
+
 func InitializeRouter() *httprouter.Router {
 	wire.Build(
 		libs.NewDatabase,
@@ -76,6 +86,7 @@ func InitializeRouter() *httprouter.Router {
 		DocumentSet,
 		RejectNoteSet,
 		NotificationSet,
+		UserRegistrationSet,
 	)
 
 	return nil
