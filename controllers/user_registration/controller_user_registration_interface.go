@@ -8,4 +8,5 @@ import (
 
 type ControllerUserRegistrationInterface interface {
 	Apply(w http.ResponseWriter, r *http.Request, p httprouter.Params)
+	FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 }

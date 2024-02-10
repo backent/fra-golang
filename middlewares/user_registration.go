@@ -45,3 +45,7 @@ func (implementation *UserRegistrationMiddleware) Apply(ctx context.Context, tx 
 	}
 
 }
+
+func (implementation *UserRegistrationMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webUserRegistration.UserRegistrationRequestFindAll) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+}

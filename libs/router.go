@@ -54,6 +54,7 @@ func NewRouter(
 	router.POST("/notifications/read-all", controllersNotification.ReadAll)
 
 	router.POST("/user-registrations/apply", controllersUserRegistration.Apply)
+	router.GET("/user-registrations", controllersUserRegistration.FindAll)
 
 	router.PanicHandler = exceptions.RouterPanicHandler
 	return router

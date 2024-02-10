@@ -7,7 +7,7 @@ type UserRegistrationRequestApply struct {
 }
 
 type UserRegistrationRequestFindAll struct {
-	WithRisk       bool
+	QueryStatus    string
 	take           int
 	skip           int
 	orderBy        string
@@ -46,7 +46,7 @@ func (implementation *UserRegistrationRequestFindAll) GetOrderBy() string {
 func (implementation *UserRegistrationRequestFindAll) GetOrderDirection() string {
 	// set default order direction
 	if implementation.orderDirection == "" {
-		return "DESC"
+		return "ASC"
 	}
 	return implementation.orderDirection
 }

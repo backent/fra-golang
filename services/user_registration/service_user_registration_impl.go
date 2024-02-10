@@ -37,6 +37,20 @@ func (implementation *ServiceUserRegistrationImpl) Apply(ctx context.Context, re
 		Status: "pending",
 	}
 
-	user_registration, err = implementation.RepositoryUserRegistrationInterface.Create(ctx, tx, user_registration)
+	_, err = implementation.RepositoryUserRegistrationInterface.Create(ctx, tx, user_registration)
 	helpers.PanicIfError(err)
+}
+
+func (implementation *ServiceUserRegistrationImpl) FindAll(ctx context.Context, request webUserRegistration.UserRegistrationRequestFindAll) ([]webUserRegistration.UserRegistrationResponse, int) {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.UserRegistrationMiddleware.FindAll(ctx, tx, &request)
+
+	userRegistrations, total, err := implementation.RepositoryUserRegistrationInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection(), request.QueryStatus)
+	helpers.PanicIfError(err)
+
+	return webUserRegistration.BulkUserRegistrationModelToUserRegistrationResponse(userRegistrations), total
+
 }

@@ -1,6 +1,7 @@
 package user_registration
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/backent/fra-golang/helpers"
@@ -32,6 +33,36 @@ func (implementation *ControllerUserRegistrationImpl) Apply(w http.ResponseWrite
 		Status: "OK",
 		Code:   http.StatusOK,
 		Data:   nil,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}
+
+func (implementation *ControllerUserRegistrationImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUserRegistration.UserRegistrationRequestFindAll
+
+	if r.URL.Query().Has("status") {
+		request.QueryStatus = r.URL.Query().Get("status")
+	}
+
+	web.SetPagination(&request, r)
+	web.SetOrder(&request, r)
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	userRegistrations, total := implementation.ServiceUserRegistrationInterface.FindAll(ctx, request)
+	pagination := web.Pagination{
+		Take:  request.GetTake(),
+		Skip:  request.GetSkip(),
+		Total: total,
+	}
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   userRegistrations,
+		Extras: pagination,
 	}
 
 	helpers.ReturnReponseJSON(w, response)
