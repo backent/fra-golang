@@ -256,3 +256,20 @@ func (implementation *ControllerDocumentImpl) TrackerProduct(w http.ResponseWrit
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerDocumentImpl) SummaryDashboard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webDocument.DocumentRequestSummaryDashboard
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	summary := implementation.ServiceDocumentInterface.SummaryDashboard(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   summary,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}

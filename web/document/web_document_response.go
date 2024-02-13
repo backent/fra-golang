@@ -304,3 +304,14 @@ func BulkRelatedDocumentToDocumentTrackerRelatedProduct(relatedDocuments []model
 
 	return bulk
 }
+
+type DocumentResponseSummaryDashboard struct {
+	SummaryAssessment summaryAssessment `json:"summary_assessement"`
+}
+
+type summaryAssessment struct {
+	Release  int `json:"release"`
+	Return   int `json:"return"`
+	Received int `json:"received"`
+	Total    int `json:"total"`
+}

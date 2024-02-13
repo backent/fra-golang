@@ -190,3 +190,7 @@ func (implementation *DocumentMiddleware) MonitoringList(ctx context.Context, tx
 func (implementation *DocumentMiddleware) TrackerProduct(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestTrackerProduct) {
 	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 }
+
+func (implementation *DocumentMiddleware) SummaryDashboard(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestSummaryDashboard) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+}

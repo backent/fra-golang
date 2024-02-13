@@ -780,3 +780,42 @@ func (implementation *RepositoryDocumentImpl) TrackerProductByName(ctx context.C
 	}
 	return documentsReturn, nil
 }
+
+func (implementation *RepositoryDocumentImpl) GetProductCurrentYear(ctx context.Context, tx *sql.Tx) ([]models.Document, error) {
+	query := fmt.Sprintf(`
+		WITH main_table AS (
+			SELECT * FROM %s WHERE YEAR(created_at) = YEAR(NOW()) AND action != 'draft'
+		), group_by_uuid AS (
+			SELECT d1.*
+			FROM main_table d1
+			JOIN (
+					SELECT uuid, MAX(id) AS max_id
+					FROM main_table
+					GROUP BY uuid
+			) d2 ON d1.uuid = d2.uuid AND d1.id = d2.max_id
+		), main_table_after_grouped AS (
+			SELECT * FROM group_by_uuid
+		)
+		SELECT 
+		id,
+		action
+	FROM main_table_after_grouped`, models.DocumentTable)
+
+	rows, err := tx.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var documents []models.Document
+	for rows.Next() {
+		var document models.Document
+		err = rows.Scan(&document.Id, &document.Action)
+		if err != nil {
+			return nil, err
+		}
+		documents = append(documents, document)
+	}
+
+	return documents, nil
+}

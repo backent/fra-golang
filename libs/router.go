@@ -49,6 +49,7 @@ func NewRouter(
 
 	router.GET("/documents-monitoring", controllersDocument.MonitoringList)
 	router.GET("/documents-tracker/:name", controllersDocument.TrackerProduct)
+	router.GET("/documents-dashboard-summary", controllersDocument.SummaryDashboard)
 
 	router.GET("/notifications", controllersNotification.FindAll)
 	router.POST("/notifications/read-all", controllersNotification.ReadAll)

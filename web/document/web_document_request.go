@@ -170,3 +170,6 @@ func (implementation *DocumentRequestMonitoringList) GetOrderDirection() string 
 type DocumentRequestTrackerProduct struct {
 	QuerySearch string
 }
+
+type DocumentRequestSummaryDashboard struct {
+}
