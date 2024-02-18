@@ -47,6 +47,7 @@ var DocumentSet = wire.NewSet(
 	controllersDocument.NewControllerDocumentImpl,
 	servicesDocument.NewServiceDocumentImpl,
 	repositoriesDocument.NewRepositoryDocumentImpl,
+	repositoriesDocument.NewRepositoryDocumentSearchEsImpl,
 	middlewares.NewDocumentMiddleware,
 )
 
@@ -80,6 +81,7 @@ func InitializeRouter() *httprouter.Router {
 		libs.NewDatabase,
 		libs.NewRouter,
 		libs.NewValidator,
+		libs.NewElastic,
 		UserSet,
 		RiskSet,
 		AuthSet,

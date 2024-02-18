@@ -304,10 +304,39 @@ func (implementation *RepositoryDocumentImpl) FindByUUID(ctx context.Context, tx
 	return documents, nil
 }
 
-func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.Document, int, error) {
+func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Context, tx *sql.Tx) ([]models.Document, error) {
+	var documentsReturn []models.Document
+
 	query := fmt.Sprintf(`
 		WITH main_table AS (
-			SELECT * FROM %s
+			SELECT * FROM %s 
+		), group_by_uuid AS (
+			SELECT d1.*
+			FROM main_table d1
+			JOIN (
+					SELECT uuid, MAX(id) AS max_id
+					FROM main_table
+					GROUP BY uuid
+			) d2 ON d1.uuid = d2.uuid AND d1.id = d2.max_id
+		), main_table_after_grouped AS (
+			SELECT * FROM group_by_uuid
+		),
+		risk_with_reject_note AS (
+			SELECT
+			a.*,
+			b.id as reject_note_id,
+			b.fraud as reject_note_fraud,
+			b.risk_source as reject_note_risk_source,
+			b.root_cause as reject_note_root_cause,
+			b.bispro_control_procedure as reject_note_bispro_control_procedure,
+			b.qualitative_impact as reject_note_qualitative_impact,
+			b.assessment as reject_note_assessment,
+			b.justification as reject_note_justification,
+			b.strategy as reject_note_strategy 
+			FROM %s a LEFT JOIN %s b ON a.id = b.risk_id
+		),
+		related_document AS (
+			SELECT * FROM %s WHERE action != 'draft' ORDER BY id DESC
 		)
 		SELECT 
 		a.id,
@@ -316,6 +345,7 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 		a.action_by,
 		a.action,
 		a.product_name,
+		a.category,
 		a.created_at,
 		a.updated_at,
 		b.id,
@@ -338,27 +368,41 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 		c.assessment_likehood,
 		c.assessment_impact,
 		c.assessment_risk_level,
+		c.reject_note_id,
+		c.reject_note_fraud,
+		c.reject_note_risk_source,
+		c.reject_note_root_cause,
+		c.reject_note_bispro_control_procedure,
+		c.reject_note_qualitative_impact,
+		c.reject_note_assessment,
+		c.reject_note_justification,
+		c.reject_note_strategy,
 		c.created_at,
 		c.updated_at,
-		z.count
-	FROM (SELECT * FROM main_table ORDER BY %s %s  LIMIT ?, ?) a
+		d.id,
+		d.created_at
+	FROM (SELECT * FROM main_table_after_grouped) a
 	LEFT JOIN %s b ON a.created_by = b.id
-	LEFT JOIN %s c ON a.id = c.document_id
-	LEFT JOIN (SELECT COUNT(*) as count FROM main_table) z ON true `, models.DocumentTable, orderBy, orderDirection, models.UserTable, models.RiskTable)
-	rows, err := tx.QueryContext(ctx, query, skip, take)
+	LEFT JOIN risk_with_reject_note c ON a.id = c.document_id 
+	LEFT JOIN related_document d ON a.uuid = d.uuid AND a.id != d.id
+	ORDER BY d.id DESC, c.id ASC`, models.DocumentTable, models.RiskTable, models.RejectNoteTable, models.DocumentTable, models.UserTable)
+	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
-		return nil, 0, err
+		return documentsReturn, err
 	}
 	defer rows.Close()
 
-	var totalDocument int
 	var documents []*models.Document
 	documentsMap := make(map[int]*models.Document)
+	documentWithRiskMap := make(map[string]bool)
+	documentWithRelatedMap := make(map[string][]models.RelatedDocument)
 
 	for rows.Next() {
 		var document models.Document
 		var user models.User
 		var nullAbleRisk models.NullAbleRisk
+		var nullAbleRejectNote models.NullAbleRejectNote
+		var nullAbleRelatedDocument models.NullAbleRelatedDocument
 
 		err = rows.Scan(
 			&document.Id,
@@ -367,6 +411,7 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 			&document.ActionBy,
 			&document.Action,
 			&document.ProductName,
+			&document.Category,
 			&document.CreatedAt,
 			&document.UpdatedAt,
 			&user.Id,
@@ -389,12 +434,22 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 			&nullAbleRisk.AssessmentLikehood,
 			&nullAbleRisk.AssessmentImpact,
 			&nullAbleRisk.AssessmentRiskLevel,
+			&nullAbleRejectNote.Id,
+			&nullAbleRejectNote.Fraud,
+			&nullAbleRejectNote.RiskSource,
+			&nullAbleRejectNote.RootCause,
+			&nullAbleRejectNote.BisproControlProcedure,
+			&nullAbleRejectNote.QualitativeImpact,
+			&nullAbleRejectNote.Assessment,
+			&nullAbleRejectNote.Justification,
+			&nullAbleRejectNote.Strategy,
 			&nullAbleRisk.CreatedAt,
 			&nullAbleRisk.UpdatedAt,
-			&totalDocument,
+			&nullAbleRelatedDocument.Id,
+			&nullAbleRelatedDocument.CreatedAt,
 		)
 		if err != nil {
-			return nil, 0, err
+			return documentsReturn, err
 		}
 
 		item, found := documentsMap[document.Id]
@@ -405,16 +460,42 @@ func (implementation *RepositoryDocumentImpl) FindAllWithDetail(ctx context.Cont
 		}
 		item.UserDetail = user
 		if nullAbleRisk.Id.Valid {
-			item.RiskDetail = append(item.RiskDetail, models.NullAbleRiskToRisk(nullAbleRisk))
+			riskDetail := models.NullAbleRiskToRisk(nullAbleRisk)
+			if nullAbleRejectNote.Id.Valid {
+				riskDetail.RejectNoteDetail.Id = int(nullAbleRejectNote.Id.Int32)
+				riskDetail.RejectNoteDetail.DocumentId = item.Id
+				riskDetail.RejectNoteDetail.RiskId = riskDetail.Id
+				riskDetail.RejectNoteDetail.Fraud = nullAbleRejectNote.Fraud.String
+				riskDetail.RejectNoteDetail.RiskSource = nullAbleRejectNote.RiskSource.String
+				riskDetail.RejectNoteDetail.RootCause = nullAbleRejectNote.RootCause.String
+				riskDetail.RejectNoteDetail.BisproControlProcedure = nullAbleRejectNote.BisproControlProcedure.String
+				riskDetail.RejectNoteDetail.QualitativeImpact = nullAbleRejectNote.QualitativeImpact.String
+				riskDetail.RejectNoteDetail.Assessment = nullAbleRejectNote.Assessment.String
+				riskDetail.RejectNoteDetail.Justification = nullAbleRejectNote.Justification.String
+				riskDetail.RejectNoteDetail.Strategy = nullAbleRejectNote.Strategy.String
+			}
+			if _, foundRisk := documentWithRiskMap[helpers.PrintStringIDRelation(document.Id, riskDetail.Id)]; !foundRisk {
+				documentWithRiskMap[helpers.PrintStringIDRelation(document.Id, riskDetail.Id)] = true
+				item.RiskDetail = append(item.RiskDetail, riskDetail)
+			}
+		}
+		if nullAbleRelatedDocument.Id.Valid {
+			if _, found := documentWithRelatedMap[helpers.PrintStringIDRelation(document.Id, int(nullAbleRelatedDocument.Id.Int32))]; !found {
+				documentWithRelatedMap[helpers.PrintStringIDRelation(document.Id, int(nullAbleRelatedDocument.Id.Int32))] = append(documentWithRelatedMap[helpers.PrintStringIDRelation(document.Id, int(nullAbleRelatedDocument.Id.Int32))], models.NullAbleRelatedDocumentToRelatedDocument(nullAbleRelatedDocument))
+				item.RelatedDocumentDetail = append(item.RelatedDocumentDetail, models.NullAbleRelatedDocumentToRelatedDocument(nullAbleRelatedDocument))
+			}
 		}
 	}
 
-	var documentsReturn []models.Document
+	if len(documents) < 1 {
+		return documentsReturn, errors.New("not found document")
+	}
+
 	for _, document := range documents {
 		documentsReturn = append(documentsReturn, *document)
 	}
 
-	return documentsReturn, totalDocument, nil
+	return documentsReturn, nil
 }
 
 func (implementation *RepositoryDocumentImpl) FindAll(

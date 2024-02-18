@@ -119,11 +119,7 @@ func (implementation *ControllerDocumentImpl) FindAll(w http.ResponseWriter, r *
 
 	var findAllResponse interface{}
 	var total int
-	if request.WithDetail {
-		findAllResponse, total = implementation.ServiceDocumentInterface.FindAllWithDetail(ctx, request)
-	} else {
-		findAllResponse, total = implementation.ServiceDocumentInterface.FindAll(ctx, request)
-	}
+	findAllResponse, total = implementation.ServiceDocumentInterface.FindAll(ctx, request)
 	pagination := web.Pagination{
 		Take:  request.GetTake(),
 		Skip:  request.GetSkip(),

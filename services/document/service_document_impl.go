@@ -14,35 +14,42 @@ import (
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	webDocument "github.com/backent/fra-golang/web/document"
+	"github.com/elastic/go-elasticsearch/v8"
 )
 
 type ServiceDocumentImpl struct {
-	DB *sql.DB
+	DB       *sql.DB
+	EsClient *elasticsearch.Client
 	repositoriesDocument.RepositoryDocumentInterface
 	*middlewares.DocumentMiddleware
 	repositoriesRisk.RepositoryRiskInterface
 	repositoriesRejectNote.RepositoryRejectNoteInterface
 	repositoriesUser.RepositoryUserInterface
 	repositoriesNotification.RepositoryNotificationInterface
+	repositoriesDocument.RepositoryDocumentSearchInterface
 }
 
 func NewServiceDocumentImpl(
 	db *sql.DB,
+	esClient *elasticsearch.Client,
 	repositoriesDocument repositoriesDocument.RepositoryDocumentInterface,
 	documentMiddleware *middlewares.DocumentMiddleware,
 	repositoriesRisk repositoriesRisk.RepositoryRiskInterface,
 	repositoriesRejectNote repositoriesRejectNote.RepositoryRejectNoteInterface,
 	repositoriesUser repositoriesUser.RepositoryUserInterface,
 	repositoriesNotification repositoriesNotification.RepositoryNotificationInterface,
+	repositoriesDocumentSearch repositoriesDocument.RepositoryDocumentSearchInterface,
 ) ServiceDocumentInterface {
 	return &ServiceDocumentImpl{
-		DB:                              db,
-		RepositoryDocumentInterface:     repositoriesDocument,
-		DocumentMiddleware:              documentMiddleware,
-		RepositoryRiskInterface:         repositoriesRisk,
-		RepositoryRejectNoteInterface:   repositoriesRejectNote,
-		RepositoryUserInterface:         repositoriesUser,
-		RepositoryNotificationInterface: repositoriesNotification,
+		DB:                                db,
+		EsClient:                          esClient,
+		RepositoryDocumentInterface:       repositoriesDocument,
+		DocumentMiddleware:                documentMiddleware,
+		RepositoryRiskInterface:           repositoriesRisk,
+		RepositoryRejectNoteInterface:     repositoriesRejectNote,
+		RepositoryUserInterface:           repositoriesUser,
+		RepositoryNotificationInterface:   repositoriesNotification,
+		RepositoryDocumentSearchInterface: repositoriesDocumentSearch,
 	}
 }
 
@@ -154,19 +161,7 @@ func (implementation *ServiceDocumentImpl) FindAll(ctx context.Context, request 
 	return webDocument.BulkDocumentModelToDocumentResponse(documents), total
 }
 func (implementation *ServiceDocumentImpl) FindAllWithDetail(ctx context.Context, request webDocument.DocumentRequestFindAll) ([]webDocument.DocumentResponseWithDetail, int) {
-	tx, err := implementation.DB.Begin()
-	helpers.PanicIfError(err)
-	defer helpers.CommitOrRollback(tx)
-
-	implementation.DocumentMiddleware.FindAll(ctx, tx, &request)
-
-	documents, total, err := implementation.RepositoryDocumentInterface.FindAllWithDetail(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
-	helpers.PanicIfError(err)
-	if documents != nil {
-		return webDocument.BulkDocumentModelToDocumentResponseWithDetail(documents), total
-	} else {
-		return []webDocument.DocumentResponseWithDetail{}, total
-	}
+	panic("no longer need this func")
 
 }
 
@@ -329,6 +324,8 @@ func (implementation *ServiceDocumentImpl) SummaryDashboard(ctx context.Context,
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
+
+	implementation.RepositoryDocumentSearchInterface.SearchByProductName(implementation.EsClient, "test")
 
 	implementation.DocumentMiddleware.SummaryDashboard(ctx, tx, &request)
 	helpers.PanicIfError(err)

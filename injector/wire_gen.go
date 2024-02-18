@@ -49,11 +49,13 @@ func InitializeRouter() *httprouter.Router {
 	authMiddleware := middlewares.NewAuthMiddleware(validate, repositoryUserInterface, repositoryAuthInterface)
 	serviceAuthInterface := auth2.NewServiceAuthImpl(db, repositoryAuthInterface, authMiddleware)
 	controllerAuthInterface := auth3.NewControllerAuthImpl(serviceAuthInterface)
+	client := libs.NewElastic()
 	repositoryDocumentInterface := document.NewRepositoryDocumentImpl()
 	documentMiddleware := middlewares.NewDocumentMiddleware(validate, repositoryDocumentInterface, repositoryAuthInterface, repositoryUserInterface, repositoryRiskInterface)
 	repositoryRejectNoteInterface := rejectnote.NewRepositoryRejectNote()
 	repositoryNotificationInterface := notification.NewRepositoryNotificationImpl()
-	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, repositoryDocumentInterface, documentMiddleware, repositoryRiskInterface, repositoryRejectNoteInterface, repositoryUserInterface, repositoryNotificationInterface)
+	repositoryDocumentSearchInterface := document.NewRepositoryDocumentSearchEsImpl()
+	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, client, repositoryDocumentInterface, documentMiddleware, repositoryRiskInterface, repositoryRejectNoteInterface, repositoryUserInterface, repositoryNotificationInterface, repositoryDocumentSearchInterface)
 	controllerDocumentInterface := document3.NewControllerDocumentImpl(serviceDocumentInterface)
 	notificationMiddleware := middlewares.NewNotificationMiddleware(validate, repositoryNotificationInterface, repositoryAuthInterface, repositoryUserInterface, repositoryRiskInterface)
 	serviceNotificationInterface := notification2.NewServiceNotificationImpl(db, repositoryNotificationInterface, notificationMiddleware, repositoryRiskInterface, repositoryRejectNoteInterface)
@@ -72,7 +74,7 @@ var UserSet = wire.NewSet(user3.NewControllerUserImpl, user2.NewServiceUserImpl,
 
 var RiskSet = wire.NewSet(risk3.NewControllerRiskImpl, risk2.NewServiceRiskImpl, risk.NewRepositoryRiskImpl, middlewares.NewRiskMiddleware)
 
-var DocumentSet = wire.NewSet(document3.NewControllerDocumentImpl, document2.NewServiceDocumentImpl, document.NewRepositoryDocumentImpl, middlewares.NewDocumentMiddleware)
+var DocumentSet = wire.NewSet(document3.NewControllerDocumentImpl, document2.NewServiceDocumentImpl, document.NewRepositoryDocumentImpl, document.NewRepositoryDocumentSearchEsImpl, middlewares.NewDocumentMiddleware)
 
 var NotificationSet = wire.NewSet(notification3.NewControllerNotificationImpl, notification2.NewServiceNotificationImpl, notification.NewRepositoryNotificationImpl, middlewares.NewNotificationMiddleware)
 
