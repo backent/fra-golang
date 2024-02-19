@@ -3,6 +3,7 @@ package document
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/backent/fra-golang/config"
 	"github.com/backent/fra-golang/helpers"
@@ -94,6 +95,12 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 
 		_, err = implementation.RepositoryRiskInterface.Create(ctx, tx, risk)
 		helpers.PanicIfError(err)
+		document.RiskDetail = append(document.RiskDetail, risk)
+	}
+
+	err = implementation.RepositoryDocumentSearchInterface.IndexProduct(implementation.EsClient, document)
+	if err != nil {
+		log.Println(err)
 	}
 
 	blastNotification(ctx, tx, document, implementation.RepositoryUserInterface, implementation.RepositoryNotificationInterface)
@@ -213,6 +220,10 @@ func (implementation *ServiceDocumentImpl) Approve(ctx context.Context, request 
 	}
 
 	blastNotification(ctx, tx, document, implementation.RepositoryUserInterface, implementation.RepositoryNotificationInterface)
+	err = implementation.RepositoryDocumentSearchInterface.IndexProduct(implementation.EsClient, document)
+	if err != nil {
+		log.Println(err)
+	}
 
 }
 
@@ -263,6 +274,10 @@ func (implementation *ServiceDocumentImpl) Reject(ctx context.Context, request w
 	}
 
 	blastNotification(ctx, tx, document, implementation.RepositoryUserInterface, implementation.RepositoryNotificationInterface)
+	err = implementation.RepositoryDocumentSearchInterface.IndexProduct(implementation.EsClient, document)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (implementation *ServiceDocumentImpl) MonitoringList(ctx context.Context, request webDocument.DocumentRequestMonitoringList) ([]webDocument.DocumentResponse, int) {
@@ -324,8 +339,6 @@ func (implementation *ServiceDocumentImpl) SummaryDashboard(ctx context.Context,
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
-
-	implementation.RepositoryDocumentSearchInterface.SearchByProductName(implementation.EsClient, "test")
 
 	implementation.DocumentMiddleware.SummaryDashboard(ctx, tx, &request)
 	helpers.PanicIfError(err)

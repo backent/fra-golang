@@ -1,12 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
-	"net/http"
-	"strconv"
 
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/libs"
@@ -51,22 +46,10 @@ func main() {
 }
 
 func reIndexing(client *elasticsearch.Client, documents []models.Document) {
+	repositoryDocumentSearch := document.NewRepositoryDocumentSearchEsImpl()
+
 	for _, document := range documents {
-		err := esIndex(client, document)
+		err := repositoryDocumentSearch.IndexProduct(client, document)
 		helpers.PanicIfError(err)
 	}
-}
-
-func esIndex(client *elasticsearch.Client, document models.Document) error {
-	documentIndex := elastic.ModelDocumentToIndexDocumentSearchGlobal(document)
-	data, _ := json.Marshal(documentIndex)
-	res, err := client.Index(INDEX_NAME, bytes.NewReader(data), client.Index.WithDocumentID(documentIndex.Uuid))
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusAccepted && res.StatusCode != http.StatusCreated {
-		return errors.New("error while indexing document with status code :" + strconv.Itoa(res.StatusCode))
-	}
-	return nil
 }

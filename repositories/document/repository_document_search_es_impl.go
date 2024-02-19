@@ -1,11 +1,15 @@
 package document
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
+	"errors"
+	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/backent/fra-golang/helpers"
+	"github.com/backent/fra-golang/models"
 	"github.com/backent/fra-golang/models/elastic"
 	webElastic "github.com/backent/fra-golang/web/elastic"
 	"github.com/elastic/go-elasticsearch/v8"
@@ -17,7 +21,7 @@ func NewRepositoryDocumentSearchEsImpl() RepositoryDocumentSearchInterface {
 	return &RepositoryDocumentSearchEsImpl{}
 }
 
-func (implementation *RepositoryDocumentSearchEsImpl) SearchByProductName(client *elasticsearch.Client, name string) {
+func (implementation *RepositoryDocumentSearchEsImpl) SearchByProductName(client *elasticsearch.Client, name string) ([]elastic.DocumentSearchGlobal, error) {
 	query := elastic.GenerateQuery("risk")
 	res, err := client.Search(
 		client.Search.WithIndex(elastic.IndexNameDocumentSearchGlobal),
@@ -25,7 +29,7 @@ func (implementation *RepositoryDocumentSearchEsImpl) SearchByProductName(client
 	)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var responseObj webElastic.Response
@@ -35,14 +39,12 @@ func (implementation *RepositoryDocumentSearchEsImpl) SearchByProductName(client
 	for _, val := range responseObj.HitsData.Hits {
 		doc, err := toReal(val.Source)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		actualDoc = append(actualDoc, doc)
 	}
 
-	for _, val := range actualDoc {
-		fmt.Println(val.ProductName)
-	}
+	return actualDoc, nil
 
 }
 
@@ -62,4 +64,20 @@ func toReal(data map[string]interface{}) (elastic.DocumentSearchGlobal, error) {
 	}
 
 	return result, nil
+}
+
+func (implementation *RepositoryDocumentSearchEsImpl) IndexProduct(client *elasticsearch.Client, document models.Document) error {
+
+	documentIndex := elastic.ModelDocumentToIndexDocumentSearchGlobal(document)
+	data, _ := json.Marshal(documentIndex)
+	res, err := client.Index(elastic.IndexNameDocumentSearchGlobal, bytes.NewReader(data), client.Index.WithDocumentID(documentIndex.Uuid))
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusAccepted && res.StatusCode != http.StatusCreated {
+		return errors.New("error while indexing document with status code :" + strconv.Itoa(res.StatusCode))
+	}
+
+	return nil
 }
