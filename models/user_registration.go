@@ -35,7 +35,7 @@ type UserLdap struct {
 	Email string
 }
 
-var UserRegistrationTable string = "user_registrations"
+var UserRegistrationTable string = "users"
 
 func NullAbleUserRegistrationToUserRegistration(nullAbleUserRegistration NullAbleUserRegistration) UserRegistration {
 	return UserRegistration{

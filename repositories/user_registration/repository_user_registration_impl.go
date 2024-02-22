@@ -19,7 +19,7 @@ func NewRepositoryUserRegistrationImpl() RepositoryUserRegistrationInterface {
 }
 
 func (implementation *RepositoryUserRegistrationImpl) Create(ctx context.Context, tx *sql.Tx, user_registration models.UserRegistration) (models.UserRegistration, error) {
-	query := fmt.Sprintf("INSERT INTO %s (nik, name, email, status) VALUES (?, ?, ?, ?)", models.UserRegistrationTable)
+	query := fmt.Sprintf("INSERT INTO %s (nik, name, email, apply_status) VALUES (?, ?, ?, ?)", models.UserRegistrationTable)
 	result, err := tx.ExecContext(ctx, query, user_registration.Nik, user_registration.Name, user_registration.Email, user_registration.Status)
 	if err != nil {
 		return user_registration, err
@@ -38,7 +38,7 @@ func (implementation *RepositoryUserRegistrationImpl) Create(ctx context.Context
 
 func (implementation *RepositoryUserRegistrationImpl) FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.UserRegistration, error) {
 	var userRegistration models.UserRegistration
-	query := fmt.Sprintf("SELECT id, nik, name, email, status, reject_by, approve_by, created_at, updated_at FROM %s WHERE nik = ? LIMIT 1", models.UserRegistrationTable)
+	query := fmt.Sprintf("SELECT id, nik, name, email, apply_status, apply_reject_by, apply_approve_by, created_at, updated_at FROM %s WHERE nik = ? LIMIT 1", models.UserRegistrationTable)
 
 	rows, err := tx.QueryContext(ctx, query, nik)
 	if err != nil {
@@ -70,7 +70,7 @@ func (implementation *RepositoryUserRegistrationImpl) FindAll(ctx context.Contex
 			conditionalQueryStatusValue = append(conditionalQueryStatusValue, val)
 		}
 		helpers.Placeholders(len(conditionalQueryStatusValue))
-		conditionalQueryStatus = fmt.Sprintf("AND action IN (%s)", helpers.Placeholders(len(conditionalQueryStatusValue)))
+		conditionalQueryStatus = fmt.Sprintf("AND apply_status IN (%s)", helpers.Placeholders(len(conditionalQueryStatusValue)))
 	}
 
 	query := fmt.Sprintf(`
@@ -82,7 +82,7 @@ func (implementation *RepositoryUserRegistrationImpl) FindAll(ctx context.Contex
 		a.nik,
 		a.name,
 		a.email,
-		a.status,
+		a.apply_status,
 		a.created_at,
 		a.updated_at,
 		b.count
