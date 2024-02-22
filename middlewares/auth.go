@@ -35,10 +35,24 @@ func (implementation *AuthMiddleware) Login(ctx context.Context, tx *sql.Tx, req
 		panic(exceptions.NewBadRequestError("username or password is incorrect"))
 	}
 
-	passwordValid := helpers.CheckPassword(request.Password, user.Password)
-	token, err := helpers.LoginLdap("402746", request.Password)
+	chanPasswordValid := make(chan bool)
+	go func() {
+		chanPasswordValid <- helpers.CheckPassword(request.Password, user.Password)
+		close(chanPasswordValid)
+	}()
 
-	if !passwordValid && (err != nil || token == "") {
+	chanLdapValid := make(chan bool)
+
+	go func() {
+		token, err := helpers.LoginLdap("402746", request.Password)
+		chanLdapValid <- err != nil || token != ""
+		close(chanLdapValid)
+	}()
+
+	passwordValid := <-chanPasswordValid
+	ldapValid := <-chanLdapValid
+
+	if !passwordValid && !ldapValid {
 		panic(exceptions.NewBadRequestError("wrong username or password."))
 	} else {
 		request.UserId = user.Id
