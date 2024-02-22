@@ -16,7 +16,10 @@ func NewElastic() *elasticsearch.Client {
 	// Load CA certificate
 	caCert, err := os.ReadFile(os.Getenv("ELASTIC_CRT_FILE"))
 	if err != nil {
-		log.Fatalf("Error loading CA certificate: %s", err)
+		log.Printf("Error loading CA certificate: %s", err)
+		client, err := elasticsearch.NewDefaultClient()
+		helpers.PanicIfError(err)
+		return client
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
