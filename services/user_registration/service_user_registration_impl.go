@@ -34,6 +34,8 @@ func (implementation *ServiceUserRegistrationImpl) Apply(ctx context.Context, re
 
 	user_registration := models.UserRegistration{
 		Nik:    request.Nik,
+		Name:   request.Name,
+		Email:  request.Email,
 		Status: "pending",
 	}
 

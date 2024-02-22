@@ -3,7 +3,9 @@ package user_registration
 import "strings"
 
 type UserRegistrationRequestApply struct {
-	Nik string `json:"nik" validate:"required,max=20"`
+	Nik   string `json:"nik" validate:"required,max=20"`
+	Name  string
+	Email string
 }
 
 type UserRegistrationRequestFindAll struct {

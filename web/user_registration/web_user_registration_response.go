@@ -7,13 +7,17 @@ import (
 type UserRegistrationResponse struct {
 	Id     int    `json:"id"`
 	Nik    string `json:"nik"`
-	Status string `json:"name"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Status string `json:"status"`
 }
 
 func UserRegistrationModelToUserRegistrationResponse(user_registration models.UserRegistration) UserRegistrationResponse {
 	return UserRegistrationResponse{
 		Id:     user_registration.Id,
 		Nik:    user_registration.Nik,
+		Name:   user_registration.Name,
+		Email:  user_registration.Email,
 		Status: user_registration.Status,
 	}
 }

@@ -44,6 +44,15 @@ func (implementation *UserRegistrationMiddleware) Apply(ctx context.Context, tx 
 		panic(exceptions.NewBadRequestError("nik already requested or exists"))
 	}
 
+	token, err := helpers.LoginLdap("402746", "Bwgclp24")
+	helpers.PanicIfError(err)
+
+	userLdap, err := helpers.GetUserLdap(request.Nik, token)
+	helpers.PanicIfError(err)
+
+	request.Name = userLdap.Name
+	request.Email = userLdap.Email
+
 }
 
 func (implementation *UserRegistrationMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webUserRegistration.UserRegistrationRequestFindAll) {

@@ -19,8 +19,8 @@ func NewRepositoryUserRegistrationImpl() RepositoryUserRegistrationInterface {
 }
 
 func (implementation *RepositoryUserRegistrationImpl) Create(ctx context.Context, tx *sql.Tx, user_registration models.UserRegistration) (models.UserRegistration, error) {
-	query := fmt.Sprintf("INSERT INTO %s (nik, status) VALUES (?, ?)", models.UserRegistrationTable)
-	result, err := tx.ExecContext(ctx, query, user_registration.Nik, user_registration.Status)
+	query := fmt.Sprintf("INSERT INTO %s (nik, name, email, status) VALUES (?, ?, ?, ?)", models.UserRegistrationTable)
+	result, err := tx.ExecContext(ctx, query, user_registration.Nik, user_registration.Name, user_registration.Email, user_registration.Status)
 	if err != nil {
 		return user_registration, err
 	}
@@ -38,7 +38,7 @@ func (implementation *RepositoryUserRegistrationImpl) Create(ctx context.Context
 
 func (implementation *RepositoryUserRegistrationImpl) FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.UserRegistration, error) {
 	var userRegistration models.UserRegistration
-	query := fmt.Sprintf("SELECT id, nik, status, reject_by, approve_by, created_at, updated_at FROM %s WHERE nik = ? LIMIT 1", models.UserRegistrationTable)
+	query := fmt.Sprintf("SELECT id, nik, name, email, status, reject_by, approve_by, created_at, updated_at FROM %s WHERE nik = ? LIMIT 1", models.UserRegistrationTable)
 
 	rows, err := tx.QueryContext(ctx, query, nik)
 	if err != nil {
@@ -47,7 +47,7 @@ func (implementation *RepositoryUserRegistrationImpl) FindByNik(ctx context.Cont
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.Scan(&userRegistration.Id, &userRegistration.Nik, &userRegistration.Status, &userRegistration.RejectBy, &userRegistration.ApproveBy, &userRegistration.CreatedAt, &userRegistration.UpdatedAt)
+		err = rows.Scan(&userRegistration.Id, &userRegistration.Nik, &userRegistration.Name, &userRegistration.Email, &userRegistration.Status, &userRegistration.RejectBy, &userRegistration.ApproveBy, &userRegistration.CreatedAt, &userRegistration.UpdatedAt)
 		if err != nil {
 			return userRegistration, err
 		}
@@ -80,6 +80,8 @@ func (implementation *RepositoryUserRegistrationImpl) FindAll(ctx context.Contex
 		SELECT
 		a.id,
 		a.nik,
+		a.name,
+		a.email,
 		a.status,
 		a.created_at,
 		a.updated_at,
@@ -101,10 +103,12 @@ func (implementation *RepositoryUserRegistrationImpl) FindAll(ctx context.Contex
 	defer rows.Close()
 
 	for rows.Next() {
-		var userRegistration models.UserRegistration
+		var userRegistration models.NullAbleUserRegistration
 		err = rows.Scan(
 			&userRegistration.Id,
 			&userRegistration.Nik,
+			&userRegistration.Name,
+			&userRegistration.Email,
 			&userRegistration.Status,
 			&userRegistration.CreatedAt,
 			&userRegistration.UpdatedAt,
@@ -114,7 +118,7 @@ func (implementation *RepositoryUserRegistrationImpl) FindAll(ctx context.Contex
 			return nil, total, err
 		}
 
-		userRegistrations = append(userRegistrations, userRegistration)
+		userRegistrations = append(userRegistrations, models.NullAbleUserRegistrationToUserRegistration(userRegistration))
 	}
 
 	return userRegistrations, total, nil

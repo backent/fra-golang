@@ -1,0 +1,3 @@
+ALTER TABLE user_registrations
+ADD COLUMN name VARCHAR(100) AFTER `nik`,
+ADD COLUMN email VARCHAR(100) AFTER `name`
