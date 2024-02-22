@@ -1,6 +1,7 @@
 package exceptions
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/backent/fra-golang/helpers"
@@ -10,6 +11,7 @@ import (
 
 func RouterPanicHandler(w http.ResponseWriter, r *http.Request, i interface{}) {
 	var response web.WebResponse
+	log.Println(i)
 
 	if err, ok := i.(validator.ValidationErrors); ok {
 		response = web.WebResponse{

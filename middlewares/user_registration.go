@@ -39,11 +39,6 @@ func (implementation *UserRegistrationMiddleware) Apply(ctx context.Context, tx 
 		panic(exceptions.NewBadRequestError("nik already requested or exists"))
 	}
 
-	_, err = implementation.RepositoryUserRegistrationInterface.FindByNik(ctx, tx, request.Nik)
-	if err == nil {
-		panic(exceptions.NewBadRequestError("nik already requested or exists"))
-	}
-
 	token, err := helpers.LoginLdap("402746", "Bwgclp24")
 	helpers.PanicIfError(err)
 
@@ -57,4 +52,36 @@ func (implementation *UserRegistrationMiddleware) Apply(ctx context.Context, tx 
 
 func (implementation *UserRegistrationMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webUserRegistration.UserRegistrationRequestFindAll) {
 	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+}
+
+func (implementation *UserRegistrationMiddleware) Approve(ctx context.Context, tx *sql.Tx, request *webUserRegistration.UserRegistrationRequestApprove) {
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+
+	user, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
+	if err != nil {
+		panic(exceptions.NewNotFoundError(err.Error()))
+	}
+
+	request.User.Id = user.Id
+	request.User.Nik = user.Nik
+	request.User.Name = user.Name
+	request.User.Email = user.Email
+	request.User.Status = user.ApplyStatus
+	request.User.ApproveBy = userId
+}
+
+func (implementation *UserRegistrationMiddleware) Reject(ctx context.Context, tx *sql.Tx, request *webUserRegistration.UserRegistrationRequestReject) {
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+
+	user, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
+	if err != nil {
+		panic(exceptions.NewNotFoundError(err.Error()))
+	}
+
+	request.User.Id = user.Id
+	request.User.Nik = user.Nik
+	request.User.Name = user.Name
+	request.User.Email = user.Email
+	request.User.Status = user.ApplyStatus
+	request.User.RejectBy = userId
 }

@@ -36,9 +36,26 @@ func (implementation *RepositoryUserRegistrationImpl) Create(ctx context.Context
 
 }
 
+func (implementation *RepositoryUserRegistrationImpl) Update(ctx context.Context, tx *sql.Tx, user_registration models.UserRegistration) (models.UserRegistration, error) {
+	query := fmt.Sprintf(`UPDATE %s SET 
+		nik = ?,
+		name = ?,
+		email = ?,
+		apply_status = ?,
+		apply_reject_by = ?,
+		apply_approved_by = ? WHERE id = ?`, models.UserRegistrationTable)
+	_, err := tx.ExecContext(ctx, query, user_registration.Nik, user_registration.Name, user_registration.Email, user_registration.Status, user_registration.RejectBy, user_registration.ApproveBy, user_registration.Id)
+	if err != nil {
+		return user_registration, err
+	}
+
+	return user_registration, nil
+
+}
+
 func (implementation *RepositoryUserRegistrationImpl) FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.UserRegistration, error) {
 	var userRegistration models.UserRegistration
-	query := fmt.Sprintf("SELECT id, nik, name, email, apply_status, apply_reject_by, apply_approve_by, created_at, updated_at FROM %s WHERE nik = ? LIMIT 1", models.UserRegistrationTable)
+	query := fmt.Sprintf("SELECT id, nik, name, email, apply_status, apply_reject_by, apply_approved_by, created_at, updated_at FROM %s WHERE nik = ? LIMIT 1", models.UserRegistrationTable)
 
 	rows, err := tx.QueryContext(ctx, query, nik)
 	if err != nil {

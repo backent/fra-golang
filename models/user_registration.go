@@ -11,8 +11,8 @@ type UserRegistration struct {
 	Name      string
 	Email     string
 	Status    string
-	RejectBy  sql.NullInt32
-	ApproveBy sql.NullInt32
+	RejectBy  int
+	ApproveBy int
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -44,8 +44,8 @@ func NullAbleUserRegistrationToUserRegistration(nullAbleUserRegistration NullAbl
 		Name:      nullAbleUserRegistration.Name.String,
 		Email:     nullAbleUserRegistration.Email.String,
 		Status:    nullAbleUserRegistration.Status.String,
-		RejectBy:  nullAbleUserRegistration.RejectBy,
-		ApproveBy: nullAbleUserRegistration.ApproveBy,
+		RejectBy:  int(nullAbleUserRegistration.RejectBy.Int32),
+		ApproveBy: int(nullAbleUserRegistration.ApproveBy.Int32),
 		CreatedAt: nullAbleUserRegistration.CreatedAt.Time,
 		UpdatedAt: nullAbleUserRegistration.UpdatedAt.Time,
 	}

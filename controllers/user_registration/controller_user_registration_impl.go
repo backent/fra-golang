@@ -39,6 +39,41 @@ func (implementation *ControllerUserRegistrationImpl) Apply(w http.ResponseWrite
 
 }
 
+func (implementation *ControllerUserRegistrationImpl) Approve(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUserRegistration.UserRegistrationRequestApprove
+	helpers.DecodeRequest(r, &request)
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+	implementation.ServiceUserRegistrationInterface.Approve(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   nil,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}
+
+func (implementation *ControllerUserRegistrationImpl) Reject(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUserRegistration.UserRegistrationRequestReject
+	helpers.DecodeRequest(r, &request)
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	implementation.ServiceUserRegistrationInterface.Reject(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   nil,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}
+
 func (implementation *ControllerUserRegistrationImpl) FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var request webUserRegistration.UserRegistrationRequestFindAll
 

@@ -1,11 +1,27 @@
 package user_registration
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/backent/fra-golang/models"
+)
 
 type UserRegistrationRequestApply struct {
 	Nik   string `json:"nik" validate:"required,max=20"`
 	Name  string
 	Email string
+}
+
+type UserRegistrationRequestApprove struct {
+	Id int `json:"id" validate:"required"`
+
+	User models.UserRegistration
+}
+
+type UserRegistrationRequestReject struct {
+	Id int `json:"id" validate:"required"`
+
+	User models.UserRegistration
 }
 
 type UserRegistrationRequestFindAll struct {

@@ -43,6 +43,46 @@ func (implementation *ServiceUserRegistrationImpl) Apply(ctx context.Context, re
 	helpers.PanicIfError(err)
 }
 
+func (implementation *ServiceUserRegistrationImpl) Approve(ctx context.Context, request webUserRegistration.UserRegistrationRequestApprove) {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.UserRegistrationMiddleware.Approve(ctx, tx, &request)
+
+	user_registration := models.UserRegistration{
+		Id:        request.Id,
+		Nik:       request.User.Nik,
+		Name:      request.User.Name,
+		Email:     request.User.Email,
+		ApproveBy: request.User.ApproveBy,
+		Status:    "approve",
+	}
+
+	_, err = implementation.RepositoryUserRegistrationInterface.Update(ctx, tx, user_registration)
+	helpers.PanicIfError(err)
+}
+
+func (implementation *ServiceUserRegistrationImpl) Reject(ctx context.Context, request webUserRegistration.UserRegistrationRequestReject) {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.UserRegistrationMiddleware.Reject(ctx, tx, &request)
+
+	user_registration := models.UserRegistration{
+		Id:       request.Id,
+		Nik:      request.User.Nik,
+		Name:     request.User.Name,
+		Email:    request.User.Email,
+		RejectBy: request.User.RejectBy,
+		Status:   "reject",
+	}
+
+	_, err = implementation.RepositoryUserRegistrationInterface.Update(ctx, tx, user_registration)
+	helpers.PanicIfError(err)
+}
+
 func (implementation *ServiceUserRegistrationImpl) FindAll(ctx context.Context, request webUserRegistration.UserRegistrationRequestFindAll) ([]webUserRegistration.UserRegistrationResponse, int) {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
@@ -52,6 +92,10 @@ func (implementation *ServiceUserRegistrationImpl) FindAll(ctx context.Context, 
 
 	userRegistrations, total, err := implementation.RepositoryUserRegistrationInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection(), request.QueryStatus)
 	helpers.PanicIfError(err)
+
+	if len(webUserRegistration.BulkUserRegistrationModelToUserRegistrationResponse(userRegistrations)) == 0 {
+		return []webUserRegistration.UserRegistrationResponse{}, total
+	}
 
 	return webUserRegistration.BulkUserRegistrationModelToUserRegistrationResponse(userRegistrations), total
 

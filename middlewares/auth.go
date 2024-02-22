@@ -31,11 +31,14 @@ func (implementation *AuthMiddleware) Login(ctx context.Context, tx *sql.Tx, req
 	helpers.PanicIfError(err)
 
 	user, err := implementation.RepositoryUserInterface.FindByNik(ctx, tx, request.Username)
-	if err != nil {
+	if err != nil || user.ApplyStatus != "approve" {
 		panic(exceptions.NewBadRequestError("username or password is incorrect"))
 	}
 
-	if !helpers.CheckPassword(request.Password, user.Password) {
+	passwordValid := helpers.CheckPassword(request.Password, user.Password)
+	token, err := helpers.LoginLdap("402746", request.Password)
+
+	if !passwordValid && (err != nil || token == "") {
 		panic(exceptions.NewBadRequestError("wrong username or password."))
 	} else {
 		request.UserId = user.Id

@@ -53,7 +53,7 @@ func (implementation *RepositoryUserImpl) Delete(ctx context.Context, tx *sql.Tx
 func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.Tx, id int) (models.User, error) {
 	var user models.User
 
-	query := fmt.Sprintf("SELECT id, nik, name, role, password FROM %s WHERE id = ?", models.UserTable)
+	query := fmt.Sprintf("SELECT id, nik, name, email, role, password FROM %s WHERE id = ?", models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, id)
 	if err != nil {
 		return user, err
@@ -61,10 +61,14 @@ func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Role, &user.Password)
+		var nullPassword sql.NullString
+		var nullEmail sql.NullString
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &nullEmail, &user.Role, &nullPassword)
 		if err != nil {
 			return user, err
 		}
+		user.Password = nullPassword.String
+		user.Email = nullEmail.String
 	} else {
 		return user, errors.New("not found user")
 	}
@@ -83,10 +87,12 @@ func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.T
 
 	for rows.Next() {
 		var user models.User
-		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Role, &user.Password)
+		var nullPassword sql.NullString
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Role, &nullPassword)
 		if err != nil {
 			return nil, err
 		}
+		user.Password = nullPassword.String
 		users = append(users, user)
 	}
 
@@ -96,7 +102,7 @@ func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.T
 func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.User, error) {
 	var user models.User
 
-	query := fmt.Sprintf("SELECT id, nik, name, role, password FROM %s WHERE nik = ?", models.UserTable)
+	query := fmt.Sprintf("SELECT id, nik, name, role, password, apply_status FROM %s WHERE nik = ?", models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, nik)
 	if err != nil {
 		return user, err
@@ -104,10 +110,14 @@ func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Role, &user.Password)
+		var nullPassword sql.NullString
+		var nullApplyStatus sql.NullString
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Role, &nullPassword, &nullApplyStatus)
 		if err != nil {
 			return user, err
 		}
+		user.Password = nullPassword.String
+		user.ApplyStatus = nullApplyStatus.String
 	} else {
 		return user, errors.New("not found user")
 	}

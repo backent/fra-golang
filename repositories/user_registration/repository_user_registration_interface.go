@@ -9,6 +9,7 @@ import (
 
 type RepositoryUserRegistrationInterface interface {
 	Create(ctx context.Context, tx *sql.Tx, user_registration models.UserRegistration) (models.UserRegistration, error)
+	Update(ctx context.Context, tx *sql.Tx, user_registration models.UserRegistration) (models.UserRegistration, error)
 	FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.UserRegistration, error)
 	FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string, queryStatus string) ([]models.UserRegistration, int, error)
 }
