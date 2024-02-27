@@ -75,6 +75,10 @@ func (implementation *UserMiddleware) FindById(ctx context.Context, tx *sql.Tx, 
 
 func (implementation *UserMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestFindAll) {
 	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+
+	if request.QueryStatus == "" {
+		request.QueryStatus = "approve,reject"
+	}
 }
 
 func (implementation *UserMiddleware) CurrentUser(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestCurrentUser) {

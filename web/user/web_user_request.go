@@ -31,6 +31,8 @@ type UserRequestFindAll struct {
 	skip           int
 	orderBy        string
 	orderDirection string
+	QueryStatus    string
+	QuerySearch    string
 }
 
 func (implementation *UserRequestFindAll) SetSkip(skip int) {

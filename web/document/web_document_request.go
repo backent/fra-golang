@@ -45,6 +45,7 @@ type DocumentRequestFindAll struct {
 	CreatedBy      int
 	QueryAction    string
 	QueryCategory  string
+	QuerySearch    string
 }
 
 func (implementation *DocumentRequestFindAll) SetSkip(skip int) {

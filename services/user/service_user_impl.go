@@ -95,17 +95,21 @@ func (implementation *ServiceUserImpl) FindById(ctx context.Context, request web
 
 	return webUser.UserModelToUserResponse(user)
 }
-func (implementation *ServiceUserImpl) FindAll(ctx context.Context, request webUser.UserRequestFindAll) []webUser.UserResponse {
+func (implementation *ServiceUserImpl) FindAll(ctx context.Context, request webUser.UserRequestFindAll) ([]webUser.UserResponse, int) {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
 	implementation.UserMiddleware.FindAll(ctx, tx, &request)
 
-	users, err := implementation.RepositoryUserInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection())
+	users, total, err := implementation.RepositoryUserInterface.FindAll(ctx, tx, request.GetTake(), request.GetSkip(), request.GetOrderBy(), request.GetOrderDirection(), request.QueryStatus, request.QuerySearch)
 	helpers.PanicIfError(err)
 
-	return webUser.BulkUserModelToUserResponse(users)
+	if total > 0 {
+		return webUser.BulkUserModelToUserResponse(users), total
+	}
+
+	return []webUser.UserResponse{}, total
 }
 
 func (implementation *ServiceUserImpl) FindAllWithRisksDetail(ctx context.Context, request webUser.UserRequestFindAll) []webUser.UserResponseWithRisksDetail {

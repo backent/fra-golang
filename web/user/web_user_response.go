@@ -5,18 +5,20 @@ import (
 )
 
 type UserResponse struct {
-	Id   int    `json:"id"`
-	Nik  string `json:"nik"`
-	Name string `json:"name"`
-	Role string `json:"role"`
+	Id     int    `json:"id"`
+	Nik    string `json:"nik"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Status string `json:"status"`
 }
 
 func UserModelToUserResponse(user models.User) UserResponse {
 	return UserResponse{
-		Id:   user.Id,
-		Name: user.Name,
-		Nik:  user.Nik,
-		Role: user.Role,
+		Id:     user.Id,
+		Name:   user.Name,
+		Nik:    user.Nik,
+		Email:  user.Email,
+		Status: user.ApplyStatus,
 	}
 }
 

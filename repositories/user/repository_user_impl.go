@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/models"
 )
 
@@ -75,28 +77,70 @@ func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.
 
 	return user, nil
 }
-func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string) ([]models.User, error) {
+func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, orderBy string, orderDirection string, applyStatus string, search string) ([]models.User, int, error) {
 	var users []models.User
+	var totalDocument int
 
-	query := fmt.Sprintf("SELECT id, nik, name, role, password FROM %s ORDER BY %s %s LIMIT ?, ?", models.UserTable, orderBy, orderDirection)
-	rows, err := tx.QueryContext(ctx, query, skip, take)
+	var conditionalQueryStatus string
+	var conditionalQueryStatusValue []interface{}
+	if applyStatus == "" {
+		conditionalQueryStatus = "AND 1 = ?"
+		conditionalQueryStatusValue = append(conditionalQueryStatusValue, "1")
+	} else {
+		for _, val := range strings.Split(applyStatus, ",") {
+			conditionalQueryStatusValue = append(conditionalQueryStatusValue, val)
+		}
+		helpers.Placeholders(len(conditionalQueryStatusValue))
+		conditionalQueryStatus = fmt.Sprintf("AND apply_status IN (%s)", helpers.Placeholders(len(conditionalQueryStatusValue)))
+	}
+
+	var conditionalQuerySearch string
+	var conditionalQuerySearchValue string
+	if search == "" {
+		conditionalQuerySearch = "AND 1 = ?"
+		conditionalQuerySearchValue = "1"
+	} else {
+		conditionalQuerySearch = "AND name LIKE ?"
+		conditionalQuerySearchValue = "%" + search + "%"
+	}
+
+	query := fmt.Sprintf(`
+		WITH main_table AS (
+			SELECT * FROM %s WHERE 1 = 1 %s %s
+		)
+		SELECT
+		a.id,
+		a.nik,
+		a.name,
+		a.email,
+		a.apply_status,
+		a.password,
+		b.count
+		FROM (SELECT * FROM main_table ORDER BY %s %s LIMIT ?, ?) a
+		LEFT JOIN (SELECT COUNT(*) as count FROM main_table) b ON true
+	`, models.UserTable, conditionalQueryStatus, conditionalQuerySearch, orderBy, orderDirection)
+
+	var args []interface{}
+	args = append(args, conditionalQueryStatusValue...)
+	args = append(args, conditionalQuerySearchValue)
+	args = append(args, skip, take)
+
+	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, totalDocument, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var user models.User
-		var nullPassword sql.NullString
-		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Role, &nullPassword)
+		var user models.NullAbleUser
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Email, &user.ApplyStatus, &user.Password, &totalDocument)
 		if err != nil {
-			return nil, err
+			return nil, totalDocument, err
 		}
-		user.Password = nullPassword.String
-		users = append(users, user)
+		users = append(users, models.NullAbleUserToUser(user))
 	}
 
-	return users, nil
+	return users, totalDocument, nil
 }
 
 func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.User, error) {

@@ -316,7 +316,7 @@ func (implementation *ServiceDocumentImpl) TrackerProduct(ctx context.Context, r
 func blastNotification(ctx context.Context, tx *sql.Tx, document models.Document, repositoryUserInterface repositoriesUser.RepositoryUserInterface, repositoryNotificationInterface repositoriesNotification.RepositoryNotificationInterface) {
 	// get all users
 
-	users, err := repositoryUserInterface.FindAll(ctx, tx, 99999, 0, "id", "asc")
+	users, _, err := repositoryUserInterface.FindAll(ctx, tx, 99999, 0, "id", "asc", "approve", "")
 	helpers.PanicIfError(err)
 
 	// blast notifications
