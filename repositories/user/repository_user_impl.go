@@ -45,7 +45,7 @@ func (implementation *RepositoryUserImpl) Update(ctx context.Context, tx *sql.Tx
 	return user, nil
 }
 func (implementation *RepositoryUserImpl) Delete(ctx context.Context, tx *sql.Tx, id int) error {
-	query := fmt.Sprintf("DELETE FROM  %s  WHERE id = ?", models.UserTable)
+	query := fmt.Sprintf("UPDATE %s SET deleted_at = NOW() WHERE id = ?", models.UserTable)
 	_, err := tx.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func (implementation *RepositoryUserImpl) Delete(ctx context.Context, tx *sql.Tx
 func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.Tx, id int) (models.User, error) {
 	var user models.User
 
-	query := fmt.Sprintf("SELECT id, nik, name, email, role, password FROM %s WHERE id = ?", models.UserTable)
+	query := fmt.Sprintf("SELECT id, nik, name, email, role, password FROM %s WHERE deleted_at IS NULL AND id = ?", models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, id)
 	if err != nil {
 		return user, err
@@ -106,7 +106,7 @@ func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.T
 
 	query := fmt.Sprintf(`
 		WITH main_table AS (
-			SELECT * FROM %s WHERE 1 = 1 %s %s
+			SELECT * FROM %s WHERE 1 = 1 AND deleted_at IS NULL %s %s
 		)
 		SELECT
 		a.id,

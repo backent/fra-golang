@@ -47,7 +47,7 @@ func (implementation *ControllerUserImpl) Update(w http.ResponseWriter, r *http.
 	helpers.PanicIfError(err)
 	request.Id = id
 
-	ctx := r.Context()
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	createResponse := implementation.ServiceUserInterface.Update(ctx, request)
 
@@ -66,7 +66,7 @@ func (implementation *ControllerUserImpl) Delete(w http.ResponseWriter, r *http.
 	helpers.PanicIfError(err)
 	request.Id = id
 
-	ctx := r.Context()
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	implementation.ServiceUserInterface.Delete(ctx, request)
 
@@ -86,7 +86,7 @@ func (implementation *ControllerUserImpl) FindById(w http.ResponseWriter, r *htt
 	helpers.PanicIfError(err)
 	request.Id = id
 
-	ctx := r.Context()
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
 
 	findByIdResponse := implementation.ServiceUserInterface.FindById(ctx, request)
 

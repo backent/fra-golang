@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/backent/fra-golang/exceptions"
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/models"
@@ -132,7 +133,9 @@ func (implementation *ServiceUserImpl) CurrentUser(ctx context.Context, request 
 	implementation.UserMiddleware.CurrentUser(ctx, tx, &request)
 
 	user, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.UserId)
-	helpers.PanicIfError(err)
+	if err != nil {
+		panic(exceptions.NewNotFoundError(err.Error()))
+	}
 
 	return webUser.UserModelToUserResponse(user)
 }
