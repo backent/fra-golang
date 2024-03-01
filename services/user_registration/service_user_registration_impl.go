@@ -3,6 +3,7 @@ package user_registration
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/middlewares"
@@ -61,6 +62,20 @@ func (implementation *ServiceUserRegistrationImpl) Approve(ctx context.Context, 
 
 	_, err = implementation.RepositoryUserRegistrationInterface.Update(ctx, tx, user_registration)
 	helpers.PanicIfError(err)
+
+	go func() {
+		recipient := helpers.RecipientRegistration{
+			Name:    user_registration.Name,
+			Email:   user_registration.Email,
+			Status:  "approved",
+			Subject: "FRA - Registration Approved",
+		}
+
+		err = helpers.SendMail(recipient)
+		if err != nil {
+			log.Println("Error while sending email to :", recipient, err)
+		}
+	}()
 }
 
 func (implementation *ServiceUserRegistrationImpl) Reject(ctx context.Context, request webUserRegistration.UserRegistrationRequestReject) {
@@ -81,6 +96,20 @@ func (implementation *ServiceUserRegistrationImpl) Reject(ctx context.Context, r
 
 	_, err = implementation.RepositoryUserRegistrationInterface.Update(ctx, tx, user_registration)
 	helpers.PanicIfError(err)
+
+	go func() {
+		recipient := helpers.RecipientRegistration{
+			Name:    user_registration.Name,
+			Email:   user_registration.Email,
+			Status:  "rejected",
+			Subject: "FRA - Registration Rejected",
+		}
+		err = helpers.SendMail(recipient)
+		if err != nil {
+			log.Println("Error while sending email to :", recipient, err)
+		}
+	}()
+
 }
 
 func (implementation *ServiceUserRegistrationImpl) FindAll(ctx context.Context, request webUserRegistration.UserRegistrationRequestFindAll) ([]webUserRegistration.UserRegistrationResponse, int) {
