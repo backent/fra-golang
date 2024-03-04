@@ -174,3 +174,51 @@ type DocumentRequestTrackerProduct struct {
 
 type DocumentRequestSummaryDashboard struct {
 }
+
+type DocumentRequestSearchGlobal struct {
+	take           int
+	skip           int
+	orderBy        string
+	orderDirection string
+	QuerySearch    string
+}
+
+func (implementation *DocumentRequestSearchGlobal) SetSkip(skip int) {
+	implementation.skip = skip
+}
+
+func (implementation *DocumentRequestSearchGlobal) SetTake(take int) {
+	implementation.take = take
+}
+
+func (implementation *DocumentRequestSearchGlobal) GetTake() int {
+	return implementation.take
+}
+
+func (implementation *DocumentRequestSearchGlobal) GetSkip() int {
+	return implementation.skip
+}
+
+func (implementation *DocumentRequestSearchGlobal) SetOrderBy(orderBy string) {
+	implementation.orderBy = orderBy
+}
+
+func (implementation *DocumentRequestSearchGlobal) SetOrderDirection(orderDirection string) {
+	implementation.orderDirection = strings.ToUpper(orderDirection)
+}
+
+func (implementation *DocumentRequestSearchGlobal) GetOrderBy() string {
+	// set default order by
+	if implementation.orderBy == "" {
+		return "created_at"
+	}
+	return implementation.orderBy
+}
+
+func (implementation *DocumentRequestSearchGlobal) GetOrderDirection() string {
+	// set default order direction
+	if implementation.orderDirection == "" {
+		return "DESC"
+	}
+	return implementation.orderDirection
+}

@@ -21,15 +21,17 @@ func NewRepositoryDocumentSearchEsImpl() RepositoryDocumentSearchInterface {
 	return &RepositoryDocumentSearchEsImpl{}
 }
 
-func (implementation *RepositoryDocumentSearchEsImpl) SearchByProductName(client *elasticsearch.Client, name string) ([]elastic.DocumentSearchGlobal, error) {
-	query := elastic.GenerateQuery("risk")
+func (implementation *RepositoryDocumentSearchEsImpl) SearchByProductName(client *elasticsearch.Client, name string, take int, skip int) ([]elastic.DocumentSearchGlobal, int, error) {
+	query := elastic.GenerateQuery(name, take, skip)
 	res, err := client.Search(
 		client.Search.WithIndex(elastic.IndexNameDocumentSearchGlobal),
 		client.Search.WithBody(strings.NewReader(query)),
 	)
 
+	var total int
+
 	if err != nil {
-		return nil, err
+		return nil, total, err
 	}
 
 	var responseObj webElastic.Response
@@ -39,12 +41,15 @@ func (implementation *RepositoryDocumentSearchEsImpl) SearchByProductName(client
 	for _, val := range responseObj.HitsData.Hits {
 		doc, err := toReal(val.Source)
 		if err != nil {
-			return nil, err
+			return nil, total, err
 		}
+		doc.Highlight = val.Highlight
 		actualDoc = append(actualDoc, doc)
 	}
 
-	return actualDoc, nil
+	total = responseObj.HitsData.Total.Value
+
+	return actualDoc, total, nil
 
 }
 

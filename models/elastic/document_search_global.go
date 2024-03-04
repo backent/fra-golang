@@ -1,6 +1,7 @@
 package elastic
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/backent/fra-golang/models"
@@ -82,12 +83,13 @@ const IndexNameDocumentSearchGlobalSettings = `
 }`
 
 type DocumentSearchGlobal struct {
-	Id               int                `json:"id"`           // id
-	Uuid             string             `json:"uuid"`         // uuid
-	Action           string             `json:"action"`       // action
-	ProductName      string             `json:"product_name"` // product_name
-	Category         string             `json:"category"`     // category
-	RiskSearchGlobal []RiskSearchGlobal `json:"risk"`         // risk
+	Id               int                    `json:"id"`           // id
+	Uuid             string                 `json:"uuid"`         // uuid
+	Action           string                 `json:"action"`       // action
+	ProductName      string                 `json:"product_name"` // product_name
+	Category         string                 `json:"category"`     // category
+	RiskSearchGlobal []RiskSearchGlobal     `json:"risk"`         // risk
+	Highlight        map[string]interface{} `json:"highlight"`    // highlight
 }
 
 type RiskSearchGlobal struct {
@@ -156,15 +158,44 @@ func BulkModelRiskToIndexRiskSearchGlobal(risks []models.Risk) []RiskSearchGloba
 	return bulk
 }
 
-func GenerateQuery(query string) string {
+func GenerateQuery(query string, take int, skip int) string {
 	return strings.ReplaceAll(`{
+		"size": `+strconv.Itoa(take)+`,
+		"from": `+strconv.Itoa(skip)+`,
+		"highlight": {
+			"pre_tags": ["<span class='highlight'>"],
+			"post_tags": ["</span>"],
+			"fields": {
+				"product_name": {},
+				"risk.risk_name": { "fragment_size": 20 },
+				"risk.fraud_schema": { "fragment_size": 20 },
+				"risk.fraud_motive": { "fragment_size": 20 },
+				"risk.fraud_technique": { "fragment_size": 20 },
+				"risk.risk_source": { "fragment_size": 20 },
+				"risk.root_cause": { "fragment_size": 20 },
+				"risk.bispro_control_procedure": { "fragment_size": 20 },
+				"risk.qualitative_impact": { "fragment_size": 20 },
+				"risk.likehood_justification": { "fragment_size": 20 },
+				"risk.impact_justification": { "fragment_size": 20 },
+				"risk.strategy_recomendation": { "fragment_size": 20 }
+			}
+		},
 		"query": {
 			"bool": {
+				"filter": [
+					{
+						"term": {
+							"action": {
+								"value": "approve"
+							}
+						}
+					}
+				],
 				"should": [
 					{
 						"match": {
 							"product_name": {
-								"query": "{{value}}", 
+								"query": "${value}", 
 								"fuzziness": "auto"
 							}
 						}
@@ -178,7 +209,87 @@ func GenerateQuery(query string) string {
 										{
 											"match": {
 												"risk.risk_name": {
-													"query": "{{value}}",
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.fraud_schema": {
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.fraud_motive": {
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.fraud_technique": {
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.risk_source": {
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.root_cause": {
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.bispro_control_procedure": {
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.qualitative_impact": {
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.likehood_justification": {
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.impact_justification": {
+													"query": "${value}",
+													"fuzziness": "auto"
+												}
+											}
+										},
+										{
+											"match": {
+												"risk.strategy_recomendation": {
+													"query": "${value}",
 													"fuzziness": "auto"
 												}
 											}
@@ -188,8 +299,9 @@ func GenerateQuery(query string) string {
 							}
 						}
 					}
-				]
+				],
+				"minimum_should_match": 1
 			}
 		}
-	}`, "{{value}}", query)
+	}`, "${value}", query)
 }

@@ -28,10 +28,11 @@ type Hits struct {
 }
 
 type Hit struct {
-	ID     string                 `json:"_id"`
-	Index  string                 `json:"_index"`
-	Score  float64                `json:"_score"`
-	Source map[string]interface{} `json:"_source"`
+	ID        string                 `json:"_id"`
+	Index     string                 `json:"_index"`
+	Score     float64                `json:"_score"`
+	Source    map[string]interface{} `json:"_source"`
+	Highlight map[string]interface{} `json:"highlight"`
 }
 
 type Shards struct {

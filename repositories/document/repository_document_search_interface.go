@@ -7,6 +7,6 @@ import (
 )
 
 type RepositoryDocumentSearchInterface interface {
-	SearchByProductName(client *elasticsearch.Client, name string) ([]elastic.DocumentSearchGlobal, error)
+	SearchByProductName(client *elasticsearch.Client, name string, take int, skip int) ([]elastic.DocumentSearchGlobal, int, error)
 	IndexProduct(client *elasticsearch.Client, document models.Document) error
 }

@@ -273,3 +273,33 @@ func (implementation *ControllerDocumentImpl) SummaryDashboard(w http.ResponseWr
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerDocumentImpl) SearchGlobal(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webDocument.DocumentRequestSearchGlobal
+
+	if r.URL.Query().Has("search") {
+		request.QuerySearch = r.URL.Query().Get("search")
+	}
+
+	web.SetPagination(&request, r)
+	web.SetOrder(&request, r)
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	documents, total := implementation.ServiceDocumentInterface.SearchGlobal(ctx, request)
+	pagination := web.Pagination{
+		Take:  request.GetTake(),
+		Skip:  request.GetSkip(),
+		Total: total,
+	}
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   documents,
+		Extras: pagination,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}

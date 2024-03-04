@@ -17,7 +17,7 @@ func TestElastic(t *testing.T) {
 	helpers.PanicIfError(err)
 	client := libs.NewElastic()
 	repository := document.NewRepositoryDocumentSearchEsImpl()
-	repository.SearchByProductName(client, "test")
+	repository.SearchByProductName(client, "test", 10, 0)
 
 	elapsed := time.Since(start)
 	fmt.Println("Time take :", elapsed)

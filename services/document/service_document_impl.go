@@ -9,11 +9,13 @@ import (
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/models"
+	"github.com/backent/fra-golang/models/elastic"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
 	repositoriesNotification "github.com/backent/fra-golang/repositories/notification"
 	repositoriesRejectNote "github.com/backent/fra-golang/repositories/rejectnote"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
+	"github.com/backent/fra-golang/web/document"
 	webDocument "github.com/backent/fra-golang/web/document"
 	"github.com/elastic/go-elasticsearch/v8"
 )
@@ -362,4 +364,21 @@ func (implementation *ServiceDocumentImpl) SummaryDashboard(ctx context.Context,
 	}
 
 	return summary
+}
+
+func (implementation *ServiceDocumentImpl) SearchGlobal(ctx context.Context, request document.DocumentRequestSearchGlobal) ([]elastic.DocumentSearchGlobal, int) {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.DocumentMiddleware.SearchGlobal(ctx, tx, &request)
+
+	docs, total, err := implementation.RepositoryDocumentSearchInterface.SearchByProductName(implementation.EsClient, request.QuerySearch, request.GetTake(), request.GetSkip())
+	helpers.PanicIfError(err)
+
+	if total == 0 {
+		return []elastic.DocumentSearchGlobal{}, total
+	}
+
+	return docs, total
 }

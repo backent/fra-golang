@@ -194,3 +194,7 @@ func (implementation *DocumentMiddleware) TrackerProduct(ctx context.Context, tx
 func (implementation *DocumentMiddleware) SummaryDashboard(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestSummaryDashboard) {
 	ValidateToken(ctx, implementation.RepositoryAuthInterface)
 }
+
+func (implementation *DocumentMiddleware) SearchGlobal(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestSearchGlobal) {
+	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+}

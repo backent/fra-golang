@@ -3,6 +3,7 @@ package document
 import (
 	"context"
 
+	"github.com/backent/fra-golang/models/elastic"
 	"github.com/backent/fra-golang/web/document"
 )
 
@@ -19,4 +20,5 @@ type ServiceDocumentInterface interface {
 	MonitoringList(ctx context.Context, request document.DocumentRequestMonitoringList) ([]document.DocumentResponse, int)
 	TrackerProduct(ctx context.Context, request document.DocumentRequestTrackerProduct) []document.DocumentTrackerProduct
 	SummaryDashboard(ctx context.Context, request document.DocumentRequestSummaryDashboard) document.DocumentResponseSummaryDashboard
+	SearchGlobal(ctx context.Context, request document.DocumentRequestSearchGlobal) ([]elastic.DocumentSearchGlobal, int)
 }
