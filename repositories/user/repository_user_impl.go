@@ -146,7 +146,7 @@ func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.T
 func (implementation *RepositoryUserImpl) FindByNik(ctx context.Context, tx *sql.Tx, nik string) (models.User, error) {
 	var user models.User
 
-	query := fmt.Sprintf("SELECT id, nik, name, role, password, apply_status FROM %s WHERE nik = ?", models.UserTable)
+	query := fmt.Sprintf("SELECT id, nik, name, role, password, apply_status FROM %s WHERE nik = ? AND deleted_at IS NULL", models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, nik)
 	if err != nil {
 		return user, err
