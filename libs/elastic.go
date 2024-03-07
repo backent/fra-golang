@@ -30,8 +30,8 @@ func NewElastic() *elasticsearch.Client {
 	}
 
 	address := []string{"https://localhost:9200"}
-	username := "elastic"
-	password := "adminlocal123"
+	username := os.Getenv("ELASTIC_USERNAME")
+	password := os.Getenv("ELASTIC_PASSWORD")
 	client, err := elasticsearch.NewClient(elasticsearch.Config{Addresses: address, Username: username, Password: password, Transport: &http.Transport{TLSClientConfig: tlsConfig}})
 	helpers.PanicIfError(err)
 
