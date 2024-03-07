@@ -32,12 +32,8 @@ env GOOS=linux GOARCH=amd64 go build .
 ```
 
 Build commands
-ensure you change directory to "commands"
+Build some command
 ```bash
-cd ./commands
-```
-and then build
-```bash
-env GOOS=linux GOARCH=amd64 go build .
+env GOOS=linux GOARCH=amd64 go build -o ./commands/exec/ ./commands/script/elastic_reindex_all.go
 ```
 
