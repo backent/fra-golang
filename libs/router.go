@@ -2,6 +2,7 @@ package libs
 
 import (
 	controllersAuth "github.com/backent/fra-golang/controllers/auth"
+	controllersDashboard "github.com/backent/fra-golang/controllers/dashboard"
 	controllersDocument "github.com/backent/fra-golang/controllers/document"
 	controllersNotification "github.com/backent/fra-golang/controllers/notification"
 	controllersRisk "github.com/backent/fra-golang/controllers/risk"
@@ -18,6 +19,7 @@ func NewRouter(
 	controllersDocument controllersDocument.ControllerDocumentInterface,
 	controllersNotification controllersNotification.ControllerNotificationInterface,
 	controllersUserRegistration controllersUserRegistration.ControllerUserRegistrationInterface,
+	controllersDashboard controllersDashboard.ControllerDashboardInterface,
 ) *httprouter.Router {
 	router := httprouter.New()
 
@@ -49,7 +51,6 @@ func NewRouter(
 
 	router.GET("/documents-monitoring", controllersDocument.MonitoringList)
 	router.GET("/documents-tracker/:name", controllersDocument.TrackerProduct)
-	router.GET("/documents-dashboard-summary", controllersDocument.SummaryDashboard)
 	router.GET("/documents-search-global", controllersDocument.SearchGlobal)
 
 	router.GET("/notifications", controllersNotification.FindAll)
@@ -59,6 +60,8 @@ func NewRouter(
 	router.POST("/user-registrations/approve", controllersUserRegistration.Approve)
 	router.POST("/user-registrations/reject", controllersUserRegistration.Reject)
 	router.GET("/user-registrations", controllersUserRegistration.FindAll)
+
+	router.GET("/dashboards", controllersDashboard.Summary)
 
 	router.PanicHandler = exceptions.RouterPanicHandler
 	return router

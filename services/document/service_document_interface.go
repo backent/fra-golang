@@ -19,6 +19,5 @@ type ServiceDocumentInterface interface {
 	Reject(ctx context.Context, request document.DocumentRequestReject)
 	MonitoringList(ctx context.Context, request document.DocumentRequestMonitoringList) ([]document.DocumentResponse, int)
 	TrackerProduct(ctx context.Context, request document.DocumentRequestTrackerProduct) []document.DocumentTrackerProduct
-	SummaryDashboard(ctx context.Context, request document.DocumentRequestSummaryDashboard) document.DocumentResponseSummaryDashboard
 	SearchGlobal(ctx context.Context, request document.DocumentRequestSearchGlobal) ([]elastic.DocumentSearchGlobal, int)
 }

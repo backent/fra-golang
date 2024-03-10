@@ -5,6 +5,7 @@ package injector
 
 import (
 	controllersAuth "github.com/backent/fra-golang/controllers/auth"
+	controllersDashboard "github.com/backent/fra-golang/controllers/dashboard"
 	controllersDocument "github.com/backent/fra-golang/controllers/document"
 	controllersNotification "github.com/backent/fra-golang/controllers/notification"
 	controllersRisk "github.com/backent/fra-golang/controllers/risk"
@@ -20,6 +21,7 @@ import (
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	repositoriesUserRegistration "github.com/backent/fra-golang/repositories/user_registration"
 	servicesAuth "github.com/backent/fra-golang/services/auth"
+	servicesDashboard "github.com/backent/fra-golang/services/dashboard"
 	servicesDocument "github.com/backent/fra-golang/services/document"
 	servicesNotification "github.com/backent/fra-golang/services/notification"
 	servicesRisk "github.com/backent/fra-golang/services/risk"
@@ -76,6 +78,12 @@ var UserRegistrationSet = wire.NewSet(
 	middlewares.NewUserRegistrationMiddleware,
 )
 
+var DashboardSet = wire.NewSet(
+	controllersDashboard.NewControllerDashboardImpl,
+	servicesDashboard.NewServiceDashboardImpl,
+	middlewares.NewDashboardMiddleware,
+)
+
 func InitializeRouter() *httprouter.Router {
 	wire.Build(
 		libs.NewDatabase,
@@ -89,6 +97,7 @@ func InitializeRouter() *httprouter.Router {
 		RejectNoteSet,
 		NotificationSet,
 		UserRegistrationSet,
+		DashboardSet,
 	)
 
 	return nil

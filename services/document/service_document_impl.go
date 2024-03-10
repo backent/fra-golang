@@ -337,35 +337,6 @@ func blastNotification(ctx context.Context, tx *sql.Tx, document models.Document
 	}
 }
 
-func (implementation *ServiceDocumentImpl) SummaryDashboard(ctx context.Context, request webDocument.DocumentRequestSummaryDashboard) webDocument.DocumentResponseSummaryDashboard {
-	tx, err := implementation.DB.Begin()
-	helpers.PanicIfError(err)
-	defer helpers.CommitOrRollback(tx)
-
-	implementation.DocumentMiddleware.SummaryDashboard(ctx, tx, &request)
-	helpers.PanicIfError(err)
-
-	documents, err := implementation.RepositoryDocumentInterface.GetProductCurrentYear(ctx, tx)
-	helpers.PanicIfError(err)
-
-	var summary webDocument.DocumentResponseSummaryDashboard
-	for _, data := range documents {
-		switch data.Action {
-		case "approve":
-			summary.SummaryAssessment.Release++
-		case "reject":
-			summary.SummaryAssessment.Return++
-		case "submit":
-			summary.SummaryAssessment.Received++
-		case "update":
-			summary.SummaryAssessment.Received++
-		}
-		summary.SummaryAssessment.Total++
-	}
-
-	return summary
-}
-
 func (implementation *ServiceDocumentImpl) SearchGlobal(ctx context.Context, request document.DocumentRequestSearchGlobal) ([]elastic.DocumentSearchGlobal, int) {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)

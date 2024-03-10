@@ -8,6 +8,7 @@ package injector
 
 import (
 	auth3 "github.com/backent/fra-golang/controllers/auth"
+	dashboard2 "github.com/backent/fra-golang/controllers/dashboard"
 	document3 "github.com/backent/fra-golang/controllers/document"
 	notification3 "github.com/backent/fra-golang/controllers/notification"
 	risk3 "github.com/backent/fra-golang/controllers/risk"
@@ -23,6 +24,7 @@ import (
 	"github.com/backent/fra-golang/repositories/user"
 	"github.com/backent/fra-golang/repositories/user_registration"
 	auth2 "github.com/backent/fra-golang/services/auth"
+	"github.com/backent/fra-golang/services/dashboard"
 	document2 "github.com/backent/fra-golang/services/document"
 	notification2 "github.com/backent/fra-golang/services/notification"
 	risk2 "github.com/backent/fra-golang/services/risk"
@@ -64,7 +66,10 @@ func InitializeRouter() *httprouter.Router {
 	userRegistrationMiddleware := middlewares.NewUserRegistrationMiddleware(validate, repositoryUserRegistrationInterface, repositoryAuthInterface, repositoryUserInterface)
 	serviceUserRegistrationInterface := user_registration2.NewServiceUserRegistrationImpl(db, repositoryUserRegistrationInterface, userRegistrationMiddleware)
 	controllerUserRegistrationInterface := user_registration3.NewControllerUserRegistrationImpl(serviceUserRegistrationInterface)
-	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface, controllerDocumentInterface, controllerNotificationInterface, controllerUserRegistrationInterface)
+	dashboardMiddleware := middlewares.NewDashboardMiddleware(validate, repositoryAuthInterface, repositoryUserInterface)
+	serviceDashboardInterface := dashboard.NewServiceDashboardImpl(db, repositoryUserInterface, repositoryDocumentInterface, dashboardMiddleware)
+	controllerDashboardInterface := dashboard2.NewControllerDashboardImpl(serviceDashboardInterface)
+	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface, controllerDocumentInterface, controllerNotificationInterface, controllerUserRegistrationInterface, controllerDashboardInterface)
 	return router
 }
 
@@ -83,3 +88,5 @@ var AuthSet = wire.NewSet(auth3.NewControllerAuthImpl, auth2.NewServiceAuthImpl,
 var RejectNoteSet = wire.NewSet(rejectnote.NewRepositoryRejectNote)
 
 var UserRegistrationSet = wire.NewSet(user_registration3.NewControllerUserRegistrationImpl, user_registration2.NewServiceUserRegistrationImpl, user_registration.NewRepositoryUserRegistrationImpl, middlewares.NewUserRegistrationMiddleware)
+
+var DashboardSet = wire.NewSet(dashboard2.NewControllerDashboardImpl, dashboard.NewServiceDashboardImpl, middlewares.NewDashboardMiddleware)
