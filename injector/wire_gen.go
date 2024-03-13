@@ -10,6 +10,7 @@ import (
 	auth3 "github.com/backent/fra-golang/controllers/auth"
 	dashboard2 "github.com/backent/fra-golang/controllers/dashboard"
 	document3 "github.com/backent/fra-golang/controllers/document"
+	document_tracker3 "github.com/backent/fra-golang/controllers/document_tracker"
 	notification3 "github.com/backent/fra-golang/controllers/notification"
 	risk3 "github.com/backent/fra-golang/controllers/risk"
 	user3 "github.com/backent/fra-golang/controllers/user"
@@ -18,6 +19,7 @@ import (
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/repositories/auth"
 	"github.com/backent/fra-golang/repositories/document"
+	"github.com/backent/fra-golang/repositories/document_tracker"
 	"github.com/backent/fra-golang/repositories/notification"
 	"github.com/backent/fra-golang/repositories/rejectnote"
 	"github.com/backent/fra-golang/repositories/risk"
@@ -26,6 +28,7 @@ import (
 	auth2 "github.com/backent/fra-golang/services/auth"
 	"github.com/backent/fra-golang/services/dashboard"
 	document2 "github.com/backent/fra-golang/services/document"
+	document_tracker2 "github.com/backent/fra-golang/services/document_tracker"
 	notification2 "github.com/backent/fra-golang/services/notification"
 	risk2 "github.com/backent/fra-golang/services/risk"
 	user2 "github.com/backent/fra-golang/services/user"
@@ -57,7 +60,8 @@ func InitializeRouter() *httprouter.Router {
 	repositoryRejectNoteInterface := rejectnote.NewRepositoryRejectNote()
 	repositoryNotificationInterface := notification.NewRepositoryNotificationImpl()
 	repositoryDocumentSearchInterface := document.NewRepositoryDocumentSearchEsImpl()
-	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, client, repositoryDocumentInterface, documentMiddleware, repositoryRiskInterface, repositoryRejectNoteInterface, repositoryUserInterface, repositoryNotificationInterface, repositoryDocumentSearchInterface)
+	repositoryDocumentTrackerInterface := document_tracker.NewRepositoryDocumentTrackerImpl()
+	serviceDocumentInterface := document2.NewServiceDocumentImpl(db, client, repositoryDocumentInterface, documentMiddleware, repositoryRiskInterface, repositoryRejectNoteInterface, repositoryUserInterface, repositoryNotificationInterface, repositoryDocumentSearchInterface, repositoryDocumentTrackerInterface)
 	controllerDocumentInterface := document3.NewControllerDocumentImpl(serviceDocumentInterface)
 	notificationMiddleware := middlewares.NewNotificationMiddleware(validate, repositoryNotificationInterface, repositoryAuthInterface, repositoryUserInterface, repositoryRiskInterface)
 	serviceNotificationInterface := notification2.NewServiceNotificationImpl(db, repositoryNotificationInterface, notificationMiddleware, repositoryRiskInterface, repositoryRejectNoteInterface)
@@ -69,7 +73,10 @@ func InitializeRouter() *httprouter.Router {
 	dashboardMiddleware := middlewares.NewDashboardMiddleware(validate, repositoryAuthInterface, repositoryUserInterface)
 	serviceDashboardInterface := dashboard.NewServiceDashboardImpl(db, repositoryUserInterface, repositoryDocumentInterface, dashboardMiddleware)
 	controllerDashboardInterface := dashboard2.NewControllerDashboardImpl(serviceDashboardInterface)
-	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface, controllerDocumentInterface, controllerNotificationInterface, controllerUserRegistrationInterface, controllerDashboardInterface)
+	documentTrackerMiddleware := middlewares.NewDocumentTrackerMiddleware(validate, repositoryDocumentInterface, repositoryAuthInterface)
+	serviceDocumentTrackerInterface := document_tracker2.NewServiceDocumentTrackerImpl(db, repositoryDocumentTrackerInterface, documentTrackerMiddleware)
+	controllerDocumentTrackerInterface := document_tracker3.NewControllerDocumentTrackerImpl(serviceDocumentTrackerInterface)
+	router := libs.NewRouter(controllerUserInterface, controllerRiskInterface, controllerAuthInterface, controllerDocumentInterface, controllerNotificationInterface, controllerUserRegistrationInterface, controllerDashboardInterface, controllerDocumentTrackerInterface)
 	return router
 }
 
@@ -80,6 +87,8 @@ var UserSet = wire.NewSet(user3.NewControllerUserImpl, user2.NewServiceUserImpl,
 var RiskSet = wire.NewSet(risk3.NewControllerRiskImpl, risk2.NewServiceRiskImpl, risk.NewRepositoryRiskImpl, middlewares.NewRiskMiddleware)
 
 var DocumentSet = wire.NewSet(document3.NewControllerDocumentImpl, document2.NewServiceDocumentImpl, document.NewRepositoryDocumentImpl, document.NewRepositoryDocumentSearchEsImpl, middlewares.NewDocumentMiddleware)
+
+var DocumentTrackerSet = wire.NewSet(document_tracker3.NewControllerDocumentTrackerImpl, document_tracker2.NewServiceDocumentTrackerImpl, document_tracker.NewRepositoryDocumentTrackerImpl, middlewares.NewDocumentTrackerMiddleware)
 
 var NotificationSet = wire.NewSet(notification3.NewControllerNotificationImpl, notification2.NewServiceNotificationImpl, notification.NewRepositoryNotificationImpl, middlewares.NewNotificationMiddleware)
 

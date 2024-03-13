@@ -7,6 +7,7 @@ import (
 	controllersAuth "github.com/backent/fra-golang/controllers/auth"
 	controllersDashboard "github.com/backent/fra-golang/controllers/dashboard"
 	controllersDocument "github.com/backent/fra-golang/controllers/document"
+	controllersDocumentTracker "github.com/backent/fra-golang/controllers/document_tracker"
 	controllersNotification "github.com/backent/fra-golang/controllers/notification"
 	controllersRisk "github.com/backent/fra-golang/controllers/risk"
 	controllersUser "github.com/backent/fra-golang/controllers/user"
@@ -15,6 +16,7 @@ import (
 	"github.com/backent/fra-golang/middlewares"
 	repositoriesAuth "github.com/backent/fra-golang/repositories/auth"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
+	repositoriesDocumentTracker "github.com/backent/fra-golang/repositories/document_tracker"
 	repositoriesNotification "github.com/backent/fra-golang/repositories/notification"
 	repositoriesRejectNote "github.com/backent/fra-golang/repositories/rejectnote"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
@@ -23,6 +25,7 @@ import (
 	servicesAuth "github.com/backent/fra-golang/services/auth"
 	servicesDashboard "github.com/backent/fra-golang/services/dashboard"
 	servicesDocument "github.com/backent/fra-golang/services/document"
+	servicesDocumentTracker "github.com/backent/fra-golang/services/document_tracker"
 	servicesNotification "github.com/backent/fra-golang/services/notification"
 	servicesRisk "github.com/backent/fra-golang/services/risk"
 	servicesUser "github.com/backent/fra-golang/services/user"
@@ -51,6 +54,13 @@ var DocumentSet = wire.NewSet(
 	repositoriesDocument.NewRepositoryDocumentImpl,
 	repositoriesDocument.NewRepositoryDocumentSearchEsImpl,
 	middlewares.NewDocumentMiddleware,
+)
+
+var DocumentTrackerSet = wire.NewSet(
+	controllersDocumentTracker.NewControllerDocumentTrackerImpl,
+	servicesDocumentTracker.NewServiceDocumentTrackerImpl,
+	repositoriesDocumentTracker.NewRepositoryDocumentTrackerImpl,
+	middlewares.NewDocumentTrackerMiddleware,
 )
 
 var NotificationSet = wire.NewSet(
@@ -94,6 +104,7 @@ func InitializeRouter() *httprouter.Router {
 		RiskSet,
 		AuthSet,
 		DocumentSet,
+		DocumentTrackerSet,
 		RejectNoteSet,
 		NotificationSet,
 		UserRegistrationSet,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/backent/fra-golang/config"
 	"github.com/backent/fra-golang/helpers"
@@ -11,11 +12,11 @@ import (
 	"github.com/backent/fra-golang/models"
 	"github.com/backent/fra-golang/models/elastic"
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
+	repositoriesDocumentTracker "github.com/backent/fra-golang/repositories/document_tracker"
 	repositoriesNotification "github.com/backent/fra-golang/repositories/notification"
 	repositoriesRejectNote "github.com/backent/fra-golang/repositories/rejectnote"
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
-	"github.com/backent/fra-golang/web/document"
 	webDocument "github.com/backent/fra-golang/web/document"
 	"github.com/elastic/go-elasticsearch/v8"
 )
@@ -30,6 +31,7 @@ type ServiceDocumentImpl struct {
 	repositoriesUser.RepositoryUserInterface
 	repositoriesNotification.RepositoryNotificationInterface
 	repositoriesDocument.RepositoryDocumentSearchInterface
+	repositoriesDocumentTracker.RepositoryDocumentTrackerInterface
 }
 
 func NewServiceDocumentImpl(
@@ -42,17 +44,19 @@ func NewServiceDocumentImpl(
 	repositoriesUser repositoriesUser.RepositoryUserInterface,
 	repositoriesNotification repositoriesNotification.RepositoryNotificationInterface,
 	repositoriesDocumentSearch repositoriesDocument.RepositoryDocumentSearchInterface,
+	repositoriesDocumentTracker repositoriesDocumentTracker.RepositoryDocumentTrackerInterface,
 ) ServiceDocumentInterface {
 	return &ServiceDocumentImpl{
-		DB:                                db,
-		EsClient:                          esClient,
-		RepositoryDocumentInterface:       repositoriesDocument,
-		DocumentMiddleware:                documentMiddleware,
-		RepositoryRiskInterface:           repositoriesRisk,
-		RepositoryRejectNoteInterface:     repositoriesRejectNote,
-		RepositoryUserInterface:           repositoriesUser,
-		RepositoryNotificationInterface:   repositoriesNotification,
-		RepositoryDocumentSearchInterface: repositoriesDocumentSearch,
+		DB:                                 db,
+		EsClient:                           esClient,
+		RepositoryDocumentInterface:        repositoriesDocument,
+		DocumentMiddleware:                 documentMiddleware,
+		RepositoryRiskInterface:            repositoriesRisk,
+		RepositoryRejectNoteInterface:      repositoriesRejectNote,
+		RepositoryUserInterface:            repositoriesUser,
+		RepositoryNotificationInterface:    repositoriesNotification,
+		RepositoryDocumentSearchInterface:  repositoriesDocumentSearch,
+		RepositoryDocumentTrackerInterface: repositoriesDocumentTracker,
 	}
 }
 
@@ -61,9 +65,42 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
 
+	// check first if it is new document
+	isNewDocument := request.Uuid == ""
+
 	implementation.DocumentMiddleware.Create(ctx, tx, &request)
 
-	document := models.Document{
+	trackerChan := make(chan error)
+	documentChan := make(chan error)
+
+	if isNewDocument {
+		go func() {
+			defer close(trackerChan)
+			err = implementation.RepositoryDocumentTrackerInterface.Create(ctx, tx, request.Uuid, time.Now())
+			trackerChan <- err
+		}()
+	} else {
+		close(trackerChan)
+	}
+
+	var document models.Document
+
+	go func() {
+		defer close(documentChan)
+		document, err = createDocumentAndRisk(ctx, tx, implementation, request)
+		documentChan <- err
+	}()
+	helpers.PanicIfError(<-trackerChan)
+	helpers.PanicIfError(<-documentChan)
+
+	blastNotification(ctx, tx, document, implementation.RepositoryUserInterface, implementation.RepositoryNotificationInterface)
+
+	return webDocument.DocumentModelToDocumentResponse(document)
+}
+
+func createDocumentAndRisk(ctx context.Context, tx *sql.Tx, implementation *ServiceDocumentImpl, request webDocument.DocumentRequestCreate) (models.Document, error) {
+	var document models.Document
+	document = models.Document{
 		Uuid:        request.Uuid,
 		CreatedBy:   request.CreatedBy,
 		ActionBy:    request.ActionBy,
@@ -72,8 +109,10 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 		Category:    request.Category,
 	}
 
-	document, err = implementation.RepositoryDocumentInterface.Create(ctx, tx, document)
-	helpers.PanicIfError(err)
+	document, err := implementation.RepositoryDocumentInterface.Create(ctx, tx, document)
+	if err != nil {
+		return document, err
+	}
 
 	for _, riskRequest := range request.Risks {
 		risk := models.Risk{
@@ -96,7 +135,9 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 		}
 
 		_, err = implementation.RepositoryRiskInterface.Create(ctx, tx, risk)
-		helpers.PanicIfError(err)
+		if err != nil {
+			return document, err
+		}
 		document.RiskDetail = append(document.RiskDetail, risk)
 	}
 
@@ -105,10 +146,9 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 		log.Println(err)
 	}
 
-	blastNotification(ctx, tx, document, implementation.RepositoryUserInterface, implementation.RepositoryNotificationInterface)
-
-	return webDocument.DocumentModelToDocumentResponse(document)
+	return document, nil
 }
+
 func (implementation *ServiceDocumentImpl) Update(ctx context.Context, request webDocument.DocumentRequestUpdate) webDocument.DocumentResponse {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
@@ -337,7 +377,7 @@ func blastNotification(ctx context.Context, tx *sql.Tx, document models.Document
 	}
 }
 
-func (implementation *ServiceDocumentImpl) SearchGlobal(ctx context.Context, request document.DocumentRequestSearchGlobal) ([]elastic.DocumentSearchGlobal, int) {
+func (implementation *ServiceDocumentImpl) SearchGlobal(ctx context.Context, request webDocument.DocumentRequestSearchGlobal) ([]elastic.DocumentSearchGlobal, int) {
 	tx, err := implementation.DB.Begin()
 	helpers.PanicIfError(err)
 	defer helpers.CommitOrRollback(tx)
