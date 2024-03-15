@@ -9,7 +9,7 @@ type DocumentTracker struct {
 	SearchedCount     int
 	DocumentCreatedAt time.Time
 
-	DocumentDetail []Document
+	DocumentDetail Document
 }
 
 var DocumentTrackerTable string = "documents_tracker"

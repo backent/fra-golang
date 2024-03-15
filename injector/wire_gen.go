@@ -71,7 +71,7 @@ func InitializeRouter() *httprouter.Router {
 	serviceUserRegistrationInterface := user_registration2.NewServiceUserRegistrationImpl(db, repositoryUserRegistrationInterface, userRegistrationMiddleware)
 	controllerUserRegistrationInterface := user_registration3.NewControllerUserRegistrationImpl(serviceUserRegistrationInterface)
 	dashboardMiddleware := middlewares.NewDashboardMiddleware(validate, repositoryAuthInterface, repositoryUserInterface)
-	serviceDashboardInterface := dashboard.NewServiceDashboardImpl(db, repositoryUserInterface, repositoryDocumentInterface, dashboardMiddleware)
+	serviceDashboardInterface := dashboard.NewServiceDashboardImpl(db, repositoryUserInterface, repositoryDocumentInterface, repositoryDocumentTrackerInterface, dashboardMiddleware)
 	controllerDashboardInterface := dashboard2.NewControllerDashboardImpl(serviceDashboardInterface)
 	documentTrackerMiddleware := middlewares.NewDocumentTrackerMiddleware(validate, repositoryDocumentInterface, repositoryAuthInterface)
 	serviceDocumentTrackerInterface := document_tracker2.NewServiceDocumentTrackerImpl(db, repositoryDocumentTrackerInterface, documentTrackerMiddleware)

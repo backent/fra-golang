@@ -4,10 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"strconv"
-	"time"
 
-	"github.com/backent/fra-golang/helpers"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -25,18 +22,18 @@ func NewDatabase() *sql.DB {
 		panic(err)
 	}
 
-	DB_CONN_MAX_LIFETIME_IN_SEC, err := strconv.Atoi(os.Getenv("DB_CONN_MAX_LIFETIME_IN_SEC"))
-	helpers.PanicIfError(err)
+	// DB_CONN_MAX_LIFETIME_IN_SEC, err := strconv.Atoi(os.Getenv("DB_CONN_MAX_LIFETIME_IN_SEC"))
+	// helpers.PanicIfError(err)
 
-	DB_MAX_OPEN_CONNECTIONS, err := strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNECTIONS"))
-	helpers.PanicIfError(err)
+	// DB_MAX_OPEN_CONNECTIONS, err := strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNECTIONS"))
+	// helpers.PanicIfError(err)
 
-	DB_MAX_IDLE_CONNECTIONS, err := strconv.Atoi(os.Getenv("DB_MAX_IDLE_CONNECTIONS"))
-	helpers.PanicIfError(err)
+	// DB_MAX_IDLE_CONNECTIONS, err := strconv.Atoi(os.Getenv("DB_MAX_IDLE_CONNECTIONS"))
+	// helpers.PanicIfError(err)
 
-	db.SetConnMaxLifetime(time.Second * time.Duration(DB_CONN_MAX_LIFETIME_IN_SEC))
-	db.SetMaxOpenConns(DB_MAX_OPEN_CONNECTIONS)
-	db.SetMaxIdleConns(DB_MAX_IDLE_CONNECTIONS)
+	// db.SetConnMaxLifetime(time.Second * time.Duration(DB_CONN_MAX_LIFETIME_IN_SEC))
+	// db.SetMaxOpenConns(DB_MAX_OPEN_CONNECTIONS)
+	// db.SetMaxIdleConns(DB_MAX_IDLE_CONNECTIONS)
 
 	return db
 }
