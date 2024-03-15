@@ -71,6 +71,10 @@ func LoginLdap(username string, password string) (string, error) {
 	decoder := json.NewDecoder(res.Body)
 	decoder.Decode(&response)
 
+	if response.Data.Jwt.Token == "" {
+		return "", errors.New("ldap authorization failed")
+	}
+
 	return response.Data.Jwt.Token, nil
 }
 

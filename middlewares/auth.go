@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/backent/fra-golang/exceptions"
 	"github.com/backent/fra-golang/helpers"
@@ -45,7 +46,10 @@ func (implementation *AuthMiddleware) Login(ctx context.Context, tx *sql.Tx, req
 
 	go func() {
 		token, err := helpers.LoginLdap("402746", request.Password)
-		chanLdapValid <- err != nil || token != ""
+		if err != nil {
+			log.Println("login ldap error : ", err)
+		}
+		chanLdapValid <- token != ""
 		close(chanLdapValid)
 	}()
 
