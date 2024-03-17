@@ -3,6 +3,7 @@ package libs
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -14,8 +15,9 @@ func NewDatabase() *sql.DB {
 	MYSQL_USER := os.Getenv("MYSQL_USER")
 	MYSQL_PASSWORD := os.Getenv("MYSQL_PASSWORD")
 	MYSQL_DATABASE := os.Getenv("MYSQL_DATABASE")
+	TIMEZONE := url.QueryEscape(os.Getenv("TIMEZONE"))
 
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE)
+	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=%s", MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE, TIMEZONE)
 
 	db, err := sql.Open("mysql", dataSourceName)
 	if err != nil {

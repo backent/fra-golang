@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/injector"
@@ -13,6 +14,12 @@ import (
 func main() {
 	err := godotenv.Load()
 	helpers.PanicIfError(err)
+
+	TIMEZONE := os.Getenv("TIMEZONE")
+
+	os.Setenv("TZ", TIMEZONE)
+	// Load the timezone
+	time.LoadLocation(TIMEZONE)
 
 	// client := libs.NewElastic()
 

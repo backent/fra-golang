@@ -28,8 +28,11 @@ func NewRepositoryAuthJWTImpl() RepositoryAuthInterface {
 
 func (implementation *RepositoryAuthJWTImpl) Issue(payload string) (string, error) {
 	// Create the Claims
+
+	remainingTimeBeforeMidnight := calculateRemainingTimeBeforeMidnight(implementation.tokenLifeTime)
+
 	claims := &jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(implementation.tokenLifeTime))),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(remainingTimeBeforeMidnight)),
 		Issuer:    payload,
 	}
 
@@ -66,4 +69,30 @@ func (implementation *RepositoryAuthJWTImpl) Validate(tokenString string) (int, 
 	} else {
 		return 0, false
 	}
+}
+
+func calculateRemainingTimeBeforeMidnight(tokenLifeTime int) time.Duration {
+	// Your token life time in seconds
+
+	// Get the current time
+	now := time.Now()
+
+	// Calculate the end of the day
+	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+
+	// Calculate the remaining duration until the end of the day
+	remainingDuration := endOfDay.Sub(now)
+
+	// Calculate the duration to add (token life time)
+	durationToAdd := time.Second * time.Duration(tokenLifeTime)
+
+	// Take the minimum of remainingDuration and durationToAdd
+	var duration time.Duration
+	if remainingDuration < durationToAdd {
+		duration = remainingDuration
+	} else {
+		duration = durationToAdd
+	}
+
+	return duration
 }
