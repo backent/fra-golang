@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/backent/fra-golang/exceptions"
@@ -31,6 +32,9 @@ func (implementation *AuthMiddleware) Login(ctx context.Context, tx *sql.Tx, req
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
 
+	fmt.Println("START validating login for user : ", request.Username)
+	defer fmt.Println("END validating login for user : ", request.Username)
+
 	user, err := implementation.RepositoryUserInterface.FindByNik(ctx, tx, request.Username)
 	if err != nil || user.ApplyStatus != "approve" {
 		panic(exceptions.NewBadRequestError("username or password is incorrect"))
@@ -45,7 +49,7 @@ func (implementation *AuthMiddleware) Login(ctx context.Context, tx *sql.Tx, req
 	chanLdapValid := make(chan bool)
 
 	go func() {
-		token, err := helpers.LoginLdap("402746", request.Password)
+		token, err := helpers.LoginLdap(request.Username, request.Password)
 		if err != nil {
 			log.Println("login ldap error : ", err)
 		}
