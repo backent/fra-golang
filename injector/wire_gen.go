@@ -25,6 +25,7 @@ import (
 	"github.com/backent/fra-golang/repositories/risk"
 	"github.com/backent/fra-golang/repositories/user"
 	"github.com/backent/fra-golang/repositories/user_registration"
+	"github.com/backent/fra-golang/repositories/users_history_login"
 	auth2 "github.com/backent/fra-golang/services/auth"
 	"github.com/backent/fra-golang/services/dashboard"
 	document2 "github.com/backent/fra-golang/services/document"
@@ -70,8 +71,9 @@ func InitializeRouter() *httprouter.Router {
 	userRegistrationMiddleware := middlewares.NewUserRegistrationMiddleware(validate, repositoryUserRegistrationInterface, repositoryAuthInterface, repositoryUserInterface)
 	serviceUserRegistrationInterface := user_registration2.NewServiceUserRegistrationImpl(db, repositoryUserRegistrationInterface, userRegistrationMiddleware)
 	controllerUserRegistrationInterface := user_registration3.NewControllerUserRegistrationImpl(serviceUserRegistrationInterface)
+	repositoryUserHistoryLoginInterface := users_history_login.NewRepositoryUserHistoryLoginImpl()
 	dashboardMiddleware := middlewares.NewDashboardMiddleware(validate, repositoryAuthInterface, repositoryUserInterface)
-	serviceDashboardInterface := dashboard.NewServiceDashboardImpl(db, repositoryUserInterface, repositoryDocumentInterface, repositoryDocumentTrackerInterface, dashboardMiddleware)
+	serviceDashboardInterface := dashboard.NewServiceDashboardImpl(db, repositoryUserInterface, repositoryDocumentInterface, repositoryDocumentTrackerInterface, repositoryUserHistoryLoginInterface, dashboardMiddleware)
 	controllerDashboardInterface := dashboard2.NewControllerDashboardImpl(serviceDashboardInterface)
 	documentTrackerMiddleware := middlewares.NewDocumentTrackerMiddleware(validate, repositoryDocumentInterface, repositoryAuthInterface)
 	serviceDocumentTrackerInterface := document_tracker2.NewServiceDocumentTrackerImpl(db, repositoryDocumentTrackerInterface, documentTrackerMiddleware)
@@ -97,5 +99,7 @@ var AuthSet = wire.NewSet(auth3.NewControllerAuthImpl, auth2.NewServiceAuthImpl,
 var RejectNoteSet = wire.NewSet(rejectnote.NewRepositoryRejectNote)
 
 var UserRegistrationSet = wire.NewSet(user_registration3.NewControllerUserRegistrationImpl, user_registration2.NewServiceUserRegistrationImpl, user_registration.NewRepositoryUserRegistrationImpl, middlewares.NewUserRegistrationMiddleware)
+
+var UserHistoryLoginSet = wire.NewSet(users_history_login.NewRepositoryUserHistoryLoginImpl)
 
 var DashboardSet = wire.NewSet(dashboard2.NewControllerDashboardImpl, dashboard.NewServiceDashboardImpl, middlewares.NewDashboardMiddleware)

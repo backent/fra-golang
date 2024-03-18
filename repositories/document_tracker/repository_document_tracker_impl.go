@@ -70,7 +70,7 @@ func (implementation *RepositoryDocumentTrackerImpl) FindAll(
 		SELECT * FROM %s WHERE YEAR(document_created_at) = ?
 	),
 	main_table_document AS (
-		SELECT * FROM %s WHERE action != 'approve'
+		SELECT * FROM %s
 	), group_by_uuid AS (
 		SELECT d1.*
 		FROM main_table_document d1
@@ -92,8 +92,9 @@ func (implementation *RepositoryDocumentTrackerImpl) FindAll(
 	 c.category,
 	 b.count
 
-	FROM (SELECT * FROM main_table ORDER BY %s %s LIMIT ?, ? ) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table) b ON true
+	FROM (SELECT * FROM main_table ) a LEFT JOIN (SELECT COUNT(*) as count FROM main_table) b ON true
 	LEFT JOIN main_table_document_after_grouped c ON a.document_uuid = c.uuid
+	WHERE c.action = 'approve' ORDER BY a.%s %s LIMIT ?, ?
 	`, models.DocumentTrackerTable, models.DocumentTable, orderBy, orderDirection)
 
 	rows, err := tx.QueryContext(ctx, query, year, skip, take)

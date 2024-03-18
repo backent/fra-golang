@@ -22,6 +22,7 @@ import (
 	repositoriesRisk "github.com/backent/fra-golang/repositories/risk"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	repositoriesUserRegistration "github.com/backent/fra-golang/repositories/user_registration"
+	repositoriesUserHistoryLogin "github.com/backent/fra-golang/repositories/users_history_login"
 	servicesAuth "github.com/backent/fra-golang/services/auth"
 	servicesDashboard "github.com/backent/fra-golang/services/dashboard"
 	servicesDocument "github.com/backent/fra-golang/services/document"
@@ -88,6 +89,10 @@ var UserRegistrationSet = wire.NewSet(
 	middlewares.NewUserRegistrationMiddleware,
 )
 
+var UserHistoryLoginSet = wire.NewSet(
+	repositoriesUserHistoryLogin.NewRepositoryUserHistoryLoginImpl,
+)
+
 var DashboardSet = wire.NewSet(
 	controllersDashboard.NewControllerDashboardImpl,
 	servicesDashboard.NewServiceDashboardImpl,
@@ -108,6 +113,7 @@ func InitializeRouter() *httprouter.Router {
 		RejectNoteSet,
 		NotificationSet,
 		UserRegistrationSet,
+		UserHistoryLoginSet,
 		DashboardSet,
 	)
 

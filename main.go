@@ -21,16 +21,6 @@ func main() {
 	// Load the timezone
 	time.LoadLocation(TIMEZONE)
 
-	// client := libs.NewElastic()
-
-	// // Get Elasticsearch info
-
-	// // Decode response body
-
-	// // Print Elasticsearch info
-
-	// exists := helpers.CheckIndexExists(client, "test_idxaef")
-
 	APP_PORT := os.Getenv("APP_PORT")
 	if APP_PORT == "" {
 		APP_PORT = "8080"

@@ -11,6 +11,7 @@ import (
 	repositoriesDocument "github.com/backent/fra-golang/repositories/document"
 	repositoriesDocumentTracker "github.com/backent/fra-golang/repositories/document_tracker"
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
+	repositoriesUserHistoryLogin "github.com/backent/fra-golang/repositories/users_history_login"
 	webDashboard "github.com/backent/fra-golang/web/dashboard"
 )
 
@@ -19,16 +20,25 @@ type ServiceDashboardImpl struct {
 	repositoriesUser.RepositoryUserInterface
 	repositoriesDocument.RepositoryDocumentInterface
 	repositoriesDocumentTracker.RepositoryDocumentTrackerInterface
+	repositoriesUserHistoryLogin.RepositoryUserHistoryLoginInterface
 	*middlewares.DashboardMiddleware
 }
 
-func NewServiceDashboardImpl(db *sql.DB, repositoriesUser repositoriesUser.RepositoryUserInterface, repositoriesDocument repositoriesDocument.RepositoryDocumentInterface, repositoriesDocumentTracker repositoriesDocumentTracker.RepositoryDocumentTrackerInterface, dashboardMiddleware *middlewares.DashboardMiddleware) ServiceDashboardInterface {
+func NewServiceDashboardImpl(
+	db *sql.DB,
+	repositoriesUser repositoriesUser.RepositoryUserInterface,
+	repositoriesDocument repositoriesDocument.RepositoryDocumentInterface,
+	repositoriesDocumentTracker repositoriesDocumentTracker.RepositoryDocumentTrackerInterface,
+	repositoriesUserHistoryLogin repositoriesUserHistoryLogin.RepositoryUserHistoryLoginInterface,
+	dashboardMiddleware *middlewares.DashboardMiddleware,
+) ServiceDashboardInterface {
 	return &ServiceDashboardImpl{
-		DB:                                 db,
-		RepositoryUserInterface:            repositoriesUser,
-		RepositoryDocumentInterface:        repositoriesDocument,
-		RepositoryDocumentTrackerInterface: repositoriesDocumentTracker,
-		DashboardMiddleware:                dashboardMiddleware,
+		DB:                                  db,
+		RepositoryUserInterface:             repositoriesUser,
+		RepositoryDocumentInterface:         repositoriesDocument,
+		RepositoryDocumentTrackerInterface:  repositoriesDocumentTracker,
+		RepositoryUserHistoryLoginInterface: repositoriesUserHistoryLogin,
+		DashboardMiddleware:                 dashboardMiddleware,
 	}
 }
 
@@ -45,6 +55,7 @@ func (implementation *ServiceDashboardImpl) Summary(ctx context.Context, request
 	chanSummaryAssessmentErr := make(chan error)
 	chanMostViewedErr := make(chan error)
 	chanTopSearchErr := make(chan error)
+	chanUserActiveErr := make(chan error)
 
 	go func() {
 		dashboardResponse.SummaryAssessment, err = getSummaryDocumentAssessment(implementation, ctx, request)
@@ -62,13 +73,20 @@ func (implementation *ServiceDashboardImpl) Summary(ctx context.Context, request
 		chanTopSearchErr <- err
 	}()
 
+	go func() {
+		dashboardResponse.UserActive, err = getUserTop(implementation, ctx, request)
+		chanUserActiveErr <- err
+	}()
+
 	summaryAssessmentErr := <-chanSummaryAssessmentErr
 	mostViewedErr := <-chanMostViewedErr
 	topSearchErr := <-chanTopSearchErr
+	userActiveErr := <-chanUserActiveErr
 
 	helpers.PanicIfError(summaryAssessmentErr)
 	helpers.PanicIfError(mostViewedErr)
 	helpers.PanicIfError(topSearchErr)
+	helpers.PanicIfError(userActiveErr)
 
 	return dashboardResponse
 
@@ -152,5 +170,28 @@ func getTopSearched(implementation *ServiceDashboardImpl, ctx context.Context, r
 	}
 
 	return []webDashboard.DashboardResponseTopListDocumentTracker{}, nil
+
+}
+
+func getUserTop(implementation *ServiceDashboardImpl, ctx context.Context, request webDashboard.DashboardRequestSummary) ([]webDashboard.DashboardResponseUserActive, error) {
+
+	tx, err := implementation.DB.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	currentYear := strconv.Itoa(time.Time.Year(time.Now()))
+	currentMonth := strconv.Itoa(int(time.Time.Month(time.Now())))
+
+	usersHistory, err := implementation.RepositoryUserHistoryLoginInterface.FindAll(ctx, tx, 10, 0, currentYear, currentMonth)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(usersHistory) > 0 {
+		return webDashboard.BulkModelUserHistoryLoginToDashboardResponseUserActive(usersHistory), nil
+	}
+
+	return []webDashboard.DashboardResponseUserActive{}, nil
 
 }

@@ -6,6 +6,7 @@ type DashboardResponse struct {
 	SummaryAssessment SummaryAssessment                         `json:"summary_assessement"`
 	RecentlyViewed    []DashboardResponseTopListDocumentTracker `json:"recently_viewed"`
 	TopSearch         []DashboardResponseTopListDocumentTracker `json:"top_search"`
+	UserActive        []DashboardResponseUserActive             `json:"user_active"`
 }
 
 type SummaryAssessment struct {
@@ -18,6 +19,11 @@ type SummaryAssessment struct {
 type DashboardResponseTopListDocumentTracker struct {
 	ProductName string `json:"product_name"`
 	Category    string `json:"category"`
+}
+
+type DashboardResponseUserActive struct {
+	Nik  string `json:"nik"`
+	Name string `json:"name"`
 }
 
 func ModelDocumentTrackerToDashboardResponseTopListDocumentTracker(documentTracker models.DocumentTracker) DashboardResponseTopListDocumentTracker {
@@ -35,4 +41,22 @@ func BulkModelDocumentTrackerToDashboardResponseTopListDocumentTracker(documentT
 	}
 
 	return bulk
+}
+
+func ModelUserHistoryLoginToDashboardResponseUserActive(userHistoryLogin models.UserHistoryLogin) DashboardResponseUserActive {
+	return DashboardResponseUserActive{
+		Nik:  userHistoryLogin.UserDetail.Nik,
+		Name: userHistoryLogin.UserDetail.Name,
+	}
+}
+
+func BulkModelUserHistoryLoginToDashboardResponseUserActive(usersHistoryLogin []models.UserHistoryLogin) []DashboardResponseUserActive {
+	var bulk []DashboardResponseUserActive
+
+	for _, userHistoryLogin := range usersHistoryLogin {
+		bulk = append(bulk, ModelUserHistoryLoginToDashboardResponseUserActive(userHistoryLogin))
+	}
+
+	return bulk
+
 }
