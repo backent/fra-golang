@@ -7,21 +7,25 @@ import (
 
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/middlewares"
+	"github.com/backent/fra-golang/models"
 	repositoriesAuth "github.com/backent/fra-golang/repositories/auth"
+	repositoriesUserHistoryLogin "github.com/backent/fra-golang/repositories/users_history_login"
 	webAuth "github.com/backent/fra-golang/web/auth"
 )
 
 type ServiceAuthImpl struct {
 	*sql.DB
 	repositoriesAuth.RepositoryAuthInterface
+	repositoriesUserHistoryLogin.RepositoryUserHistoryLoginInterface
 	*middlewares.AuthMiddleware
 }
 
-func NewServiceAuthImpl(db *sql.DB, repositoriesAuth repositoriesAuth.RepositoryAuthInterface, authMiddleware *middlewares.AuthMiddleware) ServiceAuthInterface {
+func NewServiceAuthImpl(db *sql.DB, repositoriesAuth repositoriesAuth.RepositoryAuthInterface, repositoriesUserHistoryLogin repositoriesUserHistoryLogin.RepositoryUserHistoryLoginInterface, authMiddleware *middlewares.AuthMiddleware) ServiceAuthInterface {
 	return &ServiceAuthImpl{
-		DB:                      db,
-		RepositoryAuthInterface: repositoriesAuth,
-		AuthMiddleware:          authMiddleware,
+		DB:                                  db,
+		RepositoryAuthInterface:             repositoriesAuth,
+		RepositoryUserHistoryLoginInterface: repositoriesUserHistoryLogin,
+		AuthMiddleware:                      authMiddleware,
 	}
 }
 
@@ -34,6 +38,13 @@ func (implementation *ServiceAuthImpl) Login(ctx context.Context, request webAut
 
 	stringUserId := strconv.Itoa(request.UserId)
 	token, err := implementation.RepositoryAuthInterface.Issue(stringUserId)
+	helpers.PanicIfError(err)
+
+	userHistoryLogin := models.UserHistoryLogin{
+		UserId: request.UserId,
+	}
+
+	err = implementation.RepositoryUserHistoryLoginInterface.Create(ctx, tx, userHistoryLogin)
 	helpers.PanicIfError(err)
 
 	return webAuth.LoginResponse{
