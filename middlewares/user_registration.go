@@ -39,7 +39,7 @@ func (implementation *UserRegistrationMiddleware) Apply(ctx context.Context, tx 
 		panic(exceptions.NewBadRequestError("nik already requested or exists"))
 	}
 
-	token, err := helpers.LoginLdap("402746", "Bwgclp24")
+	token, err := helpers.LoginLdap("402746", "T3lk0mDCS24")
 	helpers.PanicIfError(err)
 
 	userLdap, err := helpers.GetUserLdap(request.Nik, token)
