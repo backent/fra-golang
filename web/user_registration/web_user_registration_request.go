@@ -13,7 +13,8 @@ type UserRegistrationRequestApply struct {
 }
 
 type UserRegistrationRequestApprove struct {
-	Id int `json:"id" validate:"required"`
+	Id   int    `json:"id" validate:"required"`
+	Unit string `json:"unit" validate:"required,oneof=communication datacomm wireless internet"`
 
 	User models.UserRegistration
 }

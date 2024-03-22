@@ -13,6 +13,7 @@ type UserRegistration struct {
 	Status    string
 	RejectBy  int
 	ApproveBy int
+	Unit      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -25,6 +26,7 @@ type NullAbleUserRegistration struct {
 	Status    sql.NullString
 	RejectBy  sql.NullInt32
 	ApproveBy sql.NullInt32
+	Unit      sql.NullString
 	CreatedAt sql.NullTime
 	UpdatedAt sql.NullTime
 }

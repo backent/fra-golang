@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/backent/fra-golang/exceptions"
 	"github.com/backent/fra-golang/helpers"
@@ -68,6 +69,8 @@ func (implementation *UserRegistrationMiddleware) Approve(ctx context.Context, t
 	request.User.Email = user.Email
 	request.User.Status = user.ApplyStatus
 	request.User.ApproveBy = userId
+
+	request.Unit = strings.ToLower(request.Unit)
 }
 
 func (implementation *UserRegistrationMiddleware) Reject(ctx context.Context, tx *sql.Tx, request *webUserRegistration.UserRegistrationRequestReject) {

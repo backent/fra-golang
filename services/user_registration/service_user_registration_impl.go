@@ -57,6 +57,7 @@ func (implementation *ServiceUserRegistrationImpl) Approve(ctx context.Context, 
 		Name:      request.User.Name,
 		Email:     request.User.Email,
 		ApproveBy: request.User.ApproveBy,
+		Unit:      request.Unit,
 		Status:    "approve",
 	}
 

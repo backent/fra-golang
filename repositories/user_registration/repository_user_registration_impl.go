@@ -43,8 +43,9 @@ func (implementation *RepositoryUserRegistrationImpl) Update(ctx context.Context
 		email = ?,
 		apply_status = ?,
 		apply_reject_by = ?,
-		apply_approved_by = ? WHERE id = ?`, models.UserRegistrationTable)
-	_, err := tx.ExecContext(ctx, query, user_registration.Nik, user_registration.Name, user_registration.Email, user_registration.Status, user_registration.RejectBy, user_registration.ApproveBy, user_registration.Id)
+		apply_approved_by = ?,
+		unit = ? WHERE id = ?`, models.UserRegistrationTable)
+	_, err := tx.ExecContext(ctx, query, user_registration.Nik, user_registration.Name, user_registration.Email, user_registration.Status, user_registration.RejectBy, user_registration.ApproveBy, user_registration.Unit, user_registration.Id)
 	if err != nil {
 		return user_registration, err
 	}
