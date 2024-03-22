@@ -45,6 +45,11 @@ func (implementation *DocumentMiddleware) Create(ctx context.Context, tx *sql.Tx
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
 
+	// make sure the action is lowercase
+	request.Action = strings.ToLower(request.Action)
+
+	ValidateUserPermission(ctx, tx, implementation.RepositoryUserInterface, userId, request.Action)
+
 	for index := range request.Risks {
 		request.Risks[index].AssessmentImpact = strings.ToLower(request.Risks[index].AssessmentImpact)
 		request.Risks[index].AssessmentLikehood = strings.ToLower(request.Risks[index].AssessmentLikehood)
@@ -132,6 +137,8 @@ func (implementation *DocumentMiddleware) Approve(ctx context.Context, tx *sql.T
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
 
+	ValidateUserPermission(ctx, tx, implementation.RepositoryUserInterface, userId, "approve")
+
 	document, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
 	if err != nil {
 		panic(exceptions.NewNotFoundError(err.Error()))
@@ -153,6 +160,8 @@ func (implementation *DocumentMiddleware) Reject(ctx context.Context, tx *sql.Tx
 	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
+
+	ValidateUserPermission(ctx, tx, implementation.RepositoryUserInterface, userId, "reject")
 
 	document, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
 	if err != nil {

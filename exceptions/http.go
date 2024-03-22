@@ -31,6 +31,12 @@ func RouterPanicHandler(w http.ResponseWriter, r *http.Request, i interface{}) {
 			Status: "Unauthorized",
 			Data:   err.Error(),
 		}
+	} else if err, ok := i.(Forbidden); ok {
+		response = web.WebResponse{
+			Code:   http.StatusForbidden,
+			Status: "Forbidden",
+			Data:   err.Error(),
+		}
 	} else if err, ok := i.(NotFoundError); ok {
 		response = web.WebResponse{
 			Code:   http.StatusNotFound,
