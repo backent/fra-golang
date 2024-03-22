@@ -55,7 +55,7 @@ func (implementation *RepositoryUserImpl) Delete(ctx context.Context, tx *sql.Tx
 func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.Tx, id int) (models.User, error) {
 	var user models.User
 
-	query := fmt.Sprintf("SELECT id, nik, name, email, role, password FROM %s WHERE deleted_at IS NULL AND id = ?", models.UserTable)
+	query := fmt.Sprintf("SELECT id, nik, name, email, role, unit, password FROM %s WHERE deleted_at IS NULL AND id = ?", models.UserTable)
 	rows, err := tx.QueryContext(ctx, query, id)
 	if err != nil {
 		return user, err
@@ -63,14 +63,18 @@ func (implementation *RepositoryUserImpl) FindById(ctx context.Context, tx *sql.
 	defer rows.Close()
 
 	if rows.Next() {
+
 		var nullPassword sql.NullString
 		var nullEmail sql.NullString
-		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &nullEmail, &user.Role, &nullPassword)
+		var nullUnit sql.NullString
+
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &nullEmail, &user.Role, &nullUnit, &nullPassword)
 		if err != nil {
 			return user, err
 		}
 		user.Password = nullPassword.String
 		user.Email = nullEmail.String
+		user.Unit = nullUnit.String
 	} else {
 		return user, errors.New("not found user")
 	}

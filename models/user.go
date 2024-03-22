@@ -12,6 +12,7 @@ type User struct {
 	ApplyApproveBy int
 	Password       string
 	Role           string
+	Unit           string
 	RisksDetail    []Risk
 }
 
@@ -25,6 +26,7 @@ type NullAbleUser struct {
 	ApplyApproveBy sql.NullInt32
 	Password       sql.NullString
 	Role           sql.NullString
+	Unit           sql.NullString
 }
 
 var UserTable string = "users"
