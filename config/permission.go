@@ -75,6 +75,16 @@ func init() {
 		return true, nil
 	}
 
+	permissionMapping["user-approval"] = make(map[string]permissionFunc)
+	permissionMapping["user-approval"]["superadmin"] = func(user models.User) (bool, error) {
+		return true, nil
+	}
+
+	permissionMapping["user-update"] = make(map[string]permissionFunc)
+	permissionMapping["user-update"]["superadmin"] = func(user models.User) (bool, error) {
+		return true, nil
+	}
+
 }
 
 func ValidatePermission(user models.User, action string) (bool, error) {

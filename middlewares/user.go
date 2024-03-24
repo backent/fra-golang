@@ -41,7 +41,9 @@ func (implementation *UserMiddleware) Create(ctx context.Context, tx *sql.Tx, re
 }
 
 func (implementation *UserMiddleware) Update(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestUpdate) {
-	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+
+	ValidateUserPermission(ctx, tx, implementation.RepositoryUserInterface, userId, "user-approval")
 
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)

@@ -58,6 +58,8 @@ func (implementation *UserRegistrationMiddleware) FindAll(ctx context.Context, t
 func (implementation *UserRegistrationMiddleware) Approve(ctx context.Context, tx *sql.Tx, request *webUserRegistration.UserRegistrationRequestApprove) {
 	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
 
+	ValidateUserPermission(ctx, tx, implementation.RepositoryUserInterface, userId, "user-approval")
+
 	user, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
 	if err != nil {
 		panic(exceptions.NewNotFoundError(err.Error()))
@@ -75,6 +77,8 @@ func (implementation *UserRegistrationMiddleware) Approve(ctx context.Context, t
 
 func (implementation *UserRegistrationMiddleware) Reject(ctx context.Context, tx *sql.Tx, request *webUserRegistration.UserRegistrationRequestReject) {
 	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+
+	ValidateUserPermission(ctx, tx, implementation.RepositoryUserInterface, userId, "user-approval")
 
 	user, err := implementation.RepositoryUserInterface.FindById(ctx, tx, request.Id)
 	if err != nil {
