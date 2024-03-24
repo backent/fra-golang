@@ -56,17 +56,17 @@ func (implementation *ServiceUserImpl) Update(ctx context.Context, request webUs
 
 	userPassword := request.CurrentPassword
 
-	if request.Password != "" {
+	if request.IsEmptyPassword {
+		userPassword = ""
+	} else if request.Password != "" {
 		userPassword, err = helpers.HashPassword(request.Password)
 		helpers.PanicIfError(err)
 	}
 
-	user := models.User{
-		Id:       request.Id,
-		Nik:      request.Nik,
-		Name:     request.Name,
-		Password: userPassword,
-	}
+	user := request.User
+	user.Password = userPassword
+	user.Unit = request.Unit
+	user.Role = request.Role
 
 	user, err = implementation.RepositoryUserInterface.Update(ctx, tx, user)
 	helpers.PanicIfError(err)

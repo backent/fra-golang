@@ -1,6 +1,10 @@
 package user
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/backent/fra-golang/models"
+)
 
 type UserRequestCreate struct {
 	Nik      string `json:"nik" validate:"required"`
@@ -9,12 +13,16 @@ type UserRequestCreate struct {
 }
 
 type UserRequestUpdate struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name" validate:"required"`
-	Password string `json:"password"`
+	Id              int    `json:"id"`
+	Name            string `json:"name" validate:"required"`
+	Password        string `json:"password"`
+	IsEmptyPassword bool   `json:"is_empty_password"`
+	Unit            string `json:"unit" validate:"required,oneof=communication datacomm wireless internet"`
+	Role            string `json:"role" validate:"required,oneof=reviewer author guest"`
 
 	Nik             string `json:"nik"`
 	CurrentPassword string
+	User            models.User
 }
 
 type UserRequestDelete struct {

@@ -11,6 +11,7 @@ type UserResponse struct {
 	Email  string `json:"email"`
 	Status string `json:"status"`
 	Role   string `json:"role"`
+	Unit   string `json:"unit"`
 }
 
 func UserModelToUserResponse(user models.User) UserResponse {
@@ -21,6 +22,7 @@ func UserModelToUserResponse(user models.User) UserResponse {
 		Email:  user.Email,
 		Status: user.ApplyStatus,
 		Role:   user.Role,
+		Unit:   user.Unit,
 	}
 }
 

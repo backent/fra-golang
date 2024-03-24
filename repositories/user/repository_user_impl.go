@@ -36,8 +36,8 @@ func (implementation *RepositoryUserImpl) Create(ctx context.Context, tx *sql.Tx
 
 }
 func (implementation *RepositoryUserImpl) Update(ctx context.Context, tx *sql.Tx, user models.User) (models.User, error) {
-	query := fmt.Sprintf("UPDATE  %s SET name = ?, password = ? WHERE id = ?", models.UserTable)
-	_, err := tx.ExecContext(ctx, query, user.Name, user.Password, user.Id)
+	query := fmt.Sprintf("UPDATE  %s SET name = ?, password = ?, unit = ?, role = ? WHERE id = ?", models.UserTable)
+	_, err := tx.ExecContext(ctx, query, user.Name, user.Password, user.Unit, user.Role, user.Id)
 	if err != nil {
 		return user, err
 	}
@@ -118,6 +118,7 @@ func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.T
 		a.name,
 		a.email,
 		a.role,
+		a.unit,
 		a.apply_status,
 		a.password,
 		b.count
@@ -138,7 +139,7 @@ func (implementation *RepositoryUserImpl) FindAll(ctx context.Context, tx *sql.T
 
 	for rows.Next() {
 		var user models.NullAbleUser
-		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Email, &user.Role, &user.ApplyStatus, &user.Password, &totalDocument)
+		err = rows.Scan(&user.Id, &user.Nik, &user.Name, &user.Email, &user.Role, &user.Unit, &user.ApplyStatus, &user.Password, &totalDocument)
 		if err != nil {
 			return nil, totalDocument, err
 		}

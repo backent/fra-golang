@@ -53,6 +53,7 @@ func (implementation *UserMiddleware) Update(ctx context.Context, tx *sql.Tx, re
 
 	request.CurrentPassword = user.Password
 	request.Nik = user.Nik
+	request.User = user
 }
 
 func (implementation *UserMiddleware) Delete(ctx context.Context, tx *sql.Tx, request *webUser.UserRequestDelete) {

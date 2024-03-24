@@ -42,5 +42,6 @@ func NullAbleUserToUser(nullAbleUser NullAbleUser) User {
 		ApplyRejectBy:  int(nullAbleUser.ApplyRejectBy.Int32),
 		Password:       nullAbleUser.Password.String,
 		Role:           nullAbleUser.Role.String,
+		Unit:           nullAbleUser.Unit.String,
 	}
 }
