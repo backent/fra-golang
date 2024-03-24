@@ -26,6 +26,9 @@ This command will run migration on database/migrations, and the database mysql l
 Note: If we didn't specify how many migration that run, it will run all pending migration. This also applies on down migration. If you did'nt specify, it will run down migration until the first migration.
 
 ### Build
+
+#### To ENSURE commands works, PLEASE EXECUTE ON ROOT OF PROJECT 
+
 Build main app
 ```bash
 env GOOS=linux GOARCH=amd64 go build .
