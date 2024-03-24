@@ -122,8 +122,22 @@ func (implementation *DocumentMiddleware) FindById(ctx context.Context, tx *sql.
 func (implementation *DocumentMiddleware) FindAll(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestFindAll) {
 	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
 	user, _ := implementation.RepositoryUserInterface.FindById(ctx, tx, userId)
-	if user.Role == "reviewer" {
-		request.QueryAction = "submit,approve,reject,update"
+
+	switch user.Role {
+	case "guest":
+		request.QueryAction = "approve"
+	case "reviewer":
+		request.QueryAction = "submit,approve,reject,update,draft"
+	case "author":
+		if user.Unit == request.QueryCategory {
+			request.QueryAction = "submit,approve,reject,update,draft"
+		} else {
+			request.QueryAction = "approve"
+		}
+	default:
+		// just to make user with no role cannot see anything
+		// because there is no document with action "none"
+		request.QueryAction = "none"
 	}
 
 }
