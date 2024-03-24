@@ -26,6 +26,9 @@ func init() {
 	notificationMapping["approve"]["reviewer"] = func(documentTitle string) (string, string, error) {
 		return "", "", errors.New(errMessageNoNotificationAvailable)
 	}
+	notificationMapping["approve"]["superadmin"] = func(documentTitle string) (string, string, error) {
+		return "", "", errors.New(errMessageNoNotificationAvailable)
+	}
 
 	notificationMapping["reject"]["author"] = func(documentTitle string) (string, string, error) {
 		title := "Your assessment has been Returned"
@@ -33,6 +36,9 @@ func init() {
 		return title, subtitle, nil
 	}
 	notificationMapping["reject"]["reviewer"] = func(documentTitle string) (string, string, error) {
+		return "", "", errors.New(errMessageNoNotificationAvailable)
+	}
+	notificationMapping["reject"]["superadmin"] = func(documentTitle string) (string, string, error) {
 		return "", "", errors.New(errMessageNoNotificationAvailable)
 	}
 
@@ -44,11 +50,21 @@ func init() {
 		subtitle := fmt.Sprintf(`Assessment "%s" has been Submitted`, documentTitle)
 		return title, subtitle, nil
 	}
+	notificationMapping["submit"]["superadmin"] = func(documentTitle string) (string, string, error) {
+		title := "There is an assessment that has been Submitted"
+		subtitle := fmt.Sprintf(`Assessment "%s" has been Submitted`, documentTitle)
+		return title, subtitle, nil
+	}
 
 	notificationMapping["update"]["author"] = func(documentTitle string) (string, string, error) {
 		return "", "", errors.New(errMessageNoNotificationAvailable)
 	}
 	notificationMapping["update"]["reviewer"] = func(documentTitle string) (string, string, error) {
+		title := "There is an assessment that has been Updated"
+		subtitle := fmt.Sprintf(`Assessment "%s" has been Updated`, documentTitle)
+		return title, subtitle, nil
+	}
+	notificationMapping["update"]["superadmin"] = func(documentTitle string) (string, string, error) {
 		title := "There is an assessment that has been Updated"
 		subtitle := fmt.Sprintf(`Assessment "%s" has been Updated`, documentTitle)
 		return title, subtitle, nil

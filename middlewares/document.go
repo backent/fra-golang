@@ -128,6 +128,8 @@ func (implementation *DocumentMiddleware) FindAll(ctx context.Context, tx *sql.T
 		request.QueryAction = "approve"
 	case "reviewer":
 		request.QueryAction = "submit,approve,reject,update,draft"
+	case "superadmin":
+		request.QueryAction = "submit,approve,reject,update,draft"
 	case "author":
 		if user.Unit == request.QueryCategory {
 			request.QueryAction = "submit,approve,reject,update,draft"

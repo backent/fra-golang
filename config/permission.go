@@ -23,6 +23,9 @@ func init() {
 	permissionMapping["approve"]["reviewer"] = func(user models.User) (bool, error) {
 		return true, nil
 	}
+	permissionMapping["approve"]["superadmin"] = func(user models.User) (bool, error) {
+		return true, nil
+	}
 
 	permissionMapping["reject"] = make(map[string]permissionFunc)
 
@@ -30,6 +33,9 @@ func init() {
 		return false, errors.New(errMessageNoPermissionAvailable)
 	}
 	permissionMapping["reject"]["reviewer"] = func(user models.User) (bool, error) {
+		return true, nil
+	}
+	permissionMapping["reject"]["superadmin"] = func(user models.User) (bool, error) {
 		return true, nil
 	}
 
@@ -41,6 +47,9 @@ func init() {
 	permissionMapping["submit"]["reviewer"] = func(user models.User) (bool, error) {
 		return true, nil
 	}
+	permissionMapping["submit"]["superadmin"] = func(user models.User) (bool, error) {
+		return true, nil
+	}
 
 	permissionMapping["update"] = make(map[string]permissionFunc)
 
@@ -50,6 +59,9 @@ func init() {
 	permissionMapping["update"]["reviewer"] = func(user models.User) (bool, error) {
 		return true, nil
 	}
+	permissionMapping["update"]["superadmin"] = func(user models.User) (bool, error) {
+		return true, nil
+	}
 
 	permissionMapping["draft"] = make(map[string]permissionFunc)
 
@@ -57,6 +69,9 @@ func init() {
 		return true, nil
 	}
 	permissionMapping["draft"]["reviewer"] = func(user models.User) (bool, error) {
+		return true, nil
+	}
+	permissionMapping["draft"]["superadmin"] = func(user models.User) (bool, error) {
 		return true, nil
 	}
 
