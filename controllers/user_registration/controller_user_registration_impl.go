@@ -103,3 +103,21 @@ func (implementation *ControllerUserRegistrationImpl) FindAll(w http.ResponseWri
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerUserRegistrationImpl) CheckUserLDAP(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var request webUserRegistration.UserRegistrationRequestCheckUserLDAP
+	helpers.DecodeRequest(r, &request)
+
+	ctx := r.Context()
+
+	valid := implementation.ServiceUserRegistrationInterface.CheckUserLDAP(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   valid,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}

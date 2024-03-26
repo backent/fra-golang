@@ -40,14 +40,33 @@ func (implementation *UserRegistrationMiddleware) Apply(ctx context.Context, tx 
 		panic(exceptions.NewBadRequestError("nik already requested or exists"))
 	}
 
+	if request.Name == "" || request.Email == "" || request.Password == "" {
+
+		token, err := helpers.LoginLdap("402746", "T3lk0mDCS24")
+		helpers.PanicIfError(err)
+
+		userLdap, err := helpers.GetUserLdap(request.Nik, token)
+		helpers.PanicIfError(err)
+
+		request.Name = userLdap.Name
+		request.Email = userLdap.Email
+
+	}
+
+}
+
+func (implementation *UserRegistrationMiddleware) CheckUserLDAP(ctx context.Context, tx *sql.Tx, request *webUserRegistration.UserRegistrationRequestCheckUserLDAP) {
+
+	err := implementation.Validate.Struct(request)
+	helpers.PanicIfError(err)
+
 	token, err := helpers.LoginLdap("402746", "T3lk0mDCS24")
 	helpers.PanicIfError(err)
 
-	userLdap, err := helpers.GetUserLdap(request.Nik, token)
+	_, err = helpers.GetUserLdap(request.Nik, token)
 	helpers.PanicIfError(err)
 
-	request.Name = userLdap.Name
-	request.Email = userLdap.Email
+	request.NikValid = true
 
 }
 

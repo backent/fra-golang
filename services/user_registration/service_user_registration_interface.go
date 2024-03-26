@@ -11,4 +11,5 @@ type ServiceUserRegistrationInterface interface {
 	Approve(ctx context.Context, request user_registration.UserRegistrationRequestApprove)
 	Reject(ctx context.Context, request user_registration.UserRegistrationRequestReject)
 	FindAll(ctx context.Context, request user_registration.UserRegistrationRequestFindAll) ([]user_registration.UserRegistrationResponse, int)
+	CheckUserLDAP(ctx context.Context, request user_registration.UserRegistrationRequestCheckUserLDAP) bool
 }

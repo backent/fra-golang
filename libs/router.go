@@ -62,6 +62,7 @@ func NewRouter(
 	router.POST("/user-registrations/approve", controllersUserRegistration.Approve)
 	router.POST("/user-registrations/reject", controllersUserRegistration.Reject)
 	router.GET("/user-registrations", controllersUserRegistration.FindAll)
+	router.POST("/user-registrations-check-ldap", controllersUserRegistration.CheckUserLDAP)
 
 	router.GET("/dashboards", controllersDashboard.Summary)
 

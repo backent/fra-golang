@@ -19,8 +19,8 @@ func NewRepositoryUserRegistrationImpl() RepositoryUserRegistrationInterface {
 }
 
 func (implementation *RepositoryUserRegistrationImpl) Create(ctx context.Context, tx *sql.Tx, user_registration models.UserRegistration) (models.UserRegistration, error) {
-	query := fmt.Sprintf("INSERT INTO %s (nik, name, email, apply_status) VALUES (?, ?, ?, ?)", models.UserRegistrationTable)
-	result, err := tx.ExecContext(ctx, query, user_registration.Nik, user_registration.Name, user_registration.Email, user_registration.Status)
+	query := fmt.Sprintf("INSERT INTO %s (nik, name, email, apply_status, password) VALUES (?, ?, ?, ?, ?)", models.UserRegistrationTable)
+	result, err := tx.ExecContext(ctx, query, user_registration.Nik, user_registration.Name, user_registration.Email, user_registration.Status, user_registration.Password)
 	if err != nil {
 		return user_registration, err
 	}

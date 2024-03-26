@@ -10,6 +10,7 @@ type UserRegistration struct {
 	Nik       string
 	Name      string
 	Email     string
+	Password  string
 	Status    string
 	RejectBy  int
 	ApproveBy int

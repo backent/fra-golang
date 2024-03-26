@@ -33,10 +33,19 @@ func (implementation *ServiceUserRegistrationImpl) Apply(ctx context.Context, re
 
 	implementation.UserRegistrationMiddleware.Apply(ctx, tx, &request)
 
+	userPassword := request.Password
+
+	if userPassword != "" {
+		userPassword, err = helpers.HashPassword(request.Password)
+		helpers.PanicIfError(err)
+	}
+
 	user_registration := models.UserRegistration{
-		Nik:    request.Nik,
-		Name:   request.Name,
-		Email:  request.Email,
+		Nik:      request.Nik,
+		Name:     request.Name,
+		Email:    request.Email,
+		Password: userPassword,
+
 		Status: "pending",
 	}
 
@@ -129,4 +138,14 @@ func (implementation *ServiceUserRegistrationImpl) FindAll(ctx context.Context, 
 
 	return webUserRegistration.BulkUserRegistrationModelToUserRegistrationResponse(userRegistrations), total
 
+}
+
+func (implementation *ServiceUserRegistrationImpl) CheckUserLDAP(ctx context.Context, request webUserRegistration.UserRegistrationRequestCheckUserLDAP) bool {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.UserRegistrationMiddleware.CheckUserLDAP(ctx, tx, &request)
+
+	return request.NikValid
 }

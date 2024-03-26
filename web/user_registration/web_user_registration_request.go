@@ -7,9 +7,15 @@ import (
 )
 
 type UserRegistrationRequestApply struct {
-	Nik   string `json:"nik" validate:"required,max=20"`
-	Name  string
-	Email string
+	Nik      string `json:"nik" validate:"required,max=20"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+}
+
+type UserRegistrationRequestCheckUserLDAP struct {
+	Nik      string `json:"nik" validate:"required,max=20"`
+	NikValid bool
 }
 
 type UserRegistrationRequestApprove struct {

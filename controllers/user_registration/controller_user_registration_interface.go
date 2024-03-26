@@ -11,4 +11,5 @@ type ControllerUserRegistrationInterface interface {
 	Approve(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	Reject(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	FindAll(w http.ResponseWriter, r *http.Request, p httprouter.Params)
+	CheckUserLDAP(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 }
