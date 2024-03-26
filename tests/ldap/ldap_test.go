@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/backent/fra-golang/config"
 	"github.com/backent/fra-golang/helpers"
 )
 
 func TestLoginLdap(t *testing.T) {
 	fmt.Println("test")
-	token, err := helpers.LoginLdap("402746", "Bwgclp24")
+	usernameLDAP, passwordLDAP := config.GetUserLDAPAccount()
+	token, err := helpers.LoginLdap(usernameLDAP, passwordLDAP)
 	if err != nil {
 		panic(err)
 	}

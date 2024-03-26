@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"strings"
 
+	"github.com/backent/fra-golang/config"
 	"github.com/backent/fra-golang/exceptions"
 	"github.com/backent/fra-golang/helpers"
 	repositoriesAuth "github.com/backent/fra-golang/repositories/auth"
@@ -42,7 +43,8 @@ func (implementation *UserRegistrationMiddleware) Apply(ctx context.Context, tx 
 
 	if request.Name == "" || request.Email == "" || request.Password == "" {
 
-		token, err := helpers.LoginLdap("402746", "T3lk0mDCS24")
+		usernameLDAP, passwordLDAP := config.GetUserLDAPAccount()
+		token, err := helpers.LoginLdap(usernameLDAP, passwordLDAP)
 		helpers.PanicIfError(err)
 
 		userLdap, err := helpers.GetUserLdap(request.Nik, token)
@@ -60,7 +62,9 @@ func (implementation *UserRegistrationMiddleware) CheckUserLDAP(ctx context.Cont
 	err := implementation.Validate.Struct(request)
 	helpers.PanicIfError(err)
 
-	token, err := helpers.LoginLdap("402746", "T3lk0mDCS24")
+	usernameLDAP, passwordLDAP := config.GetUserLDAPAccount()
+
+	token, err := helpers.LoginLdap(usernameLDAP, passwordLDAP)
 	helpers.PanicIfError(err)
 
 	_, err = helpers.GetUserLdap(request.Nik, token)
