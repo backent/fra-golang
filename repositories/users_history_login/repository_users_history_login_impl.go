@@ -44,6 +44,7 @@ func (implementation *RepositoryUserHistoryLoginImpl) FindAll(
 			%s b ON a.user_id = b.id
 	WHERE 
 			YEAR(a.created_at) = ?  AND MONTH(a.created_at) = ?
+			AND b.deleted_at IS NULL
 	GROUP BY 
 			a.user_id, MONTH(a.created_at), YEAR(a.created_at), DATE_FORMAT(a.created_at, '%%Y-%%m')
 	ORDER BY 
