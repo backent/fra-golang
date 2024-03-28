@@ -18,7 +18,7 @@ type UserRequestUpdate struct {
 	Password        string `json:"password"`
 	IsEmptyPassword bool   `json:"is_empty_password"`
 	Unit            string `json:"unit" validate:"required,oneof=communication datacomm wireless internet"`
-	Role            string `json:"role" validate:"required,oneof=reviewer author guest"`
+	Role            string `json:"role" validate:"required,oneof=superadmin reviewer author guest"`
 
 	Nik             string `json:"nik"`
 	CurrentPassword string

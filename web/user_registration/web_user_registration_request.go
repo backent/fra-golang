@@ -7,7 +7,7 @@ import (
 )
 
 type UserRegistrationRequestApply struct {
-	Nik      string `json:"nik" validate:"required,max=20"`
+	Nik      string `json:"nik" validate:"required,max=25"`
 	Password string `json:"password"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`

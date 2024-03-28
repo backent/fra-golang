@@ -31,7 +31,6 @@ func NewRouter(
 	router.GET("/current-user", controllersUser.CurrentUser)
 	router.GET("/users", controllersUser.FindAll)
 	router.GET("/users/:id", controllersUser.FindById)
-	router.POST("/users", controllersUser.Create)
 	router.PUT("/users/:id", controllersUser.Update)
 	router.DELETE("/users/:id", controllersUser.Delete)
 
