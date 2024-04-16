@@ -125,16 +125,16 @@ func (implementation *DocumentMiddleware) FindAll(ctx context.Context, tx *sql.T
 
 	switch user.Role {
 	case "guest":
-		request.QueryAction = "approve"
+		request.QueryAction = "approve,final"
 	case "reviewer":
-		request.QueryAction = "submit,approve,reject,update,draft"
+		request.QueryAction = "submit,approve,final,reject,update,draft"
 	case "superadmin":
-		request.QueryAction = "submit,approve,reject,update,draft"
+		request.QueryAction = "submit,approve,final,reject,update,draft"
 	case "author":
 		if user.Unit == request.QueryCategory {
-			request.QueryAction = "submit,approve,reject,update,draft"
+			request.QueryAction = "submit,approve,final,reject,update,draft"
 		} else {
-			request.QueryAction = "approve"
+			request.QueryAction = "approve,final"
 		}
 	default:
 		// just to make user with no role cannot see anything
@@ -207,9 +207,17 @@ func (implementation *DocumentMiddleware) Reject(ctx context.Context, tx *sql.Tx
 }
 
 func (implementation *DocumentMiddleware) MonitoringList(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestMonitoringList) {
-	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
 
-	request.QueryAction = "submit,approve,reject,update"
+	user, _ := implementation.RepositoryUserInterface.FindById(ctx, tx, userId)
+
+	switch user.Role {
+	case "guest":
+		request.QueryAction = "submit,approve,reject,update,final"
+	default:
+		request.QueryAction = "approve,final"
+	}
+
 }
 
 func (implementation *DocumentMiddleware) TrackerProduct(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestTrackerProduct) {
@@ -218,4 +226,40 @@ func (implementation *DocumentMiddleware) TrackerProduct(ctx context.Context, tx
 
 func (implementation *DocumentMiddleware) SearchGlobal(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestSearchGlobal) {
 	ValidateToken(ctx, implementation.RepositoryAuthInterface)
+}
+
+func (implementation *DocumentMiddleware) UploadFinal(ctx context.Context, tx *sql.Tx, request *webDocument.DocumentRequestUploadFinal) {
+	userId := ValidateToken(ctx, implementation.RepositoryAuthInterface)
+	err := implementation.Validate.Struct(request)
+	helpers.PanicIfError(err)
+
+	ValidateUserPermission(ctx, tx, implementation.RepositoryUserInterface, userId, "approve")
+
+	if request.Id == 0 {
+		panic(exceptions.NewBadRequestError("id is required"))
+	}
+
+	if request.File == nil {
+		panic(exceptions.NewBadRequestError("file is required"))
+	}
+
+	document, err := implementation.RepositoryDocumentInterface.FindById(ctx, tx, request.Id)
+	if err != nil {
+		panic(exceptions.NewNotFoundError(err.Error()))
+	}
+
+	documents, err := implementation.RepositoryDocumentInterface.FindByUUID(ctx, tx, document.Uuid)
+	helpers.PanicIfError(err)
+	if documents[0].Id != request.Id {
+		panic(exceptions.NewConflictError("version mismatch"))
+	}
+
+	if document.Action != "approve" {
+		panic(exceptions.NewBadRequestError("only approved document can save as final"))
+	}
+
+	document.Action = "final"
+	document.ActionBy = userId
+	request.Document = document
+
 }

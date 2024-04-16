@@ -49,6 +49,8 @@ func NewRouter(
 	router.GET("/documents-product-name", controllersDocument.GetProductDistinct)
 	router.POST("/documents-approve", controllersDocument.Approve)
 	router.POST("/documents-reject", controllersDocument.Reject)
+	router.POST("/documents-upload-final", controllersDocument.UploadFinal)
+	router.GET("/documents-final/*filePath", controllersDocument.ServeFile)
 
 	router.GET("/documents-monitoring", controllersDocument.MonitoringList)
 	router.GET("/documents-tracker/:name", controllersDocument.TrackerProduct)

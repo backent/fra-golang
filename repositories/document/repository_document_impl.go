@@ -25,8 +25,10 @@ func (implementation *RepositoryDocumentImpl) Create(ctx context.Context, tx *sq
 		action_by,
 		action,
 		product_name,
-		category
-		) VALUES (?, ?, ?, ?, ?, ?) `, models.DocumentTable)
+		category,
+		file_name,
+		file_original_name
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?) `, models.DocumentTable)
 	result, err := tx.ExecContext(ctx, query,
 		document.Uuid,
 		document.CreatedBy,
@@ -34,6 +36,8 @@ func (implementation *RepositoryDocumentImpl) Create(ctx context.Context, tx *sq
 		document.Action,
 		document.ProductName,
 		document.Category,
+		document.FileName,
+		document.FileOriginalName,
 	)
 	if err != nil {
 		return document, err
@@ -112,6 +116,8 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 		a.action,
 		a.product_name,
 		a.category,
+		a.file_name,
+		a.file_original_name,
 		a.created_at,
 		a.updated_at,
 		b.id,
@@ -165,6 +171,7 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 
 	for rows.Next() {
 		var document models.Document
+		var fileName, fileOriginalName sql.NullString
 		var user models.User
 		var nullAbleRisk models.NullAbleRisk
 		var nullAbleRejectNote models.NullAbleRejectNote
@@ -178,6 +185,8 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 			&document.Action,
 			&document.ProductName,
 			&document.Category,
+			&fileName,
+			&fileOriginalName,
 			&document.CreatedAt,
 			&document.UpdatedAt,
 			&user.Id,
@@ -217,6 +226,9 @@ func (implementation *RepositoryDocumentImpl) FindById(ctx context.Context, tx *
 		if err != nil {
 			return document, err
 		}
+
+		document.FileName = fileName.String
+		document.FileOriginalName = fileOriginalName.String
 
 		item, found := documentsMap[document.Id]
 		if !found {
@@ -782,11 +794,15 @@ func (implementation *RepositoryDocumentImpl) TrackerProductByName(ctx context.C
 		a.uuid,
 		a.action,
 		a.product_name,
+		a.file_name,
+		a.file_original_name,
 		a.created_at,
 		b.id,
 		b.uuid,
 		b.action,
 		b.product_name,
+		b.file_name,
+		b.file_original_name,
 		b.created_at,
 		b.nik,
 		b.name,
@@ -811,6 +827,8 @@ func (implementation *RepositoryDocumentImpl) TrackerProductByName(ctx context.C
 		var document models.Document
 		var nullAbleRelatedDocument models.NullAbleRelatedDocument
 		var nullAbleUser models.NullAbleUser
+		var nullAbleFileName sql.NullString
+		var nullAbleFileOriginalName sql.NullString
 		var user models.User
 
 		err = rows.Scan(
@@ -818,11 +836,15 @@ func (implementation *RepositoryDocumentImpl) TrackerProductByName(ctx context.C
 			&document.Uuid,
 			&document.Action,
 			&document.ProductName,
+			&nullAbleFileName,
+			&nullAbleFileOriginalName,
 			&document.CreatedAt,
 			&nullAbleRelatedDocument.Id,
 			&nullAbleRelatedDocument.Uuid,
 			&nullAbleRelatedDocument.Action,
 			&nullAbleRelatedDocument.ProductName,
+			&nullAbleRelatedDocument.FileName,
+			&nullAbleRelatedDocument.FileOriginalName,
 			&nullAbleRelatedDocument.CreatedAt,
 			&nullAbleUser.Nik,
 			&nullAbleUser.Name,
@@ -833,6 +855,9 @@ func (implementation *RepositoryDocumentImpl) TrackerProductByName(ctx context.C
 		if err != nil {
 			return nil, err
 		}
+
+		document.FileName = nullAbleFileName.String
+		document.FileOriginalName = nullAbleFileOriginalName.String
 
 		item, found := documentsMap[document.Id]
 		if !found {
@@ -846,6 +871,8 @@ func (implementation *RepositoryDocumentImpl) TrackerProductByName(ctx context.C
 			item.Uuid = document.Uuid
 			item.Action = document.Action
 			item.ProductName = document.ProductName
+			item.FileName = document.FileName
+			item.FileOriginalName = document.FileOriginalName
 			item.CreatedAt = document.CreatedAt
 			item.UserDetail = user
 		} else {

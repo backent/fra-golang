@@ -1,6 +1,8 @@
 package document
 
 import (
+	"io/fs"
+	"os"
 	"time"
 
 	"github.com/backent/fra-golang/models"
@@ -39,15 +41,18 @@ func BulkDocumentModelToDocumentResponse(documents []models.Document) []Document
 }
 
 type DocumentResponseWithDetail struct {
-	Id          int       `json:"id"`           // id
-	Uuid        string    `json:"uuid"`         // uuid
-	CreatedBy   int       `json:"created_by"`   // created_by
-	ActionBy    int       `json:"action_by"`    // action_by
-	Action      string    `json:"action"`       // action
-	ProductName string    `json:"product_name"` // product_name
-	Category    string    `json:"category"`     // category
-	CreatedAt   time.Time `json:"created_at"`   // created_at
-	UpdatedAt   time.Time `json:"updated_at"`   // updated_at
+	Id               int       `json:"id"`                 // id
+	Uuid             string    `json:"uuid"`               // uuid
+	CreatedBy        int       `json:"created_by"`         // created_by
+	ActionBy         int       `json:"action_by"`          // action_by
+	Action           string    `json:"action"`             // action
+	ProductName      string    `json:"product_name"`       // product_name
+	Category         string    `json:"category"`           // category
+	FileName         string    `json:"file_name"`          // file_name
+	FileOriginalName string    `json:"file_original_name"` // file_original_name
+	FileLink         string    `json:"file_link"`          // file_link
+	CreatedAt        time.Time `json:"created_at"`         // created_at
+	UpdatedAt        time.Time `json:"updated_at"`         // updated_at
 
 	UserDetail            userResponse              `json:"user_detail"`             // user detail
 	RiskDetail            []riskResponse            `json:"risk_detail"`             // risk detail
@@ -125,6 +130,9 @@ func DocumentModelToDocumentResponseWithDetail(document models.Document) Documen
 		Action:                document.Action,
 		ProductName:           document.ProductName,
 		Category:              document.Category,
+		FileName:              document.FileName,
+		FileOriginalName:      document.FileOriginalName,
+		FileLink:              getFileLink(document.FileName),
 		CreatedAt:             document.CreatedAt,
 		UpdatedAt:             document.UpdatedAt,
 		UserDetail:            userModelToUserResponse(document.UserDetail),
@@ -247,16 +255,20 @@ type DocumentTrackerProduct struct {
 	Uuid                 string                          `json:"uuid"`         // uuid
 	Action               string                          `json:"action"`
 	UserDetail           userResponse                    `json:"user_detail"`             // user_detail
+	FileLink             string                          `json:"file_link"`               // file_link
+	FileOriginalName     string                          `json:"file_original_name"`      // file_original_name
 	RelatedProductDetail []DocumentTrackerRelatedProduct `json:"related_document_detail"` // related_document_detail
 }
 
 type DocumentTrackerRelatedProduct struct {
-	Id          int          `json:"id"`           // id
-	ProductName string       `json:"product_name"` // product_name
-	Uuid        string       `json:"uuid"`         // uuid
-	Action      string       `json:"action"`       // action
-	CreatedAt   time.Time    `json:"created_at"`   // created_at
-	UserDetail  userResponse `json:"user_detail"`  // user_detail
+	Id               int          `json:"id"`                 // id
+	ProductName      string       `json:"product_name"`       // product_name
+	Uuid             string       `json:"uuid"`               // uuid
+	Action           string       `json:"action"`             // action
+	FileLink         string       `json:"file_link"`          // file_link
+	FileOriginalName string       `json:"file_original_name"` // file_original_name
+	CreatedAt        time.Time    `json:"created_at"`         // created_at
+	UserDetail       userResponse `json:"user_detail"`        // user_detail
 }
 
 func DocumetModelToDocumentTrackerProduct(document models.Document) DocumentTrackerProduct {
@@ -272,6 +284,8 @@ func DocumetModelToDocumentTrackerProduct(document models.Document) DocumentTrac
 		ProductName:          document.ProductName,
 		Uuid:                 document.Uuid,
 		Action:               document.Action,
+		FileLink:             getFileLink(document.FileName),
+		FileOriginalName:     document.FileOriginalName,
 		UserDetail:           userModelToUserResponse(document.UserDetail),
 		RelatedProductDetail: relatedProductDetail,
 	}
@@ -287,12 +301,14 @@ func BulkDocumetModelToDocumentTrackerProduct(documents []models.Document) []Doc
 
 func RelatedDocumentToDocumentTrackerRelatedProduct(relatedDocument models.RelatedDocument) DocumentTrackerRelatedProduct {
 	return DocumentTrackerRelatedProduct{
-		Id:          relatedDocument.Id,
-		ProductName: relatedDocument.ProductName,
-		Uuid:        relatedDocument.Uuid,
-		Action:      relatedDocument.Action,
-		CreatedAt:   relatedDocument.CreatedAt,
-		UserDetail:  userModelToUserResponse(relatedDocument.UserDetail),
+		Id:               relatedDocument.Id,
+		ProductName:      relatedDocument.ProductName,
+		Uuid:             relatedDocument.Uuid,
+		Action:           relatedDocument.Action,
+		FileLink:         getFileLink(relatedDocument.FileName),
+		FileOriginalName: relatedDocument.FileOriginalName,
+		CreatedAt:        relatedDocument.CreatedAt,
+		UserDetail:       userModelToUserResponse(relatedDocument.UserDetail),
 	}
 }
 
@@ -314,4 +330,19 @@ type summaryAssessment struct {
 	Return   int `json:"return"`
 	Received int `json:"received"`
 	Total    int `json:"total"`
+}
+
+type DocumentResponseServeFile struct {
+	File     *os.File
+	FileInfo fs.FileInfo
+}
+
+// file name that saved on storage including the extention
+//
+// example: saved-file-2023.jpg
+func getFileLink(fileName string) string {
+	if fileName == "" {
+		return ""
+	}
+	return "/documents-final/" + fileName
 }

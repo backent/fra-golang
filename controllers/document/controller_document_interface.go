@@ -18,4 +18,6 @@ type ControllerDocumentInterface interface {
 	MonitoringList(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	TrackerProduct(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	SearchGlobal(w http.ResponseWriter, r *http.Request, p httprouter.Params)
+	UploadFinal(w http.ResponseWriter, r *http.Request, p httprouter.Params)
+	ServeFile(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 }

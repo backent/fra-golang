@@ -1,6 +1,7 @@
 package document
 
 import (
+	"mime/multipart"
 	"strings"
 
 	"github.com/backent/fra-golang/models"
@@ -14,6 +15,8 @@ type DocumentRequestCreate struct {
 	ProductName string                   `json:"product_name" validate:"required,max=100"` // product_name
 	Category    string                   `json:"category" validate:"required,oneof=communication datacomm wireless internet"`
 	Risks       []risk.RiskRequestCreate `json:"risks" validate:"required,gt=0,dive"` // risks
+	File        multipart.File
+	FileHandler *multipart.FileHeader
 
 	CreatedBy int
 	ActionBy  int
@@ -221,4 +224,15 @@ func (implementation *DocumentRequestSearchGlobal) GetOrderDirection() string {
 		return "DESC"
 	}
 	return implementation.orderDirection
+}
+
+type DocumentRequestUploadFinal struct {
+	Id          int
+	File        multipart.File
+	FileHandler *multipart.FileHeader
+	Document    models.Document
+}
+
+type DocumentRequestServeFile struct {
+	FileName string
 }

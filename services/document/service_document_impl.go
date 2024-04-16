@@ -4,9 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/backent/fra-golang/config"
+	"github.com/backent/fra-golang/exceptions"
 	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/middlewares"
 	"github.com/backent/fra-golang/models"
@@ -19,6 +23,7 @@ import (
 	repositoriesUser "github.com/backent/fra-golang/repositories/user"
 	webDocument "github.com/backent/fra-golang/web/document"
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/google/uuid"
 )
 
 type ServiceDocumentImpl struct {
@@ -392,4 +397,76 @@ func (implementation *ServiceDocumentImpl) SearchGlobal(ctx context.Context, req
 	}
 
 	return docs, total
+}
+
+func (implementation *ServiceDocumentImpl) UploadFinal(ctx context.Context, request webDocument.DocumentRequestUploadFinal) {
+	tx, err := implementation.DB.Begin()
+	helpers.PanicIfError(err)
+	defer helpers.CommitOrRollback(tx)
+
+	implementation.DocumentMiddleware.UploadFinal(ctx, tx, &request)
+
+	request.Document.FileOriginalName = request.FileHandler.Filename
+
+	var separator = "."
+	var sliceSplittedFileName = strings.Split(request.FileHandler.Filename, separator)
+	request.Document.FileName = uuid.New().String() + separator + sliceSplittedFileName[len(sliceSplittedFileName)-1]
+
+	document, err := implementation.RepositoryDocumentInterface.Create(ctx, tx, request.Document)
+	helpers.PanicIfError(err)
+
+	for _, riskRequest := range request.Document.RiskDetail {
+		risk := models.Risk{
+			DocumentId:             document.Id,
+			RiskName:               riskRequest.RiskName,
+			FraudSchema:            riskRequest.FraudSchema,
+			FraudMotive:            riskRequest.FraudMotive,
+			FraudTechnique:         riskRequest.FraudTechnique,
+			RiskSource:             riskRequest.RiskSource,
+			RootCause:              riskRequest.RootCause,
+			BisproControlProcedure: riskRequest.BisproControlProcedure,
+			QualitativeImpact:      riskRequest.QualitativeImpact,
+			LikehoodJustification:  riskRequest.LikehoodJustification,
+			ImpactJustification:    riskRequest.ImpactJustification,
+			StartegyAgreement:      riskRequest.StartegyAgreement,
+			StrategyRecomendation:  riskRequest.StrategyRecomendation,
+			AssessmentLikehood:     riskRequest.AssessmentLikehood,
+			AssessmentImpact:       riskRequest.AssessmentImpact,
+			AssessmentRiskLevel:    riskRequest.AssessmentRiskLevel,
+		}
+
+		_, err = implementation.RepositoryRiskInterface.Create(ctx, tx, risk)
+		helpers.PanicIfError(err)
+	}
+
+	err = helpers.SaveFile(request.File, request.Document.FileName, os.Getenv("DOCUMENT_FINAL_STORAGE_PATH"))
+	helpers.PanicIfError(err)
+
+	blastNotification(ctx, tx, document, implementation.RepositoryUserInterface, implementation.RepositoryNotificationInterface)
+	err = implementation.RepositoryDocumentSearchInterface.IndexProduct(implementation.EsClient, document)
+	if err != nil {
+		log.Println(err)
+	}
+
+}
+
+func (implementation *ServiceDocumentImpl) ServeFile(ctx context.Context, request webDocument.DocumentRequestServeFile) *webDocument.DocumentResponseServeFile {
+	// Extract the requested file path
+	staticDir := os.Getenv("DOCUMENT_FINAL_STORAGE_PATH")
+	filePath := filepath.Join(staticDir, request.FileName)
+	// Check if the file exists
+	fileInfo, err := os.Stat(filePath)
+	if err != nil || fileInfo.IsDir() {
+		panic(exceptions.NewNotFoundError("file not found"))
+	}
+
+	// Add your custom logic here if needed
+
+	file, err := os.Open(filePath)
+	helpers.PanicIfError(err)
+
+	return &webDocument.DocumentResponseServeFile{
+		File:     file,
+		FileInfo: fileInfo,
+	}
 }

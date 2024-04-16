@@ -286,3 +286,45 @@ func (implementation *ControllerDocumentImpl) SearchGlobal(w http.ResponseWriter
 	helpers.ReturnReponseJSON(w, response)
 
 }
+
+func (implementation *ControllerDocumentImpl) UploadFinal(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	const MAX_FILE = 10 << 20 // 20MB
+	err := r.ParseMultipartForm(MAX_FILE)
+	helpers.PanicIfError(err)
+
+	// Retrieve the file from the form data
+	var request webDocument.DocumentRequestUploadFinal
+	var id int
+	id, _ = strconv.Atoi(r.FormValue("id"))
+	request.Id = id
+	request.File, request.FileHandler, err = r.FormFile("file")
+	helpers.PanicIfError(err)
+	defer request.File.Close()
+
+	ctx := context.WithValue(r.Context(), helpers.ContextKey("token"), r.Header.Get("Authorization"))
+
+	implementation.ServiceDocumentInterface.UploadFinal(ctx, request)
+
+	response := web.WebResponse{
+		Status: "OK",
+		Code:   http.StatusOK,
+		Data:   nil,
+		Extras: nil,
+	}
+
+	helpers.ReturnReponseJSON(w, response)
+
+}
+
+func (implementation *ControllerDocumentImpl) ServeFile(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	// Extract the requested file path
+	var request webDocument.DocumentRequestServeFile
+
+	request.FileName = p.ByName("filePath")
+
+	response := implementation.ServiceDocumentInterface.ServeFile(r.Context(), request)
+	defer response.File.Close()
+	// Serve the file using ServeContent
+	http.ServeContent(w, r, response.FileInfo.Name(), response.FileInfo.ModTime(), response.File)
+
+}
