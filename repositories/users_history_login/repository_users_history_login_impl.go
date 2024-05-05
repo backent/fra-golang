@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
+	"github.com/backent/fra-golang/helpers"
 	"github.com/backent/fra-golang/models"
 )
 
@@ -29,7 +31,21 @@ func (implementation *RepositoryUserHistoryLoginImpl) FindAll(
 	skip int,
 	year string,
 	month string,
+	userException string,
 ) ([]models.UserHistoryLogin, error) {
+
+	var userExceptionQuery string
+	var userExceptionQueryValue []interface{}
+
+	if userException != "" {
+		for _, val := range strings.Split(userException, ",") {
+			userExceptionQueryValue = append(userExceptionQueryValue, val)
+		}
+		userExceptionQuery = fmt.Sprintf("AND b.nik NOT IN (%s)", helpers.Placeholders(len(userExceptionQueryValue)))
+	} else {
+		userExceptionQuery = "AND 1 = ?"
+		userExceptionQueryValue = append(userExceptionQueryValue, 1)
+	}
 
 	query := fmt.Sprintf(`
 	SELECT 
@@ -45,13 +61,19 @@ func (implementation *RepositoryUserHistoryLoginImpl) FindAll(
 	WHERE 
 			YEAR(a.created_at) = ?  AND MONTH(a.created_at) = ?
 			AND b.deleted_at IS NULL
+			%s
 	GROUP BY 
 			a.user_id, MONTH(a.created_at), YEAR(a.created_at), DATE_FORMAT(a.created_at, '%%Y-%%m')
 	ORDER BY 
 			login_count_per_month DESC LIMIT ?, ?;
-	`, models.UserHistoryLoginTable, models.UserTable)
+	`, models.UserHistoryLoginTable, models.UserTable, userExceptionQuery)
 
-	rows, err := tx.QueryContext(ctx, query, year, month, skip, take)
+	var args []interface{}
+	args = append(args, year, month)
+	args = append(args, userExceptionQueryValue...)
+	args = append(args, skip, take)
+
+	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

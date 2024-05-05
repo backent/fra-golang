@@ -546,7 +546,6 @@ func (implementation *RepositoryDocumentImpl) FindAll(
 		for _, val := range strings.Split(documentCategory, ",") {
 			conditionalQueryCategoryValue = append(conditionalQueryCategoryValue, val)
 		}
-		helpers.Placeholders(len(conditionalQueryCategoryValue))
 		conditionalQueryCategory = fmt.Sprintf("AND category IN (%s)", helpers.Placeholders(len(conditionalQueryCategoryValue)))
 	}
 

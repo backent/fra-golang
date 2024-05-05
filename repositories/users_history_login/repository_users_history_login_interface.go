@@ -9,5 +9,5 @@ import (
 
 type RepositoryUserHistoryLoginInterface interface {
 	Create(ctx context.Context, tx *sql.Tx, userHistoryLogin models.UserHistoryLogin) error
-	FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, year string, month string) ([]models.UserHistoryLogin, error)
+	FindAll(ctx context.Context, tx *sql.Tx, take int, skip int, year string, month string, userException string) ([]models.UserHistoryLogin, error)
 }

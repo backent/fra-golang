@@ -3,6 +3,7 @@ package dashboard
 import (
 	"context"
 	"database/sql"
+	"os"
 	"strconv"
 	"time"
 
@@ -182,8 +183,9 @@ func getUserTop(implementation *ServiceDashboardImpl, ctx context.Context, reque
 
 	currentYear := strconv.Itoa(time.Time.Year(time.Now()))
 	currentMonth := strconv.Itoa(int(time.Time.Month(time.Now())))
+	userException := os.Getenv("EXCEPTION_NIK_ACTIVE_USER_BOARD")
 
-	usersHistory, err := implementation.RepositoryUserHistoryLoginInterface.FindAll(ctx, tx, 10, 0, currentYear, currentMonth)
+	usersHistory, err := implementation.RepositoryUserHistoryLoginInterface.FindAll(ctx, tx, 10, 0, currentYear, currentMonth, userException)
 	if err != nil {
 		return nil, err
 	}
