@@ -2,11 +2,9 @@ package helpers
 
 import (
 	"bytes"
-	"encoding/base64"
 	"html/template"
 	"net/smtp"
 	"os"
-	"strings"
 )
 
 func SendMail(mailInterface Mail) error {
@@ -29,45 +27,22 @@ func SendMail(mailInterface Mail) error {
 }
 
 func SendMailWithoutAuth(mailInterface Mail) error {
-	r := strings.NewReplacer("\r\n", "", "\r", "", "\n", "", "%0a", "", "%0d", "")
 
+	// username := os.Getenv("MAIL_USERNAME")
+	// password := os.Getenv("MAIL_PASSWORD")
 	host := os.Getenv("MAIL_HOST")
 	port := os.Getenv("MAIL_PORT")
-	c, err := smtp.Dial(host + ":" + port)
-	if err != nil {
-		return err
-	}
-	defer c.Close()
-	from := os.Getenv("MAIL_FROM")
-	if err = c.Mail(r.Replace(from)); err != nil {
-		return err
-	}
+
+	// auth := smtp.PlainAuth("", username, password, host)
+
 	to := mailInterface.GetTo()
-	c.Rcpt(to)
-
-	w, err := c.Data()
-	if err != nil {
-		return err
-	}
-
+	from := os.Getenv("MAIL_FROM")
 	subject := mailInterface.GetSubject()
+	msg := getMessage(from, to, subject, mailInterface.GetHTML())
 
-	msg := "To: " + to + "\r\n" +
-		"From: " + from + "\r\n" +
-		"Subject: " + subject + "\r\n" +
-		"Content-Type: text/html; charset=\"UTF-8\"\r\n" +
-		"Content-Transfer-Encoding: base64\r\n" +
-		"\r\n" + base64.StdEncoding.EncodeToString([]byte("testing"))
+	err := smtp.SendMail(host+":"+port, nil, from, []string{to}, msg)
 
-	_, err = w.Write([]byte(msg))
-	if err != nil {
-		return err
-	}
-	err = w.Close()
-	if err != nil {
-		return err
-	}
-	return c.Quit()
+	return err
 }
 
 func getMessage(from string, to string, subject string, bodyEmail string) []byte {
