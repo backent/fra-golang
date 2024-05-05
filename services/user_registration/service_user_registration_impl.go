@@ -81,7 +81,7 @@ func (implementation *ServiceUserRegistrationImpl) Approve(ctx context.Context, 
 			Subject: "FRA - Registration Approved",
 		}
 
-		err = helpers.SendMail(recipient)
+		err = helpers.SendMailWithoutAuth(recipient)
 		if err != nil {
 			log.Println("Error while sending email to :", recipient, err)
 		}
@@ -114,7 +114,7 @@ func (implementation *ServiceUserRegistrationImpl) Reject(ctx context.Context, r
 			Status:  "rejected",
 			Subject: "FRA - Registration Rejected",
 		}
-		err = helpers.SendMail(recipient)
+		err = helpers.SendMailWithoutAuth(recipient)
 		if err != nil {
 			log.Println("Error while sending email to :", recipient, err)
 		}
