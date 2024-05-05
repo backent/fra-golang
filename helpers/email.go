@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/smtp"
 	"os"
+	"strings"
 )
 
 func SendMail(mailInterface Mail) error {
@@ -24,6 +25,43 @@ func SendMail(mailInterface Mail) error {
 	err := smtp.SendMail(host+":"+port, auth, from, []string{to}, msg)
 
 	return err
+}
+
+func SendMailWithoutAuth(mailInterface Mail) error {
+	r := strings.NewReplacer("\r\n", "", "\r", "", "\n", "", "%0a", "", "%0d", "")
+
+	host := os.Getenv("MAIL_HOST")
+	port := os.Getenv("MAIL_PORT")
+	c, err := smtp.Dial(host + ":" + port)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	from := os.Getenv("MAIL_FROM")
+	if err = c.Mail(r.Replace(from)); err != nil {
+		return err
+	}
+	to := mailInterface.GetTo()
+	c.Rcpt(to)
+
+	w, err := c.Data()
+	if err != nil {
+		return err
+	}
+
+	subject := mailInterface.GetSubject()
+
+	msg := getMessage(from, to, subject, mailInterface.GetHTML())
+
+	_, err = w.Write(msg)
+	if err != nil {
+		return err
+	}
+	err = w.Close()
+	if err != nil {
+		return err
+	}
+	return c.Quit()
 }
 
 func getMessage(from string, to string, subject string, bodyEmail string) []byte {

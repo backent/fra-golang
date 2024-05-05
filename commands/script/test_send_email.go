@@ -51,7 +51,7 @@ func main() {
 	}
 
 	log.Println("Try to sending email, please wait ...")
-	err = helpers.SendMail(recipient)
+	err = helpers.SendMailWithoutAuth(recipient)
 	if err != nil {
 		log.Println("Error while sending email to :", recipient, err)
 	} else {
