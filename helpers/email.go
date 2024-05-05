@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"bytes"
+	"encoding/base64"
 	"html/template"
 	"net/smtp"
 	"os"
@@ -51,9 +52,14 @@ func SendMailWithoutAuth(mailInterface Mail) error {
 
 	subject := mailInterface.GetSubject()
 
-	msg := getMessage(from, to, subject, mailInterface.GetHTML())
+	msg := "To: " + to + "\r\n" +
+		"From: " + from + "\r\n" +
+		"Subject: " + subject + "\r\n" +
+		"Content-Type: text/html; charset=\"UTF-8\"\r\n" +
+		"Content-Transfer-Encoding: base64\r\n" +
+		"\r\n" + base64.StdEncoding.EncodeToString([]byte("testing"))
 
-	_, err = w.Write(msg)
+	_, err = w.Write([]byte(msg))
 	if err != nil {
 		return err
 	}
