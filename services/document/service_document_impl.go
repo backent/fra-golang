@@ -378,6 +378,14 @@ func blastNotification(ctx context.Context, tx *sql.Tx, document models.Document
 				Action:     document.Action,
 			}
 			repositoryNotificationInterface.Create(ctx, tx, notification)
+
+			recipient := helpers.RecipientDocumentNotification{
+				Title:    title,
+				Subtitle: subtitle,
+				Email:    user.Email,
+				Subject:  title,
+			}
+			go helpers.SendMailWithoutAuth(recipient)
 		}
 	}
 }

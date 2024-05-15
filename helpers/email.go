@@ -97,3 +97,37 @@ func (implementation RecipientRegistration) GetTo() string {
 func (implementation RecipientRegistration) GetSubject() string {
 	return implementation.Subject
 }
+
+type RecipientDocumentNotification struct {
+	Title    string
+	Subtitle string
+	Email    string
+	Subject  string
+}
+
+func (implementation RecipientDocumentNotification) GetHTML() string {
+
+	content, err := os.ReadFile("assets/template/template_email_document_notification.html")
+	if err != nil {
+		panic(err)
+	}
+
+	tmpl, err := template.New("template").Parse(string(content))
+	if err != nil {
+		panic(err)
+	}
+
+	var resultTemplate bytes.Buffer
+
+	tmpl.Execute(&resultTemplate, implementation)
+
+	return resultTemplate.String()
+}
+
+func (implementation RecipientDocumentNotification) GetTo() string {
+	return implementation.Email
+}
+
+func (implementation RecipientDocumentNotification) GetSubject() string {
+	return implementation.Subject
+}
