@@ -58,7 +58,9 @@ func LoginLdap(username string, password string) (string, error) {
 
 	request.Header.Set("Content-Type", "application/json")
 
-	client := http.Client{}
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
 
 	res, err := client.Do(request)
 	if err != nil {
