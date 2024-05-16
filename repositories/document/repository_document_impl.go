@@ -27,8 +27,9 @@ func (implementation *RepositoryDocumentImpl) Create(ctx context.Context, tx *sq
 		product_name,
 		category,
 		file_name,
-		file_original_name
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?) `, models.DocumentTable)
+		file_original_name,
+		created_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) `, models.DocumentTable)
 	result, err := tx.ExecContext(ctx, query,
 		document.Uuid,
 		document.CreatedBy,
@@ -38,6 +39,7 @@ func (implementation *RepositoryDocumentImpl) Create(ctx context.Context, tx *sq
 		document.Category,
 		document.FileName,
 		document.FileOriginalName,
+		document.CreatedAt,
 	)
 	if err != nil {
 		return document, err

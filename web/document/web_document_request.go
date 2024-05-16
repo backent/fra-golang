@@ -15,6 +15,7 @@ type DocumentRequestCreate struct {
 	ProductName string                   `json:"product_name" validate:"required,max=100"` // product_name
 	Category    string                   `json:"category" validate:"required,oneof=communication datacomm wireless internet"`
 	Risks       []risk.RiskRequestCreate `json:"risks" validate:"required,gt=0,dive"` // risks
+	CreatedAt   int                      `json:"created_at"`                          // created_at
 	File        multipart.File
 	FileHandler *multipart.FileHeader
 

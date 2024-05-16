@@ -105,6 +105,11 @@ func (implementation *ServiceDocumentImpl) Create(ctx context.Context, request w
 
 func createDocumentAndRisk(ctx context.Context, tx *sql.Tx, implementation *ServiceDocumentImpl, request webDocument.DocumentRequestCreate) (models.Document, error) {
 	var document models.Document
+
+	createdAt := time.Now()
+	if request.CreatedAt > 0 {
+		createdAt = time.Unix(int64(request.CreatedAt), 0)
+	}
 	document = models.Document{
 		Uuid:        request.Uuid,
 		CreatedBy:   request.CreatedBy,
@@ -112,6 +117,7 @@ func createDocumentAndRisk(ctx context.Context, tx *sql.Tx, implementation *Serv
 		Action:      request.Action,
 		ProductName: request.ProductName,
 		Category:    request.Category,
+		CreatedAt:   createdAt,
 	}
 
 	document, err := implementation.RepositoryDocumentInterface.Create(ctx, tx, document)
