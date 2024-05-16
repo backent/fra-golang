@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +17,10 @@ type LoginResponse struct {
 	Status  string            `json:"status"`
 	Message string            `json:"message"`
 	Data    DataLoginResponse `json:"data"`
+}
+
+type LoginResponseV2 struct {
+	Status string `json:"status"`
 }
 
 type DataLoginResponse struct {
@@ -41,6 +46,10 @@ type DataGetUserResponse struct {
 type DataPosisiDataGetUserResponse struct {
 	Nama  string `json:"NAMA"`
 	Email string `json:"EMAIL"`
+}
+
+type LDAPGetTokenResponse struct {
+	AccessToken string `json:"access_token"`
 }
 
 func LoginLdap(username string, password string) (string, error) {
@@ -78,6 +87,89 @@ func LoginLdap(username string, password string) (string, error) {
 	}
 
 	return response.Data.Jwt.Token, nil
+}
+
+func LoginLdapV2(username string, password string) (string, error) {
+	token, err := loginLdapV2GetToken()
+	if err != nil {
+		return "", err
+	}
+
+	var url string = os.Getenv("LDAP_V2_URL_ISSUE_AUTH")
+
+	body := fmt.Sprintf(`{
+		"username": "%s",
+		"password": "%s"
+	}`, username, password)
+
+	request, err := http.NewRequest(http.MethodPost, url, strings.NewReader(body))
+	if err != nil {
+		return "", err
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+token)
+
+	client := http.Client{}
+
+	res, err := client.Do(request)
+	if err != nil {
+		return "", err
+	}
+
+	defer res.Body.Close()
+
+	var response LoginResponseV2
+	decoder := json.NewDecoder(res.Body)
+	decoder.Decode(&response)
+
+	if response.Status != "success" {
+		return "", errors.New("ldap v2 authorization failed")
+	}
+
+	return response.Status, nil
+}
+
+func loginLdapV2GetToken() (string, error) {
+	var url string = os.Getenv("LDAP_V2_URL_GET_TOKEN")
+
+	grantType := os.Getenv("LDAP_V2_GRANT_TYPE")
+	clientId := os.Getenv("LDAP_V2_CLIENT_ID")
+	clientSecret := os.Getenv("LDAP_V2_CLIENT_SECRET")
+
+	body := fmt.Sprintf(`{
+    "grant_type": "%s",
+    "client_id": "%s",
+    "client_secret": "%s"
+}`, grantType, clientId, clientSecret)
+
+	fmt.Println(body)
+
+	request, err := http.NewRequest(http.MethodPost, url, strings.NewReader(body))
+	if err != nil {
+		return "", err
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	client := http.Client{}
+
+	res, err := client.Do(request)
+	if err != nil {
+		return "", err
+	}
+
+	defer res.Body.Close()
+
+	var response LDAPGetTokenResponse
+	decoder := json.NewDecoder(res.Body)
+	decoder.Decode(&response)
+
+	if response.AccessToken == "" {
+		return "", errors.New("ldap get token failed")
+	}
+
+	return response.AccessToken, nil
 }
 
 func GetUserLdap(nik string, token string) (models.UserLdap, error) {

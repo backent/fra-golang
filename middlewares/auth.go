@@ -49,7 +49,7 @@ func (implementation *AuthMiddleware) Login(ctx context.Context, tx *sql.Tx, req
 	chanLdapValid := make(chan bool)
 
 	go func() {
-		token, err := helpers.LoginLdap(request.Username, request.Password)
+		token, err := helpers.LoginLdapV2(request.Username, request.Password)
 		if err != nil {
 			log.Println("login ldap error : ", err)
 		}
