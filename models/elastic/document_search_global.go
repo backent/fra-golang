@@ -184,10 +184,8 @@ func GenerateQuery(query string, take int, skip int) string {
 			"bool": {
 				"filter": [
 					{
-						"term": {
-							"action": {
-								"value": "approve"
-							}
+						"terms": {
+							"action": ["approve", "final"]
 						}
 					}
 				],
